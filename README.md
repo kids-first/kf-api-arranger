@@ -5,25 +5,37 @@
   <a href="https://github.com/kids-first/kf-template-repo/blob/master/LICENSE"><img src="https://img.shields.io/github/license/kids-first/kf-template-repo.svg?style=for-the-badge"></a>
 </p>
 
-# Kids First Repository Template
+# :factory: KF-API-ARRANGER
+This is an instantiation of the [@arranger/server](https://github.com/overture-stack/arranger/tree/develop/modules/server) application for the Kids First portal, with an integration with [Ego](https://github.com/overture-stack/ego) for authentication.
 
-Use this template to bootstrap a new Kids First repository.
+Arranger server is an application that wraps Elasticsearch and provides a GraphQL search API for consumption by the [Kids First Portal UI](https://github.com/kids-first/kf-portal-ui).
 
-### Badges
+## Development:
 
-Update the LICENSE badge to point to the new repo location on GitHub.
-Note that the LICENSE badge will fail to render correctly unless the repo has
-been set to **public**.
+### General
+* Make sure that all the needed env vars point to where they should.
+* When adding a new env var, update the .env.example. Otherwise, an error will be thrown.
+* Installing dependencies: `npm install`
 
-Add additional badges for CI, docs, and other integrations as needed within the
-`<p>` tag next to the LICENSE.
+###Docker (local elasticsearch & kibana)
+In the `/docker` folder:
+* Create, if non-existent, a folder `esdata` containing your elasticsearch data.
+* Run the `launch.sh` script that will start an elasticsearch and a kibana container.
+* To stop and remove these containers: `teardown.sh`
+  
+In the `root` folder:  
+* Make sure that the env vars point to these containers.
+* start the app in dev mode `npm run dev`
 
-### Repo Description
+###Build (Locally) 
+In the `root` folder:
+* launch the build `npm run build`
+* execute `node /dist/index.js`
 
-Update the repositories description with a short summary of the repository's
-intent.
-Include an appropriate emoji at the start of the summary.
-
-Add a handful of tags that summarize topics relating to the repository.
-If the repo has a documentation site or webpage, add it next to the repository
-description.
+###Build (Docker)
+In the `root` folder:
+* Build the container: `docker build -t whateverName .`
+* Execute: `docker run whateverName`
+* Do not forget to stop or delete if needed the container and its image.
+###Tests
+* Execute: `npm run test`
