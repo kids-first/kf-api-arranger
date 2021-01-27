@@ -1,4 +1,5 @@
-import { get, toLower } from 'lodash';
+import toLower from 'lodash/toLower';
+import get from 'lodash/get';
 import { parseResolveInfo } from 'graphql-parse-resolve-info';
 
 const setMutationNames = ['saveSet', 'deleteSets', 'updateSet'];
