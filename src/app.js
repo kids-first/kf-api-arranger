@@ -4,6 +4,7 @@ import { dependencies, version } from '../package.json';
 import { egoURL, esHost, projectId } from './env';
 import { injectBodyHttpHeaders } from './middleware';
 import egoTokenMiddleware from 'ego-token-middleware';
+import variantDBStats from './endpoints/variantDBStats';
 
 export default () => {
   const app = express();
@@ -21,6 +22,8 @@ export default () => {
       elasticsearch: esHost,
     }),
   );
+
+  app.get('/variant_db_stats', variantDBStats());
 
   app.use(injectBodyHttpHeaders());
   app.use(

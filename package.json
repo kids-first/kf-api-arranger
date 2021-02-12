@@ -30,11 +30,12 @@
   "homepage": "https://github.com/kids-first/kf-api-arranger#readme",
   "dependencies": {
     "@arranger/server": "^2.9.0",
+    "@elastic/elasticsearch": "^7.9.1",
     "cors": "2.8.5",
+    "dotenv-safe": "^8.2.0",
     "ego-token-middleware": "^1.0.1",
     "express": "^4.16.2",
-    "graphql-parse-resolve-info": "4.10.0",
-    "dotenv-safe": "^8.2.0"
+    "graphql-parse-resolve-info": "4.10.0"
   },
   "devDependencies": {
     "jest": "^26.6.3",
