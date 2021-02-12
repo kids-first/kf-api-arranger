@@ -10,7 +10,7 @@ Arranger({
   projectId,
   esHost,
   graphqlOptions: {
-    context: ({ jwt }) => ({ jwt }),
+    // context: ({ jwt }) => ({ jwt }),
     middleware: [onlyAdminMutations],
   },
 }).then((router) => {

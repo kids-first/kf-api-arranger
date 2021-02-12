@@ -23,7 +23,7 @@ export default () => {
     }),
   );
 
-  app.get('/variant_db_stats', variantDBStats());
+  app.get('/variantDbStats', variantDBStats());
 
   app.use(injectBodyHttpHeaders());
   app.use(

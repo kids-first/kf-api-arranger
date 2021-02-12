@@ -1,28 +1,22 @@
-import { esHost } from '../env';
+import { esHost, variantStatsIndex } from '../env';
 import { Client } from '@elastic/elasticsearch';
 
 const es = new Client({ node: esHost });
 
-const getVariantStats = async () => {
-  const { body } = await es.search({
-    index: 'variant_stats',
-    body: {
-      query: {
-        match_all: {},
-      },
-    },
-  });
-
-  return body;
-};
-
 export default () => async (req, res) => {
   try {
-    const response = await getVariantStats();
+    const response = await es.search({
+      index: variantStatsIndex,
+      body: {
+        query: {
+          match_all: {},
+        },
+      },
+    });
 
-    res.json(response.hits.hits[0]);
+    res.json(response.body.hits.hits[0]);
   } catch (err) {
-    console.log(err);
-    res.status(500).json({ error: err });
+    console.error(err);
+    res.status(500).json({ error: 'Cannot fetch stats' });
   }
 };
