@@ -17,6 +17,6 @@ export default () => async (req, res) => {
     res.json(response.body.hits.hits[0]);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Cannot fetch stats' });
+    res.status(500).json({ error: 'Cannot fetch stats', esHost: esHost, index: variantStatsIndex });
   }
 };
