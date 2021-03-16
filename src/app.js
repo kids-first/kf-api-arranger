@@ -5,6 +5,8 @@ import { egoURL, esHost, projectId } from './env';
 import { injectBodyHttpHeaders } from './middleware';
 import egoTokenMiddleware from 'ego-token-middleware';
 import variantDBStats from './endpoints/variantDBStats';
+import genomicFeatureSuggestions from './endpoints/genomicFeatureSuggestions';
+import asyncHandler from 'express-async-handler';
 
 export default () => {
   const app = express();
@@ -26,7 +28,7 @@ export default () => {
   app.get('/variantDbStats', variantDBStats());
 
   app.use(injectBodyHttpHeaders());
-  app.use(
+  /*  app.use(
     egoTokenMiddleware({
       egoURL,
       accessRules: [
@@ -42,7 +44,7 @@ export default () => {
         },
         {
           type: 'allow',
-          route: [`/(.*)/graphql`, `/(.*)/graphql/(.*)`, `/(.*)/download`],
+          route: [`/(.*)/graphql`, `/(.*)/graphql/(.*)`, `/(.*)/download`, `/genomicFeature/suggestions`],
           status: ['approved'],
           role: 'user',
         },
@@ -53,10 +55,17 @@ export default () => {
         },
       ],
     }),
-  );
+  );*/
   /*
    * ===== RESTRICTED ROUTES =====
    * Adding routes after ego middleware makes them require a valid Bearer Token (Ego JWT)
    */
+  app.get('/genomicFeature/suggestions/:prefix', asyncHandler(genomicFeatureSuggestions));
+
+  app.use((error, req, res, _) => {
+    console.error(error);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  });
+
   return app;
 };
