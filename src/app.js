@@ -28,7 +28,7 @@ export default () => {
   app.get('/variantDbStats', variantDBStats());
 
   app.use(injectBodyHttpHeaders());
-  /*  app.use(
+  app.use(
     egoTokenMiddleware({
       egoURL,
       accessRules: [
@@ -55,7 +55,7 @@ export default () => {
         },
       ],
     }),
-  );*/
+  );
   /*
    * ===== RESTRICTED ROUTES =====
    * Adding routes after ego middleware makes them require a valid Bearer Token (Ego JWT)
