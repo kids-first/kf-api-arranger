@@ -17,25 +17,5 @@ Arranger server is an application that wraps Elasticsearch and provides a GraphQ
 * When adding a new env var, update the .env.example. Otherwise, an error will be thrown.
 * Installing dependencies: `npm install`
 
-### Docker (local elasticsearch & kibana)
-In the `/docker` folder:
-* Create, if non-existent, a folder `esdata` containing your elasticsearch data.
-* Run the `launch.sh` script that will start an elasticsearch and a kibana container.
-* To stop and remove these containers: `teardown.sh`
-  
-In the `root` folder:  
-* Make sure that the env vars point to these containers.
-* start the app in dev mode `npm run dev`
-
-### Build (Locally) 
-In the `root` folder:
-* launch the build `npm run build`
-* execute `node /dist/index.js`
-
-### Build (Docker)
-In the `root` folder:
-* Build the container: `docker build -t whateverName .`
-* Execute: `docker run whateverName`
-* Do not forget to stop or delete if needed the container and its image.
-### Tests
+### Test
 * Execute: `npm run test`
