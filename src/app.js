@@ -27,7 +27,10 @@ export default () => {
 
   app.get('/variantDbStats', variantDBStats());
 
+  app.get('/genomicFeature/suggestions/:prefix', asyncHandler(genomicFeatureSuggestions));
+
   app.use(injectBodyHttpHeaders());
+
   app.use(
     egoTokenMiddleware({
       egoURL,
@@ -44,7 +47,12 @@ export default () => {
         },
         {
           type: 'allow',
-          route: [`/(.*)/graphql`, `/(.*)/graphql/(.*)`, `/(.*)/download`, `/genomicFeature/suggestions`],
+          route: [
+            `/(.*)/graphql`,
+            `/(.*)/graphql/(.*)`,
+            `/(.*)/download`,
+            `/genomicFeature/suggestions`,
+          ],
           status: ['approved'],
           role: 'user',
         },
@@ -60,8 +68,6 @@ export default () => {
    * ===== RESTRICTED ROUTES =====
    * Adding routes after ego middleware makes them require a valid Bearer Token (Ego JWT)
    */
-  app.get('/genomicFeature/suggestions/:prefix', asyncHandler(genomicFeatureSuggestions));
-
   app.use((error, req, res, _) => {
     console.error(error);
     return res.status(500).json({ error: 'Internal Server Error' });

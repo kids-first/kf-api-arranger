@@ -1,7 +1,7 @@
 import EsInstance from '../ElasticSearchClientInstance';
 import { indexNameGenomicFeatureSuggestion, maxNOfGenomicFeatureSuggestions } from '../env';
 
-const NEEDED_SOURCE_FIELDS = ['type', 'suggestion_id', 'locus', 'hgvsg'];
+const NEEDED_SOURCE_FIELDS = ['type', 'suggestion_id', 'locus'];
 
 export default async (req, res) => {
   const prefix = req.params.prefix;
@@ -28,7 +28,6 @@ export default async (req, res) => {
   const searchText = suggestionResponse.text;
   const suggestions = suggestionResponse.options.map((suggestion) => ({
     matchedText: suggestion.text,
-    hgvsg: suggestion._source.hgvsg,
     suggestion_id: suggestion._source.suggestion_id,
     locus: suggestion._source.locus,
     type: suggestion._source.type,
