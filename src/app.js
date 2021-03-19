@@ -4,13 +4,15 @@ import { dependencies, version } from '../package.json';
 import { egoURL, esHost, projectId } from './env';
 import { injectBodyHttpHeaders } from './middleware';
 import egoTokenMiddleware from 'ego-token-middleware';
-import variantDBStats from './endpoints/variantDBStats';
 import genomicFeatureSuggestions from './endpoints/genomicFeatureSuggestions';
 import asyncHandler from 'express-async-handler';
+import { StatusCodes, getReasonPhrase } from 'http-status-codes';
 
 export default () => {
   const app = express();
+
   app.use(cors());
+
   /*
    * ===== PUBLIC ROUTES =====
    * Adding routes before ego middleware makes them available to all public
@@ -24,8 +26,6 @@ export default () => {
       elasticsearch: esHost,
     }),
   );
-
-  app.get('/variantDbStats', variantDBStats());
 
   app.get('/genomicFeature/suggestions/:prefix', asyncHandler(genomicFeatureSuggestions));
 
@@ -47,12 +47,7 @@ export default () => {
         },
         {
           type: 'allow',
-          route: [
-            `/(.*)/graphql`,
-            `/(.*)/graphql/(.*)`,
-            `/(.*)/download`,
-            `/genomicFeature/suggestions`,
-          ],
+          route: [`/(.*)/graphql`, `/(.*)/graphql/(.*)`, `/(.*)/download`],
           status: ['approved'],
           role: 'user',
         },
@@ -70,7 +65,9 @@ export default () => {
    */
   app.use((error, req, res, _) => {
     console.error(error);
-    return res.status(500).json({ error: 'Internal Server Error' });
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ error: getReasonPhrase(StatusCodes.INTERNAL_SERVER_ERROR) });
   });
 
   return app;

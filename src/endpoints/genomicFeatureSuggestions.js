@@ -1,7 +1,8 @@
 import EsInstance from '../ElasticSearchClientInstance';
 import { indexNameGenomicFeatureSuggestion, maxNOfGenomicFeatureSuggestions } from '../env';
+import { StatusCodes } from 'http-status-codes';
 
-const NEEDED_SOURCE_FIELDS = ['type', 'suggestion_id', 'locus'];
+const NEEDED_SOURCE_FIELDS = ['type', 'suggestion_id', 'locus', 'symbol'];
 
 export default async (req, res) => {
   const prefix = req.params.prefix;
@@ -23,6 +24,7 @@ export default async (req, res) => {
       },
     },
   });
+
   const suggestionResponse = body.suggest.suggestions[0];
 
   const searchText = suggestionResponse.text;
@@ -31,9 +33,10 @@ export default async (req, res) => {
     suggestion_id: suggestion._source.suggestion_id,
     locus: suggestion._source.locus,
     type: suggestion._source.type,
+    geneSymbol: suggestion._source.symbol,
   }));
 
-  res.send({
+  res.status(StatusCodes.OK).send({
     searchText,
     suggestions,
   });
