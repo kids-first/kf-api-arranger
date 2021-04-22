@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import { dependencies, version } from '../package.json';
-import { egoURL, esHost, projectId } from './env';
+import { egoURL, esHost } from './env';
 import { injectBodyHttpHeaders } from './middleware';
 import egoTokenMiddleware from 'ego-token-middleware';
 import variantDBStats from './endpoints/variantDBStats';
@@ -20,7 +20,6 @@ export default () => {
       dependencies,
       version,
       ego: egoURL,
-      project: projectId,
       elasticsearch: esHost,
     }),
   );
