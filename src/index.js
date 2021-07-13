@@ -1,6 +1,6 @@
 import Arranger from '@arranger/server';
 import { port, projectId, esHost } from './env';
-import { onlyAdminMutations } from './middleware';
+import { onlyAdminMutations, setMutations } from './middleware';
 import buildApp from './app';
 
 const app = buildApp();
@@ -11,7 +11,7 @@ Arranger({
   esHost,
   graphqlOptions: {
     // context: ({ jwt }) => ({ jwt }),
-    middleware: [onlyAdminMutations],
+    middleware: [onlyAdminMutations, setMutations],
   },
 }).then((router) => {
   app.use(router);

@@ -18,3 +18,17 @@ export const onlyAdminMutations = {
     return resolve(parent, args, context, info);
   },
 };
+
+
+export const setMutations = {
+  Mutation: (resolve, parent, args, context, info) => {
+    const { name: mutationName } = parseResolveInfo(info);
+    if (!setMutationNames.includes(mutationName)) {
+      return resolve(parent, args, context, info);
+    }
+
+    const userIdFromToken = get(context, 'jwt.sub', null);
+    const enhancedArgs = { ...args, userId: userIdFromToken };
+    return resolve(parent, enhancedArgs, context, info);
+  },
+};
