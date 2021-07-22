@@ -33,23 +33,23 @@
     "@elastic/elasticsearch": "^7.9.1",
     "cors": "2.8.5",
     "dotenv-safe": "^8.2.0",
-    "ego-token-middleware": "^1.0.1",
     "express": "^4.16.2",
     "express-async-handler": "^1.1.4",
     "graphql-parse-resolve-info": "4.10.0",
-    "http-status-codes": "^2.1.4"
+    "http-status-codes": "^2.1.4",
+    "keycloak-connect": "^14.0.0"
   },
   "devDependencies": {
+    "@babel/cli": "^7.12.10",
+    "@babel/core": "^7.12.10",
+    "@babel/node": "^7.12.10",
+    "@babel/plugin-transform-runtime": "^7.12.10",
+    "@babel/preset-env": "^7.12.10",
+    "@babel/runtime": "^7.12.5",
     "jest": "^26.6.3",
     "nodemon": "2.0.7",
     "prettier": "2.2.1",
-    "supertest": "^6.1.2",
-    "@babel/cli": "^7.12.10",
-    "@babel/plugin-transform-runtime": "^7.12.10",
-    "@babel/core": "^7.12.10",
-    "@babel/node": "^7.12.10",
-    "@babel/preset-env": "^7.12.10",
-    "@babel/runtime": "^7.12.5"
+    "supertest": "^6.1.2"
   },
   "prettier": {
     "printWidth": 100,
