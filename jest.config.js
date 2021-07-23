@@ -1,6 +1,14 @@
 module.exports = {
-  setupFiles: [
-    'dotenv-safe/config'
-  ],
-  modulePathIgnorePatterns: ['<rootDir>/dist/']
-}
+    globals: {
+        'ts-jest': {
+            tsConfig: 'tsconfig.json',
+        },
+    },
+    moduleFileExtensions: ['ts', 'js'],
+    transform: {
+        '^.+\\.(ts|tsx)$': 'ts-jest',
+    },
+    testMatch: ['**/src/**/*.test.(ts|js)'],
+    testEnvironment: 'node',
+    modulePathIgnorePatterns: ['<rootDir>/dist/']
+};

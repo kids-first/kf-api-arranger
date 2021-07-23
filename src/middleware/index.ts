@@ -1,0 +1,1 @@
+export { onlyAdminMutations } from './graphqlMiddleware';
