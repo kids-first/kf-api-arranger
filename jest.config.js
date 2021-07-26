@@ -10,5 +10,5 @@ module.exports = {
     },
     testMatch: ['**/src/**/*.test.(ts|js)'],
     testEnvironment: 'node',
-    modulePathIgnorePatterns: ['<rootDir>/dist/']
+    modulePathIgnorePatterns: ['<rootDir>/dist/'],
 };
