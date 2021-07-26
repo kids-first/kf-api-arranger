@@ -24,11 +24,13 @@ process.on('SIGINT', () => {
 
 const keycloak = new Keycloak({}, keycloakConfig);
 const app = buildApp(keycloak);
+const externalContext = (req, _res, _con) => ({ auth: req.kauth?.grant?.access_token || {} });
 
 Arranger({
     esHost,
     graphqlOptions: {
         middleware: [onlyAdminMutations],
+        context: externalContext,
     },
 }).then(router => {
     app.get('/*/ping', router);

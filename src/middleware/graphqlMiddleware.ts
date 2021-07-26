@@ -7,7 +7,7 @@ const setMutationNames = ['saveSet', 'deleteSets', 'updateSet'];
 export const onlyAdminMutations = {
     Mutation: (resolve, parent, args, context, info) => {
         const { name: mutationName } = parseResolveInfo(info) as ResolveTree;
-        const roles = get(context, 'kauth.grant.access_token.content.realm_access.roles', []);
+        const roles = get(context, 'auth.content.realm_access.roles', []);
 
         const hasAdminRole = roles.map(toLower).includes('admin');
 
