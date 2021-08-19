@@ -12,6 +12,7 @@ Arranger server is an application that wraps Elasticsearch and provides a GraphQ
 
 ## Development:
 
+
 ### General
 * Make sure that all the needed env vars point to where they should.
 * When adding a new env var, update the .env.example. Otherwise, an error will be thrown.
