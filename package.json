@@ -34,7 +34,7 @@
     "@awaitjs/express": "^0.5.0",
     "@elastic/elasticsearch": "^7.9.1",
     "cors": "2.8.5",
-    "dotenv-safe": "^8.2.0",
+    "dotenv": "^5.0.0",
     "express": "^4.17.1",
     "graphql-parse-resolve-info": "4.10.0",
     "http-status-codes": "^2.1.4",
