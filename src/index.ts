@@ -30,7 +30,7 @@ Arranger({
     esHost,
     graphqlOptions: {
         middleware: [onlyAdminMutations],
-        context: externalContext,
+        // context: externalContext, // Uncomment it when latest version of arranger/server will be deployed.
     },
 }).then(router => {
     app.get('/*/ping', router);
