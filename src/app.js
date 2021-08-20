@@ -8,6 +8,10 @@ import genomicFeatureSuggestions from './endpoints/genomicFeatureSuggestions';
 import asyncHandler from 'express-async-handler';
 import { StatusCodes, getReasonPhrase } from 'http-status-codes';
 
+export const suggestionType = {
+  VARIANT: 'variant',
+  GENE: 'gene',
+};
 export default () => {
   const app = express();
 
@@ -26,7 +30,6 @@ export default () => {
     }),
   );
 
-  app.get('/genomicFeature/suggestions/:prefix', asyncHandler(genomicFeatureSuggestions));
 
   app.use(injectBodyHttpHeaders());
 
@@ -46,7 +49,7 @@ export default () => {
         },
         {
           type: 'allow',
-          route: [`/(.*)/graphql`, `/(.*)/graphql/(.*)`, `/(.*)/download`],
+          route: [`/genesFeature/suggestions/(.*)`, `/variantsFeature/suggestions/(.*)`, `/(.*)/graphql`, `/(.*)/graphql/(.*)`, `/(.*)/download`],
           status: ['approved'],
           role: 'user',
         },
@@ -62,6 +65,15 @@ export default () => {
    * ===== RESTRICTED ROUTES =====
    * Adding routes after ego middleware makes them require a valid Bearer Token (Ego JWT)
    */
+  app.get(
+    '/genesFeature/suggestions/:prefix',
+    asyncHandler((req, res) => genomicFeatureSuggestions(req, res, suggestionType.GENE)),
+  );
+  app.get(
+    '/variantsFeature/suggestions/:prefix',
+    asyncHandler((req, res) => genomicFeatureSuggestions(req, res, suggestionType.VARIANT)),
+  );
+
   app.use((error, req, res, _) => {
     console.error(error);
     return res
