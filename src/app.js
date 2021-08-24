@@ -8,7 +8,7 @@ import genomicFeatureSuggestions from './endpoints/genomicFeatureSuggestions';
 import asyncHandler from 'express-async-handler';
 import { StatusCodes, getReasonPhrase } from 'http-status-codes';
 
-export const suggestionType = {
+export const SUGGESTIONS_TYPES = {
   VARIANT: 'variant',
   GENE: 'gene',
 };
@@ -67,11 +67,11 @@ export default () => {
    */
   app.get(
     '/genesFeature/suggestions/:prefix',
-    asyncHandler((req, res) => genomicFeatureSuggestions(req, res, suggestionType.GENE)),
+    asyncHandler((req, res) => genomicFeatureSuggestions(req, res, SUGGESTIONS_TYPES.GENE)),
   );
   app.get(
     '/variantsFeature/suggestions/:prefix',
-    asyncHandler((req, res) => genomicFeatureSuggestions(req, res, suggestionType.VARIANT)),
+    asyncHandler((req, res) => genomicFeatureSuggestions(req, res, SUGGESTIONS_TYPES.VARIANT)),
   );
 
   app.use((error, req, res, _) => {

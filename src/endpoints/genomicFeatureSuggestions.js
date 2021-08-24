@@ -5,15 +5,15 @@ import {
   maxNOfGenomicFeatureSuggestions,
 } from '../env';
 import { StatusCodes } from 'http-status-codes';
-import { suggestionType } from '../app';
+import { SUGGESTIONS_TYPES } from '../app';
 
-export default async (req, res, _suggestionType) => {
+export default async (req, res, type) => {
   const prefix = req.params.prefix;
 
   const client = await EsInstance.getInstance();
 
   const _index =
-    _suggestionType === suggestionType.GENE
+    type === SUGGESTIONS_TYPES.GENE
       ? indexNameGeneFeatureSuggestion
       : indexNameVariantFeatureSuggestion;
 
