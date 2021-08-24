@@ -1,18 +1,25 @@
 import EsInstance from '../ElasticSearchClientInstance';
-import { indexNameGenomicFeatureSuggestion, maxNOfGenomicFeatureSuggestions } from '../env';
+import {
+  indexNameGeneFeatureSuggestion,
+  indexNameVariantFeatureSuggestion,
+  maxNOfGenomicFeatureSuggestions,
+} from '../env';
 import { StatusCodes } from 'http-status-codes';
+import { SUGGESTIONS_TYPES } from '../app';
 
-const NEEDED_SOURCE_FIELDS = ['type', 'suggestion_id', 'locus', 'symbol'];
-
-export default async (req, res) => {
+export default async (req, res, type) => {
   const prefix = req.params.prefix;
 
   const client = await EsInstance.getInstance();
 
+  const _index =
+    type === SUGGESTIONS_TYPES.GENE
+      ? indexNameGeneFeatureSuggestion
+      : indexNameVariantFeatureSuggestion;
+
   const { body } = await client.search({
-    index: indexNameGenomicFeatureSuggestion,
+    index: _index,
     body: {
-      _source: NEEDED_SOURCE_FIELDS,
       suggest: {
         suggestions: {
           prefix,
@@ -28,13 +35,8 @@ export default async (req, res) => {
   const suggestionResponse = body.suggest.suggestions[0];
 
   const searchText = suggestionResponse.text;
-  const suggestions = suggestionResponse.options.map((suggestion) => ({
-    matchedText: suggestion.text,
-    suggestion_id: suggestion._source.suggestion_id,
-    locus: suggestion._source.locus,
-    type: suggestion._source.type,
-    geneSymbol: suggestion._source.symbol,
-  }));
+
+  const suggestions = suggestionResponse.options.map(suggestion => suggestion._source);
 
   res.status(StatusCodes.OK).send({
     searchText,
