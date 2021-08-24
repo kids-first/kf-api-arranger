@@ -6,7 +6,7 @@ import { Keycloak } from 'keycloak-connect';
 
 import { dependencies, version } from '../package.json';
 import { keycloakURL, esHost } from './env';
-import genomicFeatureSuggestions from './endpoints/genomicFeatureSuggestions';
+import genomicFeatureSuggestions, { SUGGESTIONS_TYPES } from './endpoints/genomicFeatureSuggestions';
 
 export default (keycloak: Keycloak): Express => {
     const app = addAsync.addAsync(express());
@@ -29,7 +29,12 @@ export default (keycloak: Keycloak): Express => {
         }),
     );
 
-    app.getAsync('/genomicFeature/suggestions/:prefix', keycloak.protect(), genomicFeatureSuggestions);
+    app.getAsync('/genesFeature/suggestions/:prefix', keycloak.protect(), (req, res) =>
+        genomicFeatureSuggestions(req, res, SUGGESTIONS_TYPES.GENE),
+    );
+    app.getAsync('/variantsFeature/suggestions/:prefix', keycloak.protect(), (req, res) =>
+        genomicFeatureSuggestions(req, res, SUGGESTIONS_TYPES.VARIANT),
+    );
 
     app.use((error: Error, _req: Request, res: Response, _: NextFunction) => {
         console.error(error);
