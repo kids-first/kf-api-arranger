@@ -1,5 +1,6 @@
 import EsInstance from '../ElasticSearchClientInstance';
 import {
+  esHost,
   indexNameGeneFeatureSuggestion,
   indexNameVariantFeatureSuggestion,
   maxNOfGenomicFeatureSuggestions,
@@ -16,6 +17,9 @@ export default async (req, res, type) => {
     type === SUGGESTIONS_TYPES.GENE
       ? indexNameGeneFeatureSuggestion
       : indexNameVariantFeatureSuggestion;
+
+  console.log(_index)
+  console.log(esHost)
 
   const { body } = await client.search({
     index: _index,
