@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import EsInstance from '../ElasticSearchClientInstance';
+import EsInstance from '../elasticSearch/ElasticSearchClientInstance';
 import {
     esHost,
     indexNameGeneFeatureSuggestion,
