@@ -16,3 +16,4 @@ export const indexNameGeneFeatureSuggestion = process.env.GENES_SUGGESTIONS_INDE
 export const indexNameVariantFeatureSuggestion = process.env.VARIANTS_SUGGESTIONS_INDEX_NAME;
 
 export const riffURL = process.env.RIFF_URL || 'https://riff-keycloak-qa.kf-strides.org';
+export const sqsQueueUrl = process.env.SQS_QUEUE_URL || '';

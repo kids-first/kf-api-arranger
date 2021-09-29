@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 import 'regenerator-runtime/runtime.js';
+import SQS from 'aws-sdk/clients/sqs';
 import Arranger from '@arranger/server';
 import Keycloak from 'keycloak-connect';
 import { port, esHost } from './env';
@@ -22,7 +23,8 @@ process.on('SIGINT', () => {
 });
 
 const keycloak = new Keycloak({}, keycloakConfig);
-const app = buildApp(keycloak);
+const sqs = new SQS({ apiVersion: '2012-11-05' });
+const app = buildApp(keycloak, sqs);
 const externalContext = (req, _res, _con) => ({ auth: req.kauth?.grant?.access_token || {} });
 
 Arranger({

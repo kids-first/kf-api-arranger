@@ -1,15 +1,25 @@
-import express, { Express, Request, Response, NextFunction } from 'express';
+import express, { Express } from 'express';
 import cors from 'cors';
+import SQS from 'aws-sdk/clients/sqs';
 import addAsync from '@awaitjs/express';
-import { StatusCodes, getReasonPhrase } from 'http-status-codes';
 import { Keycloak } from 'keycloak-connect';
 
 import { dependencies, version } from '../package.json';
 import { keycloakURL, esHost } from './env';
 import genomicFeatureSuggestions, { SUGGESTIONS_TYPES } from './endpoints/genomicFeatureSuggestions';
-import { createSet, deleteSet, getSets, updateSet } from './endpoints/setsFeature';
+import {
+    createSet,
+    deleteSet,
+    getSets,
+    SubActionTypes,
+    updateSetContent,
+    updateSetTag,
+} from './endpoints/sets/setsFeature';
+import { CreateSetBody, UpdateSetContentBody, UpdateSetTagBody } from './endpoints/sets/setsTypes';
+import { Riff } from './riff/riffClient';
+import { globalErrorHandler, globalErrorLogger } from './errors';
 
-export default (keycloak: Keycloak): Express => {
+export default (keycloak: Keycloak, sqs: SQS): Express => {
     const app = addAsync.addAsync(express());
 
     app.use(cors());
@@ -23,7 +33,7 @@ export default (keycloak: Keycloak): Express => {
         }),
     );
 
-    app.get('/status', (req, res) =>
+    app.get('/status', (_req, res) =>
         res.send({
             dependencies,
             version,
@@ -48,38 +58,39 @@ export default (keycloak: Keycloak): Express => {
     });
 
     app.postAsync('/sets', keycloak.protect(), async (req, res) => {
-        const { sqon, sort, projectId, type, path, tag } = req.body;
         const accessToken = req.headers.authorization;
-        const createdSet = await createSet(sqon, sort, projectId, type, path, tag, accessToken);
+        const userId = req['kauth']?.grant?.access_token?.content?.sub;
+        const createdSet = await createSet(req.body as CreateSetBody, accessToken, userId, sqs);
 
         res.send(createdSet);
     });
 
     app.putAsync('/sets/:setId', keycloak.protect(), async (req, res) => {
-        const { sqon, sort, projectId, type, path, tag } = req.body;
+        const requestBody: UpdateSetTagBody | UpdateSetContentBody = req.body;
         const accessToken = req.headers.authorization;
+        const userId = req['kauth']?.grant?.access_token?.content?.sub;
         const setId: string = req.params.setId;
+        let updatedSet: Riff;
 
-        const updatedSet = await updateSet(sqon, sort, projectId, type, path, tag, accessToken, setId);
-
+        if (requestBody.subAction === SubActionTypes.RENAME_TAG) {
+            updatedSet = await updateSetTag(requestBody as UpdateSetTagBody, accessToken, userId, setId, sqs);
+        } else {
+            updatedSet = await updateSetContent(requestBody as UpdateSetContentBody, accessToken, userId, setId, sqs);
+        }
         res.send(updatedSet);
     });
 
     app.deleteAsync('/sets/:setId', keycloak.protect(), async (req, res) => {
         const accessToken = req.headers.authorization;
+        const userId = req['kauth']?.grant?.access_token?.content?.sub;
         const setId: string = req.params.setId;
 
-        const deletedResult = await deleteSet(accessToken, setId);
+        const deletedResult = await deleteSet(accessToken, setId, userId, sqs);
 
         res.send(deletedResult);
     });
 
-    app.use((error: Error, _req: Request, res: Response, _: NextFunction) => {
-        console.error(error);
-        return res
-            .status(StatusCodes.INTERNAL_SERVER_ERROR)
-            .json({ error: getReasonPhrase(StatusCodes.INTERNAL_SERVER_ERROR) });
-    });
+    app.use(globalErrorLogger, globalErrorHandler);
 
     return app;
 };

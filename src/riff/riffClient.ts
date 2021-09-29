@@ -1,7 +1,10 @@
 import fetch from 'node-fetch';
+import { SetSqon, Sort } from '../endpoints/sets/setsTypes';
 
 import { riffURL } from '../env';
 import { RiffError } from './riffError';
+
+export const RIFF_TYPE_SET = 'set';
 
 export type CreateUpdateRiffBody = {
     alias: string;
@@ -10,9 +13,12 @@ export type CreateUpdateRiffBody = {
 };
 
 export type RiffContent = {
-    type: string;
-    participantIds: string[];
-    sqon: JSON;
+    setType: string;
+    riffType: string;
+    ids: string[];
+    sqon: SetSqon;
+    sort: Sort[];
+    path: string;
 };
 
 export type Riff = {

@@ -1,11 +1,11 @@
 import { buildQuery } from '@arranger/middleware';
 import { get, isEmpty, uniq } from 'lodash';
-import { Sort } from '../endpoints/setsFeature';
+import { SetSqon, Sort } from '../endpoints/sets/setsTypes';
 import { getNestedFields } from './nestedField';
 import EsInstance from './ElasticSearchClientInstance';
 
 export const searchSqon = async (
-    sqon: JSON,
+    sqon: SetSqon,
     requestSort: Sort[],
     projectId: string,
     type: string,
@@ -20,7 +20,7 @@ export const searchSqon = async (
     });
 };
 
-const makeQuery = async (sqon: JSON, sort: Sort[], projectId: string, type: string) => {
+const makeQuery = async (sqon: SetSqon, sort: Sort[], projectId: string, type: string) => {
     const nestedFields = await getNestedFields(projectId, `${type}_centric`);
     const query = buildQuery({ nestedFields, filters: sqon });
     return { query, sort };

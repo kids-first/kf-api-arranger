@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node ./dist/src/index.js",
     "test": "jest",
+    "test:watch": "jest --watch",
     "clean": "rm -rf ./dist/* ",
     "build": "npm run clean; tsc ",
     "lint": "eslint . --ext .ts"
@@ -34,6 +35,7 @@
     "@arranger/server": "^2.15.0",
     "@awaitjs/express": "^0.5.0",
     "@elastic/elasticsearch": "^7.9.1",
+    "aws-sdk": "^2.996.0",
     "cors": "2.8.5",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
