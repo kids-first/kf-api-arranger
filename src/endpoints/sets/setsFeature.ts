@@ -1,5 +1,9 @@
-import { difference, get, union } from 'lodash';
+import SQS from 'aws-sdk/clients/sqs';
+import { difference, dropRight, get, union } from 'lodash';
 
+import { addSqonToSetSqon, removeSqonToSetSqon } from '../../elasticSearch/manipulateSqon';
+import { searchSqon } from '../../elasticSearch/searchSqon';
+import { maxSetContentSize } from '../../env';
 import {
     CreateUpdateRiffBody,
     deleteRiff,
@@ -9,11 +13,6 @@ import {
     Riff,
     RIFF_TYPE_SET,
 } from '../../riff/riffClient';
-import { searchSqon } from '../../elasticSearch/searchSqon';
-import { addSqonToSetSqon, removeSqonToSetSqon } from '../../elasticSearch/manipulateSqon';
-import { CreateSetBody, Set, UpdateSetContentBody, UpdateSetTagBody } from './setsTypes';
-import { sendSetInSQSQueue } from '../../SQS/sendEvent';
-import SQS from 'aws-sdk/clients/sqs';
 import {
     EventCreate,
     EventCreateValue,
@@ -23,7 +22,9 @@ import {
     UpdateContentValue,
     UpdateTagValue,
 } from '../../SQS/eventTypes';
+import { sendSetInSQSQueue } from '../../SQS/sendEvent';
 import { SetNotFoundError } from './setError';
+import { CreateSetBody, Set, UpdateSetContentBody, UpdateSetTagBody } from './setsTypes';
 
 export const SubActionTypes = {
     RENAME_TAG: 'RENAME_TAG',
@@ -54,11 +55,12 @@ export const createSet = async (
 ): Promise<Riff> => {
     const { sqon, sort, projectId, type, path, tag } = requestBody;
     const ids = await searchSqon(sqon, sort, projectId, type, path);
+    const truncatedIds = truncateIds(ids);
 
     const riffPayload = {
         alias: tag,
         sharedPublicly: false,
-        content: { ids, riffType: RIFF_TYPE_SET, setType: type, sqon, sort, path },
+        content: { ids: truncatedIds, riffType: RIFF_TYPE_SET, setType: type, sqon, sort, path },
     } as CreateUpdateRiffBody;
 
     const createResult = await postRiff(accessToken, riffPayload);
@@ -69,8 +71,8 @@ export const createSet = async (
             values: {
                 userId,
                 setId: createResult.id,
-                ids,
-                size: ids.length,
+                ids: truncatedIds,
+                size: truncatedIds.length,
                 sqon,
                 path,
                 type,
@@ -147,11 +149,12 @@ export const updateSetContent = async (
 
     const existingIdsWithNewIds =
         requestBody.subAction === SubActionTypes.ADD_IDS ? union(ids, newSqonIds) : difference(ids, newSqonIds);
+    const truncatedIds = truncateIds(existingIdsWithNewIds);
 
     const riffPayload = {
         alias: setToUpdate.alias,
         sharedPublicly: setToUpdate.sharedPublicly,
-        content: { ...setToUpdate.content, sqon: existingSqonWithNewSqon, ids: existingIdsWithNewIds },
+        content: { ...setToUpdate.content, sqon: existingSqonWithNewSqon, ids: truncatedIds },
     } as CreateUpdateRiffBody;
 
     const updateResult = await putRiff(accessToken, riffPayload, setId);
@@ -164,7 +167,7 @@ export const updateSetContent = async (
                 userId,
                 setId,
                 tag: updateResult.alias,
-                ids: existingIdsWithNewIds,
+                ids: truncatedIds,
                 createdAt: updateResult.creationDate,
             } as UpdateContentValue,
         } as EventUpdate);
@@ -183,3 +186,10 @@ export const deleteSet = async (accessToken: string, setId: string, userId: stri
 };
 
 const mapRiffToSet = (riff: Riff): Set => ({ id: riff.id, tag: riff.alias, size: riff.content.ids.length } as Set);
+
+const truncateIds = (ids: string[]): string[] => {
+    if (ids.length <= maxSetContentSize) {
+        return ids;
+    }
+    return dropRight(ids, ids.length - maxSetContentSize);
+};

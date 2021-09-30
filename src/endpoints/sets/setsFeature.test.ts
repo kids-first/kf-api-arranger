@@ -1,5 +1,6 @@
-import { createSet, updateSetTag, updateSetContent, getSets, SubActionTypes, deleteSet } from './setsFeature';
-import { Sort, Set, CreateSetBody, UpdateSetTagBody, UpdateSetContentBody } from './setsTypes';
+import AWS from 'aws-sdk';
+
+import { searchSqon } from '../../elasticSearch/searchSqon';
 import {
     CreateUpdateRiffBody,
     deleteRiff,
@@ -9,13 +10,14 @@ import {
     Riff,
     RIFF_TYPE_SET,
 } from '../../riff/riffClient';
-import { searchSqon } from '../../elasticSearch/searchSqon';
 import { sendSetInSQSQueue } from '../../SQS/sendEvent';
-import AWS from 'aws-sdk';
+import { createSet, deleteSet, getSets, SubActionTypes, updateSetContent, updateSetTag } from './setsFeature';
+import { CreateSetBody, Set, Sort, UpdateSetContentBody, UpdateSetTagBody } from './setsTypes';
 
 jest.mock('../../elasticSearch/searchSqon');
 jest.mock('../../riff/riffClient');
 jest.mock('../../SQS/sendEvent');
+jest.mock('../../env', () => ({ esHost: 'http://localhost:9200', maxSetContentSize: 3 }));
 
 describe('Set management', () => {
     const sqon = { op: 'and', content: [] };
@@ -119,6 +121,40 @@ describe('Set management', () => {
             expect((postRiff as jest.Mock).mock.calls.length).toEqual(1);
             expect((postRiff as jest.Mock).mock.calls[0][0]).toEqual(accessToken);
             expect((postRiff as jest.Mock).mock.calls[0][1]).toEqual(expectedCreateRiffBody);
+            expect((sendSetInSQSQueue as jest.Mock).mock.calls.length).toEqual(1);
+        });
+
+        it('should truncate id list if greater than max defined in config', async () => {
+            const mockTooLongParticipantIds = [
+                'participant_1',
+                'participant_2',
+                'participant_3',
+                'participant_4',
+                'participant_5',
+            ];
+
+            const expectedRiff = {
+                ...riff,
+                content: { ...riff.content, ids: ['participant_1', 'participant_2', 'participant_3'] },
+            };
+
+            (sendSetInSQSQueue as jest.Mock).mockImplementation(() => Promise.resolve({ MessageId: '123' }));
+            (searchSqon as jest.Mock).mockImplementation(() => mockTooLongParticipantIds);
+            (postRiff as jest.Mock).mockImplementation(() => expectedRiff);
+
+            const result = await createSet(createSetBody, accessToken, userId, sqs);
+
+            expect(result).toEqual(expectedRiff);
+            expect((searchSqon as jest.Mock).mock.calls.length).toEqual(1);
+            expect((postRiff as jest.Mock).mock.calls.length).toEqual(1);
+            expect((postRiff as jest.Mock).mock.calls[0][0]).toEqual(accessToken);
+            expect((postRiff as jest.Mock).mock.calls[0][1]).toEqual({
+                ...expectedCreateRiffBody,
+                content: {
+                    ...expectedCreateRiffBody.content,
+                    ids: ['participant_1', 'participant_2', 'participant_3'],
+                },
+            });
             expect((sendSetInSQSQueue as jest.Mock).mock.calls.length).toEqual(1);
         });
 
