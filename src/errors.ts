@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction } from 'express';
-import { StatusCodes, getReasonPhrase } from 'http-status-codes';
+import { NextFunction, Request, Response } from 'express';
+import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 
 import { SetNotFoundError } from './endpoints/sets/setError';
 

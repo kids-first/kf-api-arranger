@@ -1,11 +1,10 @@
-import express, { Express } from 'express';
-import cors from 'cors';
-import SQS from 'aws-sdk/clients/sqs';
 import addAsync from '@awaitjs/express';
+import SQS from 'aws-sdk/clients/sqs';
+import cors from 'cors';
+import express, { Express } from 'express';
 import { Keycloak } from 'keycloak-connect';
 
 import { dependencies, version } from '../package.json';
-import { keycloakURL, esHost } from './env';
 import genomicFeatureSuggestions, { SUGGESTIONS_TYPES } from './endpoints/genomicFeatureSuggestions';
 import {
     createSet,
@@ -16,8 +15,9 @@ import {
     updateSetTag,
 } from './endpoints/sets/setsFeature';
 import { CreateSetBody, UpdateSetContentBody, UpdateSetTagBody } from './endpoints/sets/setsTypes';
-import { Riff } from './riff/riffClient';
+import { esHost, keycloakURL } from './env';
 import { globalErrorHandler, globalErrorLogger } from './errors';
+import { Riff } from './riff/riffClient';
 
 export default (keycloak: Keycloak, sqs: SQS): Express => {
     const app = addAsync.addAsync(express());

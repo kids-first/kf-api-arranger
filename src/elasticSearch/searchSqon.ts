@@ -1,8 +1,9 @@
 import { buildQuery } from '@arranger/middleware';
 import { get, isEmpty, uniq } from 'lodash';
+
 import { SetSqon, Sort } from '../endpoints/sets/setsTypes';
-import { getNestedFields } from './nestedField';
 import EsInstance from './ElasticSearchClientInstance';
+import { getNestedFields } from './nestedField';
 
 export const searchSqon = async (
     sqon: SetSqon,

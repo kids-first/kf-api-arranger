@@ -1,22 +1,23 @@
+import AWS from 'aws-sdk';
 import { Express } from 'express';
 import Keycloak from 'keycloak-connect';
 import request from 'supertest';
-import AWS from 'aws-sdk';
-import buildApp from './app';
+
 import { getToken, publicKey } from '../test/authTestUtils';
+import buildApp from './app';
+import { SetNotFoundError } from './endpoints/sets/setError';
 import {
     createSet,
     deleteSet,
     getSets,
-    updateSetTag,
-    updateSetContent,
     SubActionTypes,
+    updateSetContent,
+    updateSetTag,
 } from './endpoints/sets/setsFeature';
 import { Set, UpdateSetContentBody, UpdateSetTagBody } from './endpoints/sets/setsTypes';
 import { keycloakClient, keycloakRealm, keycloakURL } from './env';
-import { RiffError } from './riff/riffError';
 import { Riff, RIFF_TYPE_SET } from './riff/riffClient';
-import { SetNotFoundError } from './endpoints/sets/setError';
+import { RiffError } from './riff/riffError';
 
 jest.mock('./endpoints/sets/setsFeature');
 

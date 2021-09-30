@@ -1,5 +1,6 @@
 import fetch from 'node-fetch';
-import { deleteRiff, postRiff, putRiff, CreateUpdateRiffBody, Riff, RiffContent, getRiffs } from '../riff/riffClient';
+
+import { CreateUpdateRiffBody, deleteRiff, getRiffs, postRiff, putRiff, Riff, RiffContent } from '../riff/riffClient';
 import { RiffError } from './riffError';
 
 jest.mock('node-fetch');

@@ -1,5 +1,6 @@
 import AWS from 'aws-sdk';
 import { PromiseResult } from 'aws-sdk/lib/request';
+
 import { sqsQueueUrl } from '../env';
 import { EventCreate, EventDelete, EventUpdate } from './eventTypes';
 

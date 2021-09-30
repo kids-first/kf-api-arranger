@@ -1,10 +1,12 @@
 /* eslint-disable no-console */
 import 'regenerator-runtime/runtime.js';
-import SQS from 'aws-sdk/clients/sqs';
+
 import Arranger from '@arranger/server';
+import SQS from 'aws-sdk/clients/sqs';
 import Keycloak from 'keycloak-connect';
-import { port, esHost } from './env';
+
 import buildApp from './app';
+import { esHost, port } from './env';
 import keycloakConfig from './keycloak';
 
 process.on('uncaughtException', err => {

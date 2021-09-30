@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
-import { SetSqon, Sort } from '../endpoints/sets/setsTypes';
 
+import { SetSqon, Sort } from '../endpoints/sets/setsTypes';
 import { riffURL } from '../env';
 import { RiffError } from './riffError';
 

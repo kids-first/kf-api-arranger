@@ -1,4 +1,5 @@
 import { get } from 'lodash';
+
 import { AsyncCache } from '../cache/asyncCache';
 import EsInstance from './ElasticSearchClientInstance';
 
