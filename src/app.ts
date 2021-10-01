@@ -5,6 +5,7 @@ import express, { Express } from 'express';
 import { Keycloak } from 'keycloak-connect';
 
 import { dependencies, version } from '../package.json';
+import { ArrangerProject } from './elasticSearch/searchSqon';
 import genomicFeatureSuggestions, { SUGGESTIONS_TYPES } from './endpoints/genomicFeatureSuggestions';
 import {
     createSet,
@@ -19,7 +20,7 @@ import { esHost, keycloakURL } from './env';
 import { globalErrorHandler, globalErrorLogger } from './errors';
 import { Riff } from './riff/riffClient';
 
-export default (keycloak: Keycloak, sqs: SQS): Express => {
+export default (keycloak: Keycloak, sqs: SQS, getProject: (projectId: string) => ArrangerProject): Express => {
     const app = addAsync.addAsync(express());
 
     app.use(cors());
@@ -60,7 +61,7 @@ export default (keycloak: Keycloak, sqs: SQS): Express => {
     app.postAsync('/sets', keycloak.protect(), async (req, res) => {
         const accessToken = req.headers.authorization;
         const userId = req['kauth']?.grant?.access_token?.content?.sub;
-        const createdSet = await createSet(req.body as CreateSetBody, accessToken, userId, sqs);
+        const createdSet = await createSet(req.body as CreateSetBody, accessToken, userId, sqs, getProject);
 
         res.send(createdSet);
     });
@@ -75,7 +76,14 @@ export default (keycloak: Keycloak, sqs: SQS): Express => {
         if (requestBody.subAction === SubActionTypes.RENAME_TAG) {
             updatedSet = await updateSetTag(requestBody as UpdateSetTagBody, accessToken, userId, setId, sqs);
         } else {
-            updatedSet = await updateSetContent(requestBody as UpdateSetContentBody, accessToken, userId, setId, sqs);
+            updatedSet = await updateSetContent(
+                requestBody as UpdateSetContentBody,
+                accessToken,
+                userId,
+                setId,
+                sqs,
+                getProject,
+            );
         }
         res.send(updatedSet);
     });

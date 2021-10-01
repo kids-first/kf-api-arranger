@@ -2,7 +2,7 @@ import SQS from 'aws-sdk/clients/sqs';
 import { difference, dropRight, get, union } from 'lodash';
 
 import { addSqonToSetSqon, removeSqonToSetSqon } from '../../elasticSearch/manipulateSqon';
-import { searchSqon } from '../../elasticSearch/searchSqon';
+import { ArrangerProject, searchSqon } from '../../elasticSearch/searchSqon';
 import { maxSetContentSize } from '../../env';
 import {
     CreateUpdateRiffBody,
@@ -52,15 +52,16 @@ export const createSet = async (
     accessToken: string,
     userId: string,
     sqs: SQS,
+    getProject: (projectId: string) => ArrangerProject,
 ): Promise<Riff> => {
-    const { sqon, sort, projectId, type, path, tag } = requestBody;
-    const ids = await searchSqon(sqon, sort, projectId, type, path);
+    const { sqon, sort, projectId, type, idField, tag } = requestBody;
+    const ids = await searchSqon(sqon, projectId, type, sort, idField, getProject);
     const truncatedIds = truncateIds(ids);
 
     const riffPayload = {
         alias: tag,
         sharedPublicly: false,
-        content: { ids: truncatedIds, riffType: RIFF_TYPE_SET, setType: type, sqon, sort, path },
+        content: { ids: truncatedIds, riffType: RIFF_TYPE_SET, setType: type, sqon, sort, idField },
     } as CreateUpdateRiffBody;
 
     const createResult = await postRiff(accessToken, riffPayload);
@@ -74,7 +75,7 @@ export const createSet = async (
                 ids: truncatedIds,
                 size: truncatedIds.length,
                 sqon,
-                path,
+                path: idField,
                 type,
                 tag,
                 createdAt: createResult.creationDate,
@@ -124,6 +125,7 @@ export const updateSetContent = async (
     userId: string,
     setId: string,
     sqs: SQS,
+    getProject: (projectId: string) => ArrangerProject,
 ): Promise<Riff> => {
     const existingSetsFilterById = (await getRiffs(accessToken, userId)).filter(r => r.id === setId);
 
@@ -136,10 +138,11 @@ export const updateSetContent = async (
 
     const newSqonIds = await searchSqon(
         requestBody.sqon,
-        setToUpdate.content.sort,
         requestBody.projectId,
         setToUpdate.content.setType,
-        setToUpdate.content.path,
+        setToUpdate.content.sort,
+        setToUpdate.content.idField,
+        getProject,
     );
 
     const existingSqonWithNewSqon =

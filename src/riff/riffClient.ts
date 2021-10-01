@@ -18,7 +18,7 @@ export type RiffContent = {
     ids: string[];
     sqon: SetSqon;
     sort: Sort[];
-    path: string;
+    idField: string;
 };
 
 export type Riff = {

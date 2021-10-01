@@ -5,6 +5,7 @@ import request from 'supertest';
 
 import { getToken, publicKey } from '../test/authTestUtils';
 import buildApp from './app';
+import { ArrangerProject } from './elasticSearch/searchSqon';
 import { SetNotFoundError } from './endpoints/sets/setError';
 import {
     createSet,
@@ -25,6 +26,8 @@ describe('Express app (without Arranger)', () => {
     let app: Express;
     let keycloakFakeConfig;
 
+    const getProject = (_s: string) => ({} as ArrangerProject);
+
     beforeEach(() => {
         const sqs = new AWS.SQS({ apiVersion: '2012-11-05' });
         const publicKeyToVerify = publicKey;
@@ -38,7 +41,7 @@ describe('Express app (without Arranger)', () => {
             'realm-public-key': publicKeyToVerify, // For test purpose, we use public key to validate token.
         };
         const keycloak = new Keycloak({}, keycloakFakeConfig);
-        app = buildApp(keycloak, sqs); // Re-create app between each test to ensure isolation between tests.
+        app = buildApp(keycloak, sqs, getProject); // Re-create app between each test to ensure isolation between tests.
     });
 
     it('GET /status (public) should responds with json', async () => {

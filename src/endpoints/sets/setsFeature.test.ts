@@ -1,6 +1,6 @@
 import AWS from 'aws-sdk';
 
-import { searchSqon } from '../../elasticSearch/searchSqon';
+import { ArrangerProject, searchSqon } from '../../elasticSearch/searchSqon';
 import {
     CreateUpdateRiffBody,
     deleteRiff,
@@ -22,13 +22,14 @@ jest.mock('../../env', () => ({ esHost: 'http://localhost:9200', maxSetContentSi
 describe('Set management', () => {
     const sqon = { op: 'and', content: [] };
     const tag = 'tag';
-    const path = 'kf_id';
+    const idField = 'kf_id';
     const projectId = '2021_05_03_v2';
     const type = 'participant';
     const sort: Sort[] = [];
     const accessToken = 'Bearer bearer';
     const setId = '1ea';
     const userId = 'user_id';
+    const getProject = (_s: string) => ({} as ArrangerProject);
 
     const mockParticipantIds = ['participant_1', 'participant_2'];
 
@@ -80,7 +81,7 @@ describe('Set management', () => {
 
     describe('Create set using Riff API', () => {
         const createSetBody: CreateSetBody = {
-            path,
+            idField,
             projectId,
             sort,
             sqon,
@@ -93,7 +94,7 @@ describe('Set management', () => {
             sharedPublicly: false,
             content: {
                 ids: mockParticipantIds,
-                path,
+                idField,
                 sort,
                 sqon,
                 riffType: RIFF_TYPE_SET,
@@ -114,7 +115,7 @@ describe('Set management', () => {
             (searchSqon as jest.Mock).mockImplementation(() => mockParticipantIds);
             (postRiff as jest.Mock).mockImplementation(() => riff);
 
-            const result = await createSet(createSetBody, accessToken, userId, sqs);
+            const result = await createSet(createSetBody, accessToken, userId, sqs, getProject);
 
             expect(result).toEqual(riff);
             expect((searchSqon as jest.Mock).mock.calls.length).toEqual(1);
@@ -142,7 +143,7 @@ describe('Set management', () => {
             (searchSqon as jest.Mock).mockImplementation(() => mockTooLongParticipantIds);
             (postRiff as jest.Mock).mockImplementation(() => expectedRiff);
 
-            const result = await createSet(createSetBody, accessToken, userId, sqs);
+            const result = await createSet(createSetBody, accessToken, userId, sqs, getProject);
 
             expect(result).toEqual(expectedRiff);
             expect((searchSqon as jest.Mock).mock.calls.length).toEqual(1);
@@ -163,7 +164,7 @@ describe('Set management', () => {
             (searchSqon as jest.Mock).mockImplementation(() => mockParticipantIds);
             (postRiff as jest.Mock).mockImplementation(() => ({ ...riff, alias: '' }));
 
-            const result = await createSet({ ...createSetBody, tag: '' }, accessToken, userId, sqs);
+            const result = await createSet({ ...createSetBody, tag: '' }, accessToken, userId, sqs, getProject);
 
             expect(result).toEqual({ ...riff, alias: '' });
             expect((searchSqon as jest.Mock).mock.calls.length).toEqual(1);
@@ -178,7 +179,7 @@ describe('Set management', () => {
             });
 
             try {
-                await createSet(createSetBody, accessToken, userId, sqs);
+                await createSet(createSetBody, accessToken, userId, sqs, getProject);
             } catch (e) {
                 expect(e.message).toEqual('OOPS');
             } finally {
@@ -334,7 +335,7 @@ describe('Set management', () => {
             (putRiff as jest.Mock).mockImplementation(() => updatedRiff);
             (sendSetInSQSQueue as jest.Mock).mockImplementation(() => Promise.resolve({ MessageId: '123' }));
 
-            const result = await updateSetContent(updateSetContentAddSqon, accessToken, userId, setId, sqs);
+            const result = await updateSetContent(updateSetContentAddSqon, accessToken, userId, setId, sqs, getProject);
 
             expect(result).toEqual(updatedRiff);
             expect((getRiffs as jest.Mock).mock.calls.length).toEqual(1);
@@ -363,7 +364,7 @@ describe('Set management', () => {
             (searchSqon as jest.Mock).mockImplementation(() => mockNewSqonParticipantIds);
             (putRiff as jest.Mock).mockImplementation(() => updatedRiff);
 
-            const result = await updateSetContent(updateSetContentAddSqon, accessToken, userId, setId, sqs);
+            const result = await updateSetContent(updateSetContentAddSqon, accessToken, userId, setId, sqs, getProject);
 
             expect(result).toEqual(updatedRiff);
             expect((getRiffs as jest.Mock).mock.calls.length).toEqual(1);
@@ -401,7 +402,14 @@ describe('Set management', () => {
             (putRiff as jest.Mock).mockImplementation(() => updatedRiff);
             (sendSetInSQSQueue as jest.Mock).mockImplementation(() => Promise.resolve({ MessageId: '123' }));
 
-            const result = await updateSetContent(updateSetContentRemoveSqon, accessToken, userId, setId, sqs);
+            const result = await updateSetContent(
+                updateSetContentRemoveSqon,
+                accessToken,
+                userId,
+                setId,
+                sqs,
+                getProject,
+            );
 
             expect(result).toEqual(updatedRiff);
             expect((getRiffs as jest.Mock).mock.calls.length).toEqual(1);
@@ -418,7 +426,7 @@ describe('Set management', () => {
             (searchSqon as jest.Mock).mockImplementation(() => mockNewSqonParticipantIds);
 
             try {
-                await updateSetContent(updateSetContentAddSqon, accessToken, userId, setId, sqs);
+                await updateSetContent(updateSetContentAddSqon, accessToken, userId, setId, sqs, getProject);
             } catch (e) {
                 expect(e.message).toEqual('Set to update can not be found !');
             } finally {
@@ -437,7 +445,7 @@ describe('Set management', () => {
             });
 
             try {
-                await updateSetContent(updateSetContentAddSqon, accessToken, userId, setId, sqs);
+                await updateSetContent(updateSetContentAddSqon, accessToken, userId, setId, sqs, getProject);
             } catch (e) {
                 expect(e.message).toEqual('OOPS');
             } finally {

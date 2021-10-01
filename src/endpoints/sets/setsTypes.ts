@@ -7,7 +7,7 @@ export type CreateSetBody = {
     projectId: string;
     type: string;
     sqon: SetSqon;
-    path: string;
+    idField: string;
     sort: Sort[];
     tag: string;
 };
