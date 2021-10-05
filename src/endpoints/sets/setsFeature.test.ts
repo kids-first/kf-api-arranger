@@ -1,6 +1,5 @@
 import AWS from 'aws-sdk';
 
-import { ArrangerProject, searchSqon } from '../../elasticSearch/searchSqon';
 import {
     CreateUpdateRiffBody,
     deleteRiff,
@@ -10,11 +9,12 @@ import {
     Riff,
     RIFF_TYPE_SET,
 } from '../../riff/riffClient';
+import { ArrangerProject, searchSqon } from '../../sqon/searchSqon';
 import { sendSetInSQSQueue } from '../../SQS/sendEvent';
 import { createSet, deleteSet, getSets, SubActionTypes, updateSetContent, updateSetTag } from './setsFeature';
 import { CreateSetBody, Set, Sort, UpdateSetContentBody, UpdateSetTagBody } from './setsTypes';
 
-jest.mock('../../elasticSearch/searchSqon');
+jest.mock('../../sqon/searchSqon');
 jest.mock('../../riff/riffClient');
 jest.mock('../../SQS/sendEvent');
 jest.mock('../../env', () => ({ esHost: 'http://localhost:9200', maxSetContentSize: 3 }));

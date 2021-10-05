@@ -5,7 +5,6 @@ import express, { Express } from 'express';
 import { Keycloak } from 'keycloak-connect';
 
 import { dependencies, version } from '../package.json';
-import { ArrangerProject } from './elasticSearch/searchSqon';
 import genomicFeatureSuggestions, { SUGGESTIONS_TYPES } from './endpoints/genomicFeatureSuggestions';
 import {
     createSet,
@@ -19,6 +18,7 @@ import { CreateSetBody, UpdateSetContentBody, UpdateSetTagBody } from './endpoin
 import { esHost, keycloakURL } from './env';
 import { globalErrorHandler, globalErrorLogger } from './errors';
 import { Riff } from './riff/riffClient';
+import { ArrangerProject } from './sqon/searchSqon';
 
 export default (keycloak: Keycloak, sqs: SQS, getProject: (projectId: string) => ArrangerProject): Express => {
     const app = addAsync.addAsync(express());
