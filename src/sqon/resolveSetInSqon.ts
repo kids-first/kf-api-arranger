@@ -1,4 +1,4 @@
-import { Dictionary, flattenDeep, isArray, zipObject } from 'lodash';
+import { Dictionary, flattenDeep, get, isArray, zipObject } from 'lodash';
 
 import { SetSqon } from '../endpoints/sets/setsTypes';
 import { getRiffs } from '../riff/riffClient';
@@ -32,7 +32,7 @@ export const resolveSetsInSqon = async (sqon: SetSqon, userId: string, accessTok
     const setIds: string[] = getSetIdsFromSqon(sqon || ({} as SetSqon));
     if (setIds.length) {
         const userRiffs = await getRiffs(accessToken, userId);
-        const ids = setIds.map(setId => userRiffs.filter(r => r.id === setId)[0].content.ids || []);
+        const ids = setIds.map(setId => get(userRiffs.filter(r => r.id === setId)[0], 'content.ids', []));
         const setIdsToValueMap: Dictionary<string[]> = zipObject(
             setIds.map(id => `set_id:${id}`),
             ids,
