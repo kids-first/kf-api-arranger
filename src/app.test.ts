@@ -5,7 +5,6 @@ import request from 'supertest';
 
 import { getToken, publicKey } from '../test/authTestUtils';
 import buildApp from './app';
-import { ArrangerProject } from './elasticSearch/searchSqon';
 import { SetNotFoundError } from './endpoints/sets/setError';
 import {
     createSet,
@@ -19,6 +18,7 @@ import { Set, UpdateSetContentBody, UpdateSetTagBody } from './endpoints/sets/se
 import { keycloakClient, keycloakRealm, keycloakURL } from './env';
 import { Riff, RIFF_TYPE_SET } from './riff/riffClient';
 import { RiffError } from './riff/riffError';
+import { ArrangerProject } from './sqon/searchSqon';
 
 jest.mock('./endpoints/sets/setsFeature');
 

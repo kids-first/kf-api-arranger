@@ -1,8 +1,6 @@
 import SQS from 'aws-sdk/clients/sqs';
 import { difference, dropRight, get, union } from 'lodash';
 
-import { addSqonToSetSqon, removeSqonToSetSqon } from '../../elasticSearch/manipulateSqon';
-import { ArrangerProject, searchSqon } from '../../elasticSearch/searchSqon';
 import { maxSetContentSize } from '../../env';
 import {
     CreateUpdateRiffBody,
@@ -13,6 +11,8 @@ import {
     Riff,
     RIFF_TYPE_SET,
 } from '../../riff/riffClient';
+import { addSqonToSetSqon, removeSqonToSetSqon } from '../../sqon/manipulateSqon';
+import { ArrangerProject, searchSqon } from '../../sqon/searchSqon';
 import {
     EventCreate,
     EventCreateValue,

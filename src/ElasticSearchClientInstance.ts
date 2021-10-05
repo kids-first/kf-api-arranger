@@ -1,6 +1,6 @@
 import { Client } from '@elastic/elasticsearch';
 
-import { esHost } from '../env';
+import { esHost } from './env';
 
 class EsInstance {
     private instance: Client;

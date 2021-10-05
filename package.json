@@ -10,7 +10,8 @@
     "clean": "rm -rf ./dist/* ",
     "build": "npm run clean; tsc ",
     "lint": "eslint . --ext .ts",
-    "lint:fix": "eslint . --ext .ts --fix"
+    "lint:fix": "eslint . --ext .ts --fix",
+    "buildAndRun": "npm run build; npm start"
   },
   "repository": {
     "type": "git",
@@ -33,7 +34,7 @@
   "homepage": "https://github.com/kids-first/kf-api-arranger#readme",
   "dependencies": {
     "@arranger/server": "^2.15.0",
-    "@awaitjs/express": "^0.5.0",
+    "@awaitjs/express": "^0.8.0",
     "@elastic/elasticsearch": "^7.9.1",
     "aws-sdk": "^2.996.0",
     "cors": "2.8.5",

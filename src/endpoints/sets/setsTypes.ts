@@ -1,6 +1,6 @@
 export type SetSqon = {
     op: string;
-    content: unknown[];
+    content: any; // Since SQON is generic, it is too complex to define an explicit type for its content.
 };
 
 export type CreateSetBody = {
