@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import EsInstance from '../ElasticSearchClientInstance';
 import {
+    esHost,
     indexNameGeneFeatureSuggestion,
     indexNameVariantFeatureSuggestion,
     maxNOfGenomicFeatureSuggestions,
@@ -18,6 +19,9 @@ export default async (req: Request, res: Response, type: string): Promise<void> 
     const client = await EsInstance.getInstance();
 
     const _index = type === SUGGESTIONS_TYPES.GENE ? indexNameGeneFeatureSuggestion : indexNameVariantFeatureSuggestion;
+
+    console.log(_index);
+    console.log(esHost);
 
     const { body } = await client.search({
         index: _index,

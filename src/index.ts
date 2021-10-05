@@ -3,7 +3,6 @@ import 'regenerator-runtime/runtime.js';
 import Arranger from '@arranger/server';
 import Keycloak from 'keycloak-connect';
 import { port, esHost } from './env';
-import { onlyAdminMutations } from './middleware';
 import buildApp from './app';
 import keycloakConfig from './keycloak';
 
@@ -29,7 +28,6 @@ const externalContext = (req, _res, _con) => ({ auth: req.kauth?.grant?.access_t
 Arranger({
     esHost,
     graphqlOptions: {
-        middleware: [onlyAdminMutations],
         context: externalContext,
     },
 }).then(router => {
