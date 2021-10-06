@@ -6,6 +6,7 @@ import request from 'supertest';
 import { getToken, publicKey } from '../test/authTestUtils';
 import buildApp from './app';
 import { search } from './endpoints/search';
+import { searchAllSources } from './endpoints/searchByIds/index';
 import { SetNotFoundError } from './endpoints/sets/setError';
 import {
     createSet,
@@ -25,6 +26,7 @@ import { ArrangerProject } from './sqon/searchSqon';
 jest.mock('./endpoints/search');
 jest.mock('./endpoints/sets/setsFeature');
 jest.mock('./endpoints/survival');
+jest.mock('./endpoints/searchByIds/index');
 
 describe('Express app (without Arranger)', () => {
     let app: Express;
@@ -425,6 +427,14 @@ describe('Express app (without Arranger)', () => {
     });
 
     describe('POST /survival', () => {
+        const requestBody = {
+            project: '2021_05_03_v2',
+            sqon: {
+                op: 'and',
+                content: [{ op: 'in', content: { field: 'gender', value: ['Female'] } }],
+            },
+        };
+
         beforeEach(() => {
             (calculateSurvivalForSqonResult as jest.Mock).mockReset();
         });
@@ -482,10 +492,11 @@ describe('Express app (without Arranger)', () => {
 
             await request(app)
                 .post('/survival')
+                .send(requestBody)
                 .set('Content-type', 'application/json')
                 .set({ Authorization: `Bearer ${token}` })
                 .expect(200, { data: mockSurvivalResponse });
-            expect((deleteSet as jest.Mock).mock.calls.length).toEqual(1);
+            expect((calculateSurvivalForSqonResult as jest.Mock).mock.calls.length).toEqual(1);
         });
 
         it('should return 500 if Authorization header contains valid token but an error occurs', async () => {
@@ -498,10 +509,61 @@ describe('Express app (without Arranger)', () => {
 
             await request(app)
                 .post('/survival')
+                .send(requestBody)
                 .set('Content-type', 'application/json')
                 .set({ Authorization: `Bearer ${token}` })
                 .expect(500, { error: 'Internal Server Error' });
             expect((calculateSurvivalForSqonResult as jest.Mock).mock.calls.length).toEqual(1);
+        });
+    });
+
+    describe('POST /searchByIds', () => {
+        const requestBody = {
+            project: '2021_05_03_v2',
+            ids: ['PT_HXDR3ZX6'],
+        };
+
+        beforeEach(() => {
+            (searchAllSources as jest.Mock).mockReset();
+        });
+
+        it('should return 403 if no Authorization header', () =>
+            request(app)
+                .post('/searchByIds')
+                .expect(403));
+
+        it('should return 200 if Authorization header contains valid token and no error occurs', async () => {
+            const mockSearchByIdsResponse = [
+                { search: 'PT_HXDR3ZX6', type: 'PARTICIPANT', participantIds: ['PT_HXDR3ZX6'] },
+            ];
+            (searchAllSources as jest.Mock).mockImplementation(() => mockSearchByIdsResponse);
+
+            const token = getToken();
+
+            await request(app)
+                .post('/searchByIds')
+                .send(requestBody)
+                .set('Content-type', 'application/json')
+                .set({ Authorization: `Bearer ${token}` })
+                .expect(200, { participants: mockSearchByIdsResponse });
+            expect((searchAllSources as jest.Mock).mock.calls.length).toEqual(1);
+        });
+
+        it('should return 500 if Authorization header contains valid token but an error occurs', async () => {
+            const expectedError = new Error('OOPS');
+            (searchAllSources as jest.Mock).mockImplementation(() => {
+                throw expectedError;
+            });
+
+            const token = getToken();
+
+            await request(app)
+                .post('/searchByIds')
+                .send(requestBody)
+                .set('Content-type', 'application/json')
+                .set({ Authorization: `Bearer ${token}` })
+                .expect(500, { error: 'Internal Server Error' });
+            expect((searchAllSources as jest.Mock).mock.calls.length).toEqual(1);
         });
     });
 });

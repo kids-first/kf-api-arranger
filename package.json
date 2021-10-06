@@ -33,6 +33,7 @@
   },
   "homepage": "https://github.com/kids-first/kf-api-arranger#readme",
   "dependencies": {
+    "@arranger/middleware": "^2.15.0",
     "@arranger/server": "^2.15.0",
     "@awaitjs/express": "^0.8.0",
     "@elastic/elasticsearch": "^7.9.1",

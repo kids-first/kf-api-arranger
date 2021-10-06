@@ -7,6 +7,8 @@ import { Keycloak } from 'keycloak-connect';
 import { dependencies, version } from '../package.json';
 import genomicFeatureSuggestions, { SUGGESTIONS_TYPES } from './endpoints/genomicFeatureSuggestions';
 import { search, SearchVariables } from './endpoints/search';
+import { searchAllSources } from './endpoints/searchByIds';
+import { SearchByIdsResult } from './endpoints/searchByIds/searchByIdsTypes';
 import {
     createSet,
     deleteSet,
@@ -71,6 +73,14 @@ export default (keycloak: Keycloak, sqs: SQS, getProject: (projectId: string) =>
         const data = await search(userId, accessToken, projectId, query, variables, getProject);
 
         res.send(data);
+    });
+
+    app.postAsync('/searchByIds', keycloak.protect(), async (req, res) => {
+        const ids: string[] = req.body.ids;
+        const projectId: string = req.body.project;
+        const participants: SearchByIdsResult[] = await searchAllSources(ids, projectId, getProject);
+
+        res.send({ participants });
     });
 
     app.getAsync('/sets', keycloak.protect(), async (req, res) => {
