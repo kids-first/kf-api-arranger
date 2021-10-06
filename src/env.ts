@@ -18,3 +18,6 @@ export const indexNameVariantFeatureSuggestion = process.env.VARIANTS_SUGGESTION
 export const riffURL = process.env.RIFF_URL || 'https://riff-keycloak-qa.kf-strides.org';
 export const sqsQueueUrl = process.env.SQS_QUEUE_URL || '';
 export const maxSetContentSize: number = Number.parseInt(process.env.MAX_SET_CONTENT_SIZE) || 1000;
+
+export const survivalPyFile = process.env.SURVIVAL_PY_FILE || 'resource/py/survival.py';
+export const pythonPath = process.env.PYTHON_PATH || '/usr/local/bin/python3';

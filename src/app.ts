@@ -14,7 +14,8 @@ import {
     updateSetContent,
     updateSetTag,
 } from './endpoints/sets/setsFeature';
-import { CreateSetBody, UpdateSetContentBody, UpdateSetTagBody } from './endpoints/sets/setsTypes';
+import { CreateSetBody, SetSqon, UpdateSetContentBody, UpdateSetTagBody } from './endpoints/sets/setsTypes';
+import { calculateSurvivalForSqonResult } from './endpoints/survival';
 import { esHost, keycloakURL } from './env';
 import { globalErrorHandler, globalErrorLogger } from './errors';
 import { Riff } from './riff/riffClient';
@@ -49,6 +50,16 @@ export default (keycloak: Keycloak, sqs: SQS, getProject: (projectId: string) =>
     app.getAsync('/variantsFeature/suggestions/:prefix', keycloak.protect(), (req, res) =>
         genomicFeatureSuggestions(req, res, SUGGESTIONS_TYPES.VARIANT),
     );
+
+    app.postAsync('/survival', keycloak.protect(), async (req, res) => {
+        const accessToken = req.headers.authorization;
+        const userId = req['kauth']?.grant?.access_token?.content?.sub;
+        const sqon: SetSqon = req.body.sqon;
+        const projectId: string = req.body.project;
+        const data = await calculateSurvivalForSqonResult(sqon, projectId, userId, accessToken, getProject);
+
+        res.send({ data });
+    });
 
     app.getAsync('/sets', keycloak.protect(), async (req, res) => {
         const accessToken = req.headers.authorization;
