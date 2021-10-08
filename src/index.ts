@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import 'regenerator-runtime/runtime.js';
 
 import Arranger from '@arranger/server';
@@ -9,7 +8,6 @@ import Keycloak from 'keycloak-connect';
 import buildApp from './app';
 import { esHost, port } from './env';
 import keycloakConfig from './keycloak';
-import { resolveSetInQueries } from './middleware';
 
 process.on('uncaughtException', err => {
     console.log(`Uncaught Exception: ${err.message}`);
@@ -34,7 +32,6 @@ const externalContext = (req, _res, _con) => ({ auth: req.kauth?.grant?.access_t
 Arranger({
     esHost,
     graphqlOptions: {
-        middleware: [resolveSetInQueries],
         context: externalContext,
     },
 }).then(router => {
