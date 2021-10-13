@@ -7,9 +7,12 @@ RUN npm run clean
 RUN npm run build
 
 # Second image, that creates an image for production
-FROM node:16.5.0-alpine AS prod-image
+FROM nikolaik/python-nodejs:python3.9-nodejs16-alpine AS prod-image
 WORKDIR /app
 COPY --from=build-image ./app/dist ./dist
 COPY package* ./
+COPY ./resource ./resource
 RUN npm ci --production
+RUN pip3 install -r resource/py/requirements.txt
+
 CMD [ "node", "./dist/src/index.js" ]
