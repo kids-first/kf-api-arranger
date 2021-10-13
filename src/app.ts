@@ -6,6 +6,7 @@ import { Keycloak } from 'keycloak-connect';
 
 import { dependencies, version } from '../package.json';
 import genomicFeatureSuggestions, { SUGGESTIONS_TYPES } from './endpoints/genomicFeatureSuggestions';
+import { search, SearchVariables } from './endpoints/search';
 import {
     createSet,
     deleteSet,
@@ -59,6 +60,17 @@ export default (keycloak: Keycloak, sqs: SQS, getProject: (projectId: string) =>
         const data = await calculateSurvivalForSqonResult(sqon, projectId, userId, accessToken, getProject);
 
         res.send({ data });
+    });
+
+    app.postAsync('/search', keycloak.protect(), async (req, res) => {
+        const accessToken = req.headers.authorization;
+        const userId = req['kauth']?.grant?.access_token?.content?.sub;
+        const variables: SearchVariables = req.body.variables;
+        const query: string = req.body.query;
+        const projectId: string = req.body.projectId;
+        const data = await search(userId, accessToken, projectId, query, variables, getProject);
+
+        res.send(data);
     });
 
     app.getAsync('/sets', keycloak.protect(), async (req, res) => {

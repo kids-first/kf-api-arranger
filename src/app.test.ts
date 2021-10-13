@@ -5,6 +5,7 @@ import request from 'supertest';
 
 import { getToken, publicKey } from '../test/authTestUtils';
 import buildApp from './app';
+import { search } from './endpoints/search';
 import { SetNotFoundError } from './endpoints/sets/setError';
 import {
     createSet,
@@ -21,6 +22,7 @@ import { Riff, RIFF_TYPE_SET } from './riff/riffClient';
 import { RiffError } from './riff/riffError';
 import { ArrangerProject } from './sqon/searchSqon';
 
+jest.mock('./endpoints/search');
 jest.mock('./endpoints/sets/setsFeature');
 jest.mock('./endpoints/survival');
 
@@ -50,6 +52,76 @@ describe('Express app (without Arranger)', () => {
         await request(app)
             .get('/status')
             .expect('Content-Type', /json/);
+    });
+
+    describe('POST /search', () => {
+        const requestBody = {
+            projectId: '2021_05_03_v2',
+            query: 'query($sqon: JSON) {participant {hits(filters: $sqon) {total}}}',
+            variables: {
+                sqon: {
+                    op: 'and',
+                    content: [
+                        {
+                            op: 'in',
+                            content: {
+                                field: 'phenotype.source_text_phenotype',
+                                value: ['Nevus'],
+                            },
+                        },
+                    ],
+                },
+            },
+        };
+
+        beforeEach(() => {
+            (search as jest.Mock).mockReset();
+        });
+
+        it('should return 403 if no Authorization header', () =>
+            request(app)
+                .post('/search')
+                .expect(403));
+
+        it('should return 200 if Authorization header contains valid token and no error occurs', async () => {
+            const expectedSearchResult = {
+                data: {
+                    participant: {
+                        hits: {
+                            total: 198,
+                        },
+                    },
+                },
+            };
+            (search as jest.Mock).mockImplementation(() => expectedSearchResult);
+
+            const token = getToken();
+
+            await request(app)
+                .post('/search')
+                .send(requestBody)
+                .set('Content-type', 'application/json')
+                .set({ Authorization: `Bearer ${token}` })
+                .expect(200, expectedSearchResult);
+            expect((search as jest.Mock).mock.calls.length).toEqual(1);
+        });
+
+        it('should return 500 if Authorization header contains valid token but an error occurs', async () => {
+            const expectedError = new RiffError(400, { message: 'OOPS' });
+            (search as jest.Mock).mockImplementation(() => {
+                throw expectedError;
+            });
+
+            const token = getToken();
+
+            await request(app)
+                .post('/search')
+                .send(requestBody)
+                .set('Content-type', 'application/json')
+                .set({ Authorization: `Bearer ${token}` })
+                .expect(500, { error: 'Internal Server Error' });
+            expect((search as jest.Mock).mock.calls.length).toEqual(1);
+        });
     });
 
     describe('GET /sets', () => {
