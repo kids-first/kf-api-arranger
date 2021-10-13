@@ -6,7 +6,7 @@ import request from 'supertest';
 import { getToken, publicKey } from '../test/authTestUtils';
 import buildApp from './app';
 import { search } from './endpoints/search';
-import { searchAllSources } from './endpoints/searchByIds/index';
+import { searchAllSources } from './endpoints/searchByIds/searchAllSources';
 import { SetNotFoundError } from './endpoints/sets/setError';
 import {
     createSet,
@@ -26,7 +26,7 @@ import { ArrangerProject } from './sqon/searchSqon';
 jest.mock('./endpoints/search');
 jest.mock('./endpoints/sets/setsFeature');
 jest.mock('./endpoints/survival');
-jest.mock('./endpoints/searchByIds/index');
+jest.mock('./endpoints/searchByIds/searchAllSources');
 
 describe('Express app (without Arranger)', () => {
     let app: Express;
