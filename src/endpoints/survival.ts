@@ -116,35 +116,35 @@ const getParticipants = async (
     return participants;
 };
 
-const calculateSurvival = async participants => {
-    const data = [];
-    try {
-        const pyShell = new PythonShell(survivalPyFile, pyOptions);
-        pyShell.on('error', err => {
-            throw err;
-        });
-        pyShell.on('message', payload => {
-            const message = JSON.parse(payload).message;
-            // Only expecting one response from our script, but for extra security we add to array, return only uses first message
-            data.push(message);
-        });
+const calculateSurvival = async participants =>
+    new Promise((resolve, reject) => {
+        const data = [];
+        try {
+            const pyShell = new PythonShell(survivalPyFile, pyOptions);
+            pyShell.on('error', err => {
+                reject(err);
+            });
+            pyShell.on('message', payload => {
+                const message = JSON.parse(payload).message;
+                // Only expecting one response from our script, but for extra security we add to array, return only uses first message
+                data.push(message);
+            });
 
-        participants.forEach(participant => {
-            pyShell.send(JSON.stringify(participant));
-        });
+            participants.forEach(participant => {
+                pyShell.send(JSON.stringify(participant));
+            });
 
-        pyShell.end(err => {
-            if (err) {
-                throw err;
-            } else {
-                return data[0];
-            }
-        });
-    } catch (error) {
-        console.error('Calculate Survival failed');
-        throw error;
-    }
-};
+            pyShell.end(err => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(data[0]);
+                }
+            });
+        } catch (error) {
+            reject(error);
+        }
+    });
 
 export const calculateSurvivalForSqonResult = async (
     sqon: SetSqon,
