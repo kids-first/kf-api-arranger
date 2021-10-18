@@ -53,7 +53,7 @@ export const createSet = async (
     userId: string,
     sqs: SQS,
     getProject: (projectId: string) => ArrangerProject,
-): Promise<Riff> => {
+): Promise<Set> => {
     const { sqon, sort, projectId, type, idField, tag } = requestBody;
     const ids = await searchSqon(sqon, projectId, type, sort, idField, getProject);
     const truncatedIds = truncateIds(ids);
@@ -65,6 +65,8 @@ export const createSet = async (
     } as CreateUpdateRiffBody;
 
     const createResult = await postRiff(accessToken, riffPayload);
+
+    const setResult: Set = mapRiffToSet(createResult);
 
     if (createResult.alias) {
         await sendSetInSQSQueue(sqs, {
@@ -82,7 +84,7 @@ export const createSet = async (
             } as EventCreateValue,
         } as EventCreate);
     }
-    return createResult;
+    return setResult;
 };
 
 export const updateSetTag = async (

@@ -48,6 +48,12 @@ describe('Set management', () => {
         updatedDate: new Date(),
     } as Riff;
 
+    const setFromRiff: Set = {
+        id: setId,
+        tag,
+        size: mockParticipantIds.length,
+    };
+
     describe('Get user sets using Riff API', () => {
         beforeEach(() => {
             (getRiffs as jest.Mock).mockReset();
@@ -117,7 +123,7 @@ describe('Set management', () => {
 
             const result = await createSet(createSetBody, accessToken, userId, sqs, getProject);
 
-            expect(result).toEqual(riff);
+            expect(result).toEqual(setFromRiff);
             expect((searchSqon as jest.Mock).mock.calls.length).toEqual(1);
             expect((postRiff as jest.Mock).mock.calls.length).toEqual(1);
             expect((postRiff as jest.Mock).mock.calls[0][0]).toEqual(accessToken);
@@ -139,13 +145,18 @@ describe('Set management', () => {
                 content: { ...riff.content, ids: ['participant_1', 'participant_2', 'participant_3'] },
             };
 
+            const expectedSet = {
+                ...setFromRiff,
+                size: 3,
+            };
+
             (sendSetInSQSQueue as jest.Mock).mockImplementation(() => Promise.resolve({ MessageId: '123' }));
             (searchSqon as jest.Mock).mockImplementation(() => mockTooLongParticipantIds);
             (postRiff as jest.Mock).mockImplementation(() => expectedRiff);
 
             const result = await createSet(createSetBody, accessToken, userId, sqs, getProject);
 
-            expect(result).toEqual(expectedRiff);
+            expect(result).toEqual(expectedSet);
             expect((searchSqon as jest.Mock).mock.calls.length).toEqual(1);
             expect((postRiff as jest.Mock).mock.calls.length).toEqual(1);
             expect((postRiff as jest.Mock).mock.calls[0][0]).toEqual(accessToken);
@@ -166,7 +177,7 @@ describe('Set management', () => {
 
             const result = await createSet({ ...createSetBody, tag: '' }, accessToken, userId, sqs, getProject);
 
-            expect(result).toEqual({ ...riff, alias: '' });
+            expect(result).toEqual({ ...setFromRiff, tag: '' });
             expect((searchSqon as jest.Mock).mock.calls.length).toEqual(1);
             expect((postRiff as jest.Mock).mock.calls.length).toEqual(1);
             expect((sendSetInSQSQueue as jest.Mock).mock.calls.length).toEqual(0);

@@ -209,18 +209,9 @@ describe('Express app (without Arranger)', () => {
         it('should return 200 if Authorization header contains valid token and no error occurs', async () => {
             const expectedCreatedSet = {
                 id: '1eg',
-                uid: 'qwertyuiop',
-                alias: 'Nevus',
-                content: {
-                    riffType: RIFF_TYPE_SET,
-                    setType: 'participant',
-                    ids: ['participant1', 'participant2'],
-                    sqon: {},
-                },
-                sharedPublicly: false,
-                creationDate: new Date(),
-                updatedDate: new Date(),
-            } as Riff;
+                tag: 'Nevus',
+                size: 2,
+            } as Set;
             (createSet as jest.Mock).mockImplementation(() => expectedCreatedSet);
 
             const token = getToken();
