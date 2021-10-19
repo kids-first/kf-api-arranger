@@ -17,11 +17,10 @@ import {
     updateSetContent,
     updateSetTag,
 } from './endpoints/sets/setsFeature';
-import { CreateSetBody, SetSqon, UpdateSetContentBody, UpdateSetTagBody } from './endpoints/sets/setsTypes';
+import { CreateSetBody, Set, SetSqon, UpdateSetContentBody, UpdateSetTagBody } from './endpoints/sets/setsTypes';
 import { calculateSurvivalForSqonResult } from './endpoints/survival';
 import { esHost, keycloakURL } from './env';
 import { globalErrorHandler, globalErrorLogger } from './errors';
-import { Riff } from './riff/riffClient';
 import { ArrangerProject } from './sqon/searchSqon';
 
 export default (keycloak: Keycloak, sqs: SQS, getProject: (projectId: string) => ArrangerProject): Express => {
@@ -104,7 +103,7 @@ export default (keycloak: Keycloak, sqs: SQS, getProject: (projectId: string) =>
         const accessToken = req.headers.authorization;
         const userId = req['kauth']?.grant?.access_token?.content?.sub;
         const setId: string = req.params.setId;
-        let updatedSet: Riff;
+        let updatedSet: Set;
 
         if (requestBody.subAction === SubActionTypes.RENAME_TAG) {
             updatedSet = await updateSetTag(requestBody as UpdateSetTagBody, accessToken, userId, setId, sqs);

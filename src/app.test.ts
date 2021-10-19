@@ -19,7 +19,6 @@ import {
 import { Set, UpdateSetContentBody, UpdateSetTagBody } from './endpoints/sets/setsTypes';
 import { calculateSurvivalForSqonResult } from './endpoints/survival';
 import { keycloakClient, keycloakRealm, keycloakURL } from './env';
-import { Riff, RIFF_TYPE_SET } from './riff/riffClient';
 import { RiffError } from './riff/riffError';
 import { ArrangerProject } from './sqon/searchSqon';
 
@@ -286,18 +285,9 @@ describe('Express app (without Arranger)', () => {
         it('should return 200 if Authorization header contains valid token and no error occurs - update tag name', async () => {
             const expectedUpdatedSet = {
                 id: '1eh',
-                uid: 'qwertyuiop',
-                alias: 'Nevus Updated',
-                content: {
-                    riffType: RIFF_TYPE_SET,
-                    setType: 'participant',
-                    ids: ['participant1', 'participant2'],
-                    sqon: {},
-                },
-                sharedPublicly: false,
-                creationDate: new Date(),
-                updatedDate: new Date(),
-            } as Riff;
+                size: 2,
+                tag: 'Nevus Updated',
+            } as Set;
             (updateSetTag as jest.Mock).mockImplementation(() => expectedUpdatedSet);
 
             const userId = 'user_id';
@@ -324,18 +314,9 @@ describe('Express app (without Arranger)', () => {
         it('should return 200 if Authorization header contains valid token and no error occurs - update content', async () => {
             const expectedUpdatedSet = {
                 id: '1eh',
-                uid: 'qwertyuiop',
-                alias: 'Nevus',
-                content: {
-                    riffType: RIFF_TYPE_SET,
-                    setType: 'participant',
-                    ids: ['participant1', 'participant2'],
-                    sqon: {},
-                },
-                sharedPublicly: false,
-                creationDate: new Date(),
-                updatedDate: new Date(),
-            } as Riff;
+                size: 2,
+                tag: 'Nevus',
+            } as Set;
             (updateSetContent as jest.Mock).mockImplementation(() => expectedUpdatedSet);
 
             const userId = 'user_id';

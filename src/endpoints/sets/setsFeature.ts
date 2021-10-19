@@ -93,7 +93,7 @@ export const updateSetTag = async (
     userId: string,
     setId: string,
     sqs: SQS,
-): Promise<Riff> => {
+): Promise<Set> => {
     const existingSetsFilterById = (await getRiffs(accessToken, userId)).filter(r => r.id === setId);
 
     if (existingSetsFilterById.length !== 1) {
@@ -110,6 +110,8 @@ export const updateSetTag = async (
 
     const updateResult = await putRiff(accessToken, riffPayload, setId);
 
+    const setResult: Set = mapRiffToSet(updateResult);
+
     if (updateResult.alias) {
         await sendSetInSQSQueue(sqs, {
             actionType: ActionTypes.UPDATE,
@@ -118,7 +120,7 @@ export const updateSetTag = async (
         } as EventUpdate);
     }
 
-    return updateResult;
+    return setResult;
 };
 
 export const updateSetContent = async (
@@ -128,7 +130,7 @@ export const updateSetContent = async (
     setId: string,
     sqs: SQS,
     getProject: (projectId: string) => ArrangerProject,
-): Promise<Riff> => {
+): Promise<Set> => {
     const existingSetsFilterById = (await getRiffs(accessToken, userId)).filter(r => r.id === setId);
 
     if (existingSetsFilterById.length !== 1) {
@@ -164,6 +166,8 @@ export const updateSetContent = async (
 
     const updateResult = await putRiff(accessToken, riffPayload, setId);
 
+    const setResult: Set = mapRiffToSet(updateResult);
+
     if (updateResult.alias) {
         await sendSetInSQSQueue(sqs, {
             actionType: ActionTypes.UPDATE,
@@ -177,7 +181,7 @@ export const updateSetContent = async (
             } as UpdateContentValue,
         } as EventUpdate);
     }
-    return updateResult;
+    return setResult;
 };
 
 export const deleteSet = async (accessToken: string, setId: string, userId: string, sqs: SQS): Promise<boolean> => {

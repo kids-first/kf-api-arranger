@@ -233,13 +233,15 @@ describe('Set management', () => {
         });
 
         it('should send put riff and return result', async () => {
+            const setFromUpdatedRiff: Set = { ...setFromRiff, tag: 'tag updated' };
+
             (getRiffs as jest.Mock).mockImplementation(() => mockExistingSets);
             (putRiff as jest.Mock).mockImplementation(() => updatedRiff);
             (sendSetInSQSQueue as jest.Mock).mockImplementation(() => Promise.resolve({ MessageId: '123' }));
 
             const result = await updateSetTag(updateSetTagBody, accessToken, userId, setId, sqs);
 
-            expect(result).toEqual(updatedRiff);
+            expect(result).toEqual(setFromUpdatedRiff);
             expect((getRiffs as jest.Mock).mock.calls.length).toEqual(1);
             expect((putRiff as jest.Mock).mock.calls.length).toEqual(1);
             expect((putRiff as jest.Mock).mock.calls[0][0]).toEqual(accessToken);
@@ -249,12 +251,14 @@ describe('Set management', () => {
         });
 
         it('should not send message in SQS for empty tag sets', async () => {
+            const setFromUpdatedRiff: Set = { ...setFromRiff, tag: '' };
+
             (getRiffs as jest.Mock).mockImplementation(() => mockExistingSets);
             (putRiff as jest.Mock).mockImplementation(() => ({ ...updatedRiff, alias: '' }));
 
             const result = await updateSetTag({ ...updateSetTagBody, newTag: '' }, accessToken, userId, setId, sqs);
 
-            expect(result).toEqual({ ...updatedRiff, alias: '' });
+            expect(result).toEqual(setFromUpdatedRiff);
             expect((getRiffs as jest.Mock).mock.calls.length).toEqual(1);
             expect((putRiff as jest.Mock).mock.calls.length).toEqual(1);
             expect((sendSetInSQSQueue as jest.Mock).mock.calls.length).toEqual(0);
@@ -321,6 +325,7 @@ describe('Set management', () => {
         });
 
         it('should send put riff and return result - case add ids', async () => {
+            const setFromUpdatedRiff: Set = { ...setFromRiff, size: 3 };
             const expectedAddSqon = { op: 'or', content: [sqon, newSqon] };
             const expectedUpdateRiffBody: CreateUpdateRiffBody = {
                 alias: riff.alias,
@@ -348,7 +353,7 @@ describe('Set management', () => {
 
             const result = await updateSetContent(updateSetContentAddSqon, accessToken, userId, setId, sqs, getProject);
 
-            expect(result).toEqual(updatedRiff);
+            expect(result).toEqual(setFromUpdatedRiff);
             expect((getRiffs as jest.Mock).mock.calls.length).toEqual(1);
             expect((searchSqon as jest.Mock).mock.calls.length).toEqual(1);
             expect((putRiff as jest.Mock).mock.calls.length).toEqual(1);
@@ -359,6 +364,7 @@ describe('Set management', () => {
         });
 
         it('should not send message in SQS for empty tag sets', async () => {
+            const setFromUpdatedRiff: Set = { ...setFromRiff, size: 3, tag: '' };
             const expectedAddSqon = { op: 'or', content: [sqon, newSqon] };
             const updatedRiff: Riff = {
                 ...riff,
@@ -377,7 +383,7 @@ describe('Set management', () => {
 
             const result = await updateSetContent(updateSetContentAddSqon, accessToken, userId, setId, sqs, getProject);
 
-            expect(result).toEqual(updatedRiff);
+            expect(result).toEqual(setFromUpdatedRiff);
             expect((getRiffs as jest.Mock).mock.calls.length).toEqual(1);
             expect((searchSqon as jest.Mock).mock.calls.length).toEqual(1);
             expect((putRiff as jest.Mock).mock.calls.length).toEqual(1);
@@ -385,6 +391,7 @@ describe('Set management', () => {
         });
 
         it('should send put riff and return result - case remove ids', async () => {
+            const setFromUpdatedRiff: Set = { ...setFromRiff, size: 1 };
             const expectedRemoveSqon = {
                 op: 'and',
                 content: [sqon, { op: 'not', content: [newSqon] }],
@@ -422,7 +429,7 @@ describe('Set management', () => {
                 getProject,
             );
 
-            expect(result).toEqual(updatedRiff);
+            expect(result).toEqual(setFromUpdatedRiff);
             expect((getRiffs as jest.Mock).mock.calls.length).toEqual(1);
             expect((searchSqon as jest.Mock).mock.calls.length).toEqual(1);
             expect((putRiff as jest.Mock).mock.calls.length).toEqual(1);
