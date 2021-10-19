@@ -6,6 +6,12 @@ export type SearchVariables = {
     sqon: SetSqon;
 };
 
+export type SearchPayload = {
+    variables: SearchVariables;
+    projectId: string;
+    query: string;
+};
+
 export const search = async (
     userId: string,
     accessToken: string,

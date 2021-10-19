@@ -5,7 +5,7 @@ import request from 'supertest';
 
 import { getToken, publicKey } from '../test/authTestUtils';
 import buildApp from './app';
-import { search } from './endpoints/search';
+import { search, SearchPayload } from './endpoints/search';
 import { searchAllSources } from './endpoints/searchByIds/searchAllSources';
 import { SetNotFoundError } from './endpoints/sets/setError';
 import {
@@ -56,7 +56,7 @@ describe('Express app (without Arranger)', () => {
     });
 
     describe('POST /search', () => {
-        const requestBody = {
+        const searchElement1: SearchPayload = {
             projectId: '2021_05_03_v2',
             query: 'query($sqon: JSON) {participant {hits(filters: $sqon) {total}}}',
             variables: {
@@ -74,6 +74,25 @@ describe('Express app (without Arranger)', () => {
                 },
             },
         };
+        const searchElement2: SearchPayload = {
+            projectId: '2021_05_03_v2',
+            query: 'query($sqon: JSON) {participant {hits(filters: $sqon) {total}}}',
+            variables: {
+                sqon: {
+                    op: 'and',
+                    content: [
+                        {
+                            op: 'in',
+                            content: {
+                                field: 'gender',
+                                value: ['Female'],
+                            },
+                        },
+                    ],
+                },
+            },
+        };
+        const requestBody = [searchElement1, searchElement2];
 
         beforeEach(() => {
             (search as jest.Mock).mockReset();
@@ -85,16 +104,27 @@ describe('Express app (without Arranger)', () => {
                 .expect(403));
 
         it('should return 200 if Authorization header contains valid token and no error occurs', async () => {
-            const expectedSearchResult = {
+            const expectedSearchElement1Result = {
                 data: {
                     participant: {
                         hits: {
-                            total: 198,
+                            total: 111,
                         },
                     },
                 },
             };
-            (search as jest.Mock).mockImplementation(() => expectedSearchResult);
+
+            const expectedSearchElement2Result = {
+                data: {
+                    participant: {
+                        hits: {
+                            total: 222,
+                        },
+                    },
+                },
+            };
+            (search as jest.Mock).mockImplementationOnce(() => expectedSearchElement1Result);
+            (search as jest.Mock).mockImplementationOnce(() => expectedSearchElement2Result);
 
             const token = getToken();
 
@@ -103,13 +133,24 @@ describe('Express app (without Arranger)', () => {
                 .send(requestBody)
                 .set('Content-type', 'application/json')
                 .set({ Authorization: `Bearer ${token}` })
-                .expect(200, expectedSearchResult);
-            expect((search as jest.Mock).mock.calls.length).toEqual(1);
+                .expect(200, [expectedSearchElement1Result, expectedSearchElement2Result]);
+            expect((search as jest.Mock).mock.calls.length).toEqual(2);
         });
 
         it('should return 500 if Authorization header contains valid token but an error occurs', async () => {
+            const expectedSearchElement1Result = {
+                data: {
+                    participant: {
+                        hits: {
+                            total: 111,
+                        },
+                    },
+                },
+            };
+
             const expectedError = new RiffError(400, { message: 'OOPS' });
-            (search as jest.Mock).mockImplementation(() => {
+            (search as jest.Mock).mockImplementationOnce(() => expectedSearchElement1Result);
+            (search as jest.Mock).mockImplementationOnce(() => {
                 throw expectedError;
             });
 
@@ -121,7 +162,7 @@ describe('Express app (without Arranger)', () => {
                 .set('Content-type', 'application/json')
                 .set({ Authorization: `Bearer ${token}` })
                 .expect(500, { error: 'Internal Server Error' });
-            expect((search as jest.Mock).mock.calls.length).toEqual(1);
+            expect((search as jest.Mock).mock.calls.length).toEqual(2);
         });
     });
 

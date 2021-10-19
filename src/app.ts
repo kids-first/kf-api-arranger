@@ -6,7 +6,7 @@ import { Keycloak } from 'keycloak-connect';
 
 import { dependencies, version } from '../package.json';
 import genomicFeatureSuggestions, { SUGGESTIONS_TYPES } from './endpoints/genomicFeatureSuggestions';
-import { search, SearchVariables } from './endpoints/search';
+import { search, SearchPayload, SearchVariables } from './endpoints/search';
 import { searchAllSources } from './endpoints/searchByIds/searchAllSources';
 import { SearchByIdsResult } from './endpoints/searchByIds/searchByIdsTypes';
 import {
@@ -66,10 +66,11 @@ export default (keycloak: Keycloak, sqs: SQS, getProject: (projectId: string) =>
     app.postAsync('/search', keycloak.protect(), async (req, res) => {
         const accessToken = req.headers.authorization;
         const userId = req['kauth']?.grant?.access_token?.content?.sub;
-        const variables: SearchVariables = req.body.variables;
-        const query: string = req.body.query;
-        const projectId: string = req.body.projectId;
-        const data = await search(userId, accessToken, projectId, query, variables, getProject);
+        const searchList: SearchPayload[] = req.body as SearchPayload[];
+        const searchResults: Promise<unknown>[] = searchList.map(s =>
+            search(userId, accessToken, s.projectId, s.query, s.variables, getProject),
+        );
+        const data = await Promise.all(searchResults);
 
         res.send(data);
     });
