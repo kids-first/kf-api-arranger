@@ -3,11 +3,11 @@ import { ArrangerProject } from '../sqon/searchSqon';
 import { SetSqon } from './sets/setsTypes';
 
 export type SearchVariables = {
-    sqon: SetSqon;
+    sqon?: SetSqon;
 };
 
 export type SearchPayload = {
-    variables: SearchVariables;
+    variables?: SearchVariables;
     projectId: string;
     query: string;
 };
@@ -20,8 +20,11 @@ export const search = async (
     variables: SearchVariables,
     getProject: (projectId: string) => ArrangerProject,
 ): Promise<unknown> => {
-    const sqonAfterReplace = await resolveSetsInSqon(variables.sqon, userId, accessToken);
-    const variablesAfterReplace = { ...variables, sqon: sqonAfterReplace };
+    let variablesAfterReplace = variables;
+    if (variables && variables.sqon) {
+        const sqonAfterReplace = await resolveSetsInSqon(variables.sqon, userId, accessToken);
+        variablesAfterReplace = { ...variables, sqon: sqonAfterReplace };
+    }
     const project = getProject(projectId);
     if (!project) {
         throw new Error(`ProjectID '${projectId}' cannot be established.`);

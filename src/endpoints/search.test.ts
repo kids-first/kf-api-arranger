@@ -64,6 +64,40 @@ describe('Search feature', () => {
         expect((resolveSetsInSqon as jest.Mock).mock.calls.length).toEqual(1);
     });
 
+    it('should send query to Arranger directly if no variables or no sqon in variables', async () => {
+        const expectedSearchResult = {
+            data: {
+                participant: {
+                    hits: {
+                        total: 198,
+                    },
+                },
+            },
+        };
+
+        const project: ArrangerProject = {
+            runQuery: () => Promise.resolve(expectedSearchResult),
+        };
+
+        const resultVariablesNull = await search(userId, accessToken, projectId, query, null, () => project);
+        expect(resultVariablesNull).toEqual(expectedSearchResult);
+        const resultVariablesUndefined = await search(userId, accessToken, projectId, query, undefined, () => project);
+        expect(resultVariablesUndefined).toEqual(expectedSearchResult);
+        const resultSqonNull = await search(userId, accessToken, projectId, query, { sqon: null }, () => project);
+        expect(resultSqonNull).toEqual(expectedSearchResult);
+        const resultSqonUndefined = await search(
+            userId,
+            accessToken,
+            projectId,
+            query,
+            { sqon: undefined },
+            () => project,
+        );
+        expect(resultSqonUndefined).toEqual(expectedSearchResult);
+
+        expect((resolveSetsInSqon as jest.Mock).mock.calls.length).toEqual(0);
+    });
+
     it('should throw an error if replacing setId failed', async () => {
         const expectedSearchResult = {
             data: {
