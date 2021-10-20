@@ -6,7 +6,7 @@ import { Keycloak } from 'keycloak-connect';
 
 import { dependencies, version } from '../package.json';
 import genomicFeatureSuggestions, { SUGGESTIONS_TYPES } from './endpoints/genomicFeatureSuggestions';
-import { search, SearchPayload, SearchVariables } from './endpoints/search';
+import { search, SearchPayload } from './endpoints/search';
 import { searchAllSources } from './endpoints/searchByIds/searchAllSources';
 import { SearchByIdsResult } from './endpoints/searchByIds/searchByIdsTypes';
 import {
