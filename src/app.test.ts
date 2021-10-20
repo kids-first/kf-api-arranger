@@ -103,7 +103,7 @@ describe('Express app (without Arranger)', () => {
                 .post('/search')
                 .expect(403));
 
-        it('should return 200 if Authorization header contains valid token and no error occurs', async () => {
+        it('should return 200 if Authorization header contains valid token and no error occurs - case multiple searchs', async () => {
             const expectedSearchElement1Result = {
                 data: {
                     participant: {
@@ -135,6 +135,30 @@ describe('Express app (without Arranger)', () => {
                 .set({ Authorization: `Bearer ${token}` })
                 .expect(200, [expectedSearchElement1Result, expectedSearchElement2Result]);
             expect((search as jest.Mock).mock.calls.length).toEqual(2);
+        });
+
+        it('should return 200 if Authorization header contains valid token and no error occurs - case single search', async () => {
+            const expectedSearchElement1Result = {
+                data: {
+                    participant: {
+                        hits: {
+                            total: 111,
+                        },
+                    },
+                },
+            };
+
+            (search as jest.Mock).mockImplementationOnce(() => expectedSearchElement1Result);
+
+            const token = getToken();
+
+            await request(app)
+                .post('/search')
+                .send(searchElement1)
+                .set('Content-type', 'application/json')
+                .set({ Authorization: `Bearer ${token}` })
+                .expect(200, expectedSearchElement1Result);
+            expect((search as jest.Mock).mock.calls.length).toEqual(1);
         });
 
         it('should return 500 if Authorization header contains valid token but an error occurs', async () => {

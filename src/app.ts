@@ -66,13 +66,27 @@ export default (keycloak: Keycloak, sqs: SQS, getProject: (projectId: string) =>
     app.postAsync('/search', keycloak.protect(), async (req, res) => {
         const accessToken = req.headers.authorization;
         const userId = req['kauth']?.grant?.access_token?.content?.sub;
-        const searchList: SearchPayload[] = req.body as SearchPayload[];
-        const searchResults: Promise<unknown>[] = searchList.map(s =>
-            search(userId, accessToken, s.projectId, s.query, s.variables, getProject),
-        );
-        const data = await Promise.all(searchResults);
+        const searchBody: SearchPayload[] | SearchPayload = req.body;
 
-        res.send(data);
+        if (Array.isArray(searchBody)) {
+            const searchResults: Promise<unknown>[] = searchBody.map(s =>
+                search(userId, accessToken, s.projectId, s.query, s.variables, getProject),
+            );
+            const data = await Promise.all(searchResults);
+
+            res.send(data);
+        } else {
+            const data = await search(
+                userId,
+                accessToken,
+                searchBody.projectId,
+                searchBody.query,
+                searchBody.variables,
+                getProject,
+            );
+
+            res.send(data);
+        }
     });
 
     app.postAsync('/searchByIds', keycloak.protect(), async (req, res) => {
