@@ -12,6 +12,7 @@ import {
     RIFF_TYPE_SET,
 } from '../../riff/riffClient';
 import { addSqonToSetSqon, removeSqonToSetSqon } from '../../sqon/manipulateSqon';
+import { resolveSetsInSqon } from '../../sqon/resolveSetInSqon';
 import { ArrangerProject, searchSqon } from '../../sqon/searchSqon';
 import {
     EventCreate,
@@ -55,7 +56,8 @@ export const createSet = async (
     getProject: (projectId: string) => ArrangerProject,
 ): Promise<Set> => {
     const { sqon, sort, projectId, type, idField, tag } = requestBody;
-    const ids = await searchSqon(sqon, projectId, type, sort, idField, getProject);
+    const sqonAfterReplace = await resolveSetsInSqon(sqon, userId, accessToken);
+    const ids = await searchSqon(sqonAfterReplace, projectId, type, sort, idField, getProject);
     const truncatedIds = truncateIds(ids);
 
     const riffPayload = {
@@ -140,8 +142,9 @@ export const updateSetContent = async (
     const setToUpdate: Riff = existingSetsFilterById[0];
     const { sqon, ids } = setToUpdate.content;
 
+    const sqonAfterReplace = await resolveSetsInSqon(requestBody.sqon, userId, accessToken);
     const newSqonIds = await searchSqon(
-        requestBody.sqon,
+        sqonAfterReplace,
         requestBody.projectId,
         setToUpdate.content.setType,
         setToUpdate.content.sort,

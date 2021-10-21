@@ -9,11 +9,13 @@ import {
     Riff,
     RIFF_TYPE_SET,
 } from '../../riff/riffClient';
+import { resolveSetsInSqon } from '../../sqon/resolveSetInSqon';
 import { ArrangerProject, searchSqon } from '../../sqon/searchSqon';
 import { sendSetInSQSQueue } from '../../SQS/sendEvent';
 import { createSet, deleteSet, getSets, SubActionTypes, updateSetContent, updateSetTag } from './setsFeature';
 import { CreateSetBody, Set, Sort, UpdateSetContentBody, UpdateSetTagBody } from './setsTypes';
 
+jest.mock('../../sqon/resolveSetInSqon');
 jest.mock('../../sqon/searchSqon');
 jest.mock('../../riff/riffClient');
 jest.mock('../../SQS/sendEvent');
@@ -111,12 +113,14 @@ describe('Set management', () => {
         const sqs = new AWS.SQS({ apiVersion: '2012-11-05' });
 
         beforeEach(() => {
+            (resolveSetsInSqon as jest.Mock).mockReset();
             (searchSqon as jest.Mock).mockReset();
             (postRiff as jest.Mock).mockReset();
             (sendSetInSQSQueue as jest.Mock).mockReset();
         });
 
         it('should send create riff, send message in SQS and return result', async () => {
+            (resolveSetsInSqon as jest.Mock).mockImplementation(sqon => sqon);
             (sendSetInSQSQueue as jest.Mock).mockImplementation(() => Promise.resolve({ MessageId: '123' }));
             (searchSqon as jest.Mock).mockImplementation(() => mockParticipantIds);
             (postRiff as jest.Mock).mockImplementation(() => riff);
@@ -124,10 +128,48 @@ describe('Set management', () => {
             const result = await createSet(createSetBody, accessToken, userId, sqs, getProject);
 
             expect(result).toEqual(setFromRiff);
+            expect((resolveSetsInSqon as jest.Mock).mock.calls.length).toEqual(1);
             expect((searchSqon as jest.Mock).mock.calls.length).toEqual(1);
             expect((postRiff as jest.Mock).mock.calls.length).toEqual(1);
             expect((postRiff as jest.Mock).mock.calls[0][0]).toEqual(accessToken);
             expect((postRiff as jest.Mock).mock.calls[0][1]).toEqual(expectedCreateRiffBody);
+            expect((sendSetInSQSQueue as jest.Mock).mock.calls.length).toEqual(1);
+        });
+
+        it('should resolve ser_id in sqon before saving new set', async () => {
+            const sqonWithSetId = {
+                op: 'and',
+                content: [{ op: 'in', content: { field: 'kf_id', value: ['set_id:1a1'] } }],
+            };
+
+            const sqonWithResolvedSetId = {
+                op: 'and',
+                content: [{ op: 'in', content: { field: 'kf_id', value: mockParticipantIds } }],
+            };
+
+            (resolveSetsInSqon as jest.Mock).mockImplementation(() => sqonWithResolvedSetId);
+            (sendSetInSQSQueue as jest.Mock).mockImplementation(() => Promise.resolve({ MessageId: '123' }));
+            (searchSqon as jest.Mock).mockImplementation(() => mockParticipantIds);
+            (postRiff as jest.Mock).mockImplementation(() => riff);
+
+            const result = await createSet(
+                { ...createSetBody, sqon: sqonWithSetId },
+                accessToken,
+                userId,
+                sqs,
+                getProject,
+            );
+
+            expect(result).toEqual(setFromRiff);
+            expect((resolveSetsInSqon as jest.Mock).mock.calls.length).toEqual(1);
+            expect((resolveSetsInSqon as jest.Mock).mock.calls[0][0]).toEqual(sqonWithSetId);
+            expect((searchSqon as jest.Mock).mock.calls.length).toEqual(1);
+            expect((postRiff as jest.Mock).mock.calls.length).toEqual(1);
+            expect((postRiff as jest.Mock).mock.calls[0][0]).toEqual(accessToken);
+            expect((postRiff as jest.Mock).mock.calls[0][1]).toEqual({
+                ...expectedCreateRiffBody,
+                content: { ...expectedCreateRiffBody.content, sqon: sqonWithSetId },
+            });
             expect((sendSetInSQSQueue as jest.Mock).mock.calls.length).toEqual(1);
         });
 
@@ -150,6 +192,7 @@ describe('Set management', () => {
                 size: 3,
             };
 
+            (resolveSetsInSqon as jest.Mock).mockImplementation(sqon => sqon);
             (sendSetInSQSQueue as jest.Mock).mockImplementation(() => Promise.resolve({ MessageId: '123' }));
             (searchSqon as jest.Mock).mockImplementation(() => mockTooLongParticipantIds);
             (postRiff as jest.Mock).mockImplementation(() => expectedRiff);
@@ -157,6 +200,7 @@ describe('Set management', () => {
             const result = await createSet(createSetBody, accessToken, userId, sqs, getProject);
 
             expect(result).toEqual(expectedSet);
+            expect((resolveSetsInSqon as jest.Mock).mock.calls.length).toEqual(1);
             expect((searchSqon as jest.Mock).mock.calls.length).toEqual(1);
             expect((postRiff as jest.Mock).mock.calls.length).toEqual(1);
             expect((postRiff as jest.Mock).mock.calls[0][0]).toEqual(accessToken);
@@ -171,6 +215,7 @@ describe('Set management', () => {
         });
 
         it('should not send message in SQS for empty tag sets', async () => {
+            (resolveSetsInSqon as jest.Mock).mockImplementation(sqon => sqon);
             (sendSetInSQSQueue as jest.Mock).mockImplementation(() => Promise.resolve({ MessageId: '123' }));
             (searchSqon as jest.Mock).mockImplementation(() => mockParticipantIds);
             (postRiff as jest.Mock).mockImplementation(() => ({ ...riff, alias: '' }));
@@ -178,12 +223,14 @@ describe('Set management', () => {
             const result = await createSet({ ...createSetBody, tag: '' }, accessToken, userId, sqs, getProject);
 
             expect(result).toEqual({ ...setFromRiff, tag: '' });
+            expect((resolveSetsInSqon as jest.Mock).mock.calls.length).toEqual(1);
             expect((searchSqon as jest.Mock).mock.calls.length).toEqual(1);
             expect((postRiff as jest.Mock).mock.calls.length).toEqual(1);
             expect((sendSetInSQSQueue as jest.Mock).mock.calls.length).toEqual(0);
         });
 
         it('should send create riff and return error if creation request throws an error', async () => {
+            (resolveSetsInSqon as jest.Mock).mockImplementation(sqon => sqon);
             (searchSqon as jest.Mock).mockImplementation(() => mockParticipantIds);
             (postRiff as jest.Mock).mockImplementation(() => {
                 throw new Error('OOPS');
@@ -194,6 +241,7 @@ describe('Set management', () => {
             } catch (e) {
                 expect(e.message).toEqual('OOPS');
             } finally {
+                expect((resolveSetsInSqon as jest.Mock).mock.calls.length).toEqual(1);
                 expect((searchSqon as jest.Mock).mock.calls.length).toEqual(1);
                 expect((postRiff as jest.Mock).mock.calls.length).toEqual(1);
                 expect((postRiff as jest.Mock).mock.calls[0][0]).toEqual(accessToken);
@@ -320,6 +368,7 @@ describe('Set management', () => {
         beforeEach(() => {
             (getRiffs as jest.Mock).mockReset();
             (putRiff as jest.Mock).mockReset();
+            (resolveSetsInSqon as jest.Mock).mockReset();
             (searchSqon as jest.Mock).mockReset();
             (sendSetInSQSQueue as jest.Mock).mockReset();
         });
@@ -347,6 +396,7 @@ describe('Set management', () => {
             };
 
             (getRiffs as jest.Mock).mockImplementation(() => mockExistingSets);
+            (resolveSetsInSqon as jest.Mock).mockImplementation(sqon => sqon);
             (searchSqon as jest.Mock).mockImplementation(() => mockNewSqonParticipantIds);
             (putRiff as jest.Mock).mockImplementation(() => updatedRiff);
             (sendSetInSQSQueue as jest.Mock).mockImplementation(() => Promise.resolve({ MessageId: '123' }));
@@ -355,7 +405,66 @@ describe('Set management', () => {
 
             expect(result).toEqual(setFromUpdatedRiff);
             expect((getRiffs as jest.Mock).mock.calls.length).toEqual(1);
+            expect((resolveSetsInSqon as jest.Mock).mock.calls.length).toEqual(1);
             expect((searchSqon as jest.Mock).mock.calls.length).toEqual(1);
+            expect((putRiff as jest.Mock).mock.calls.length).toEqual(1);
+            expect((putRiff as jest.Mock).mock.calls[0][0]).toEqual(accessToken);
+            expect((putRiff as jest.Mock).mock.calls[0][1]).toEqual(expectedUpdateRiffBody);
+            expect((putRiff as jest.Mock).mock.calls[0][2]).toEqual(setId);
+            expect((sendSetInSQSQueue as jest.Mock).mock.calls.length).toEqual(1);
+        });
+
+        it('should resolve set id in sqon before send put riff and return result - case add ids', async () => {
+            const newSqonWithSetId = {
+                op: 'and',
+                content: [{ op: 'in', content: { field: 'kf_id', value: ['set_id:1b1'] } }],
+            };
+            const newSqonWithResolvedSet = {
+                op: 'and',
+                content: [{ op: 'in', content: { field: 'kf_id', value: mockNewSqonParticipantIds } }],
+            };
+            const setFromUpdatedRiff: Set = { ...setFromRiff, size: 3 };
+            const expectedAddSqon = { op: 'or', content: [sqon, newSqonWithSetId] };
+            const expectedUpdateRiffBody: CreateUpdateRiffBody = {
+                alias: riff.alias,
+                sharedPublicly: riff.sharedPublicly,
+                content: {
+                    ...riff.content,
+                    sqon: expectedAddSqon,
+                    ids: ['participant_1', 'participant_2', 'participant_3'],
+                },
+            };
+            const updatedRiff = {
+                ...riff,
+                content: {
+                    ...riff.content,
+                    sqon: expectedAddSqon,
+                    ids: ['participant_1', 'participant_2', 'participant_3'],
+                },
+                updatedDate: new Date(),
+            };
+
+            (getRiffs as jest.Mock).mockImplementation(() => mockExistingSets);
+            (resolveSetsInSqon as jest.Mock).mockImplementation(() => newSqonWithResolvedSet);
+            (searchSqon as jest.Mock).mockImplementation(() => mockNewSqonParticipantIds);
+            (putRiff as jest.Mock).mockImplementation(() => updatedRiff);
+            (sendSetInSQSQueue as jest.Mock).mockImplementation(() => Promise.resolve({ MessageId: '123' }));
+
+            const result = await updateSetContent(
+                { ...updateSetContentAddSqon, sqon: newSqonWithSetId },
+                accessToken,
+                userId,
+                setId,
+                sqs,
+                getProject,
+            );
+
+            expect(result).toEqual(setFromUpdatedRiff);
+            expect((getRiffs as jest.Mock).mock.calls.length).toEqual(1);
+            expect((resolveSetsInSqon as jest.Mock).mock.calls.length).toEqual(1);
+            expect((resolveSetsInSqon as jest.Mock).mock.calls[0][0]).toEqual(newSqonWithSetId);
+            expect((searchSqon as jest.Mock).mock.calls.length).toEqual(1);
+            expect((searchSqon as jest.Mock).mock.calls[0][0]).toEqual(newSqonWithResolvedSet);
             expect((putRiff as jest.Mock).mock.calls.length).toEqual(1);
             expect((putRiff as jest.Mock).mock.calls[0][0]).toEqual(accessToken);
             expect((putRiff as jest.Mock).mock.calls[0][1]).toEqual(expectedUpdateRiffBody);
@@ -378,6 +487,7 @@ describe('Set management', () => {
             };
 
             (getRiffs as jest.Mock).mockImplementation(() => [{ ...riff, tag: '' }]);
+            (resolveSetsInSqon as jest.Mock).mockImplementation(sqon => sqon);
             (searchSqon as jest.Mock).mockImplementation(() => mockNewSqonParticipantIds);
             (putRiff as jest.Mock).mockImplementation(() => updatedRiff);
 
@@ -385,6 +495,7 @@ describe('Set management', () => {
 
             expect(result).toEqual(setFromUpdatedRiff);
             expect((getRiffs as jest.Mock).mock.calls.length).toEqual(1);
+            expect((resolveSetsInSqon as jest.Mock).mock.calls.length).toEqual(1);
             expect((searchSqon as jest.Mock).mock.calls.length).toEqual(1);
             expect((putRiff as jest.Mock).mock.calls.length).toEqual(1);
             expect((sendSetInSQSQueue as jest.Mock).mock.calls.length).toEqual(0);
@@ -416,6 +527,7 @@ describe('Set management', () => {
             };
 
             (getRiffs as jest.Mock).mockImplementation(() => mockExistingSets);
+            (resolveSetsInSqon as jest.Mock).mockImplementation(sqon => sqon);
             (searchSqon as jest.Mock).mockImplementation(() => mockNewSqonParticipantIds);
             (putRiff as jest.Mock).mockImplementation(() => updatedRiff);
             (sendSetInSQSQueue as jest.Mock).mockImplementation(() => Promise.resolve({ MessageId: '123' }));
@@ -431,6 +543,7 @@ describe('Set management', () => {
 
             expect(result).toEqual(setFromUpdatedRiff);
             expect((getRiffs as jest.Mock).mock.calls.length).toEqual(1);
+            expect((resolveSetsInSqon as jest.Mock).mock.calls.length).toEqual(1);
             expect((searchSqon as jest.Mock).mock.calls.length).toEqual(1);
             expect((putRiff as jest.Mock).mock.calls.length).toEqual(1);
             expect((putRiff as jest.Mock).mock.calls[0][0]).toEqual(accessToken);
@@ -441,7 +554,6 @@ describe('Set management', () => {
 
         it('should return an error if set to update does not exist', async () => {
             (getRiffs as jest.Mock).mockImplementation(() => []);
-            (searchSqon as jest.Mock).mockImplementation(() => mockNewSqonParticipantIds);
 
             try {
                 await updateSetContent(updateSetContentAddSqon, accessToken, userId, setId, sqs, getProject);
@@ -449,6 +561,7 @@ describe('Set management', () => {
                 expect(e.message).toEqual('Set to update can not be found !');
             } finally {
                 expect((getRiffs as jest.Mock).mock.calls.length).toEqual(1);
+                expect((resolveSetsInSqon as jest.Mock).mock.calls.length).toEqual(0);
                 expect((searchSqon as jest.Mock).mock.calls.length).toEqual(0);
                 expect((putRiff as jest.Mock).mock.calls.length).toEqual(0);
                 expect((sendSetInSQSQueue as jest.Mock).mock.calls.length).toEqual(0);
@@ -457,6 +570,7 @@ describe('Set management', () => {
 
         it('should send put riff and return error if update throws an error', async () => {
             (getRiffs as jest.Mock).mockImplementation(() => mockExistingSets);
+            (resolveSetsInSqon as jest.Mock).mockImplementation(sqon => sqon);
             (searchSqon as jest.Mock).mockImplementation(() => mockNewSqonParticipantIds);
             (putRiff as jest.Mock).mockImplementation(() => {
                 throw new Error('OOPS');
@@ -468,6 +582,7 @@ describe('Set management', () => {
                 expect(e.message).toEqual('OOPS');
             } finally {
                 expect((getRiffs as jest.Mock).mock.calls.length).toEqual(1);
+                expect((resolveSetsInSqon as jest.Mock).mock.calls.length).toEqual(1);
                 expect((searchSqon as jest.Mock).mock.calls.length).toEqual(1);
                 expect((putRiff as jest.Mock).mock.calls.length).toEqual(1);
                 expect((sendSetInSQSQueue as jest.Mock).mock.calls.length).toEqual(0);
