@@ -6,7 +6,6 @@ import { Keycloak } from 'keycloak-connect';
 
 import { dependencies, version } from '../package.json';
 import genomicFeatureSuggestions, { SUGGESTIONS_TYPES } from './endpoints/genomicFeatureSuggestions';
-import { search, SearchPayload } from './endpoints/search';
 import { searchAllSources } from './endpoints/searchByIds/searchAllSources';
 import { SearchByIdsResult } from './endpoints/searchByIds/searchByIdsTypes';
 import {
@@ -72,32 +71,6 @@ export default (keycloak: Keycloak, sqs: SQS, getProject: (projectId: string) =>
         const data = await calculateSurvivalForSqonResult(sqon, projectId, userId, accessToken, getProject);
 
         res.send({ data });
-    });
-
-    app.postAsync('/search', keycloak.protect(), async (req, res) => {
-        const accessToken = req.headers.authorization;
-        const userId = req['kauth']?.grant?.access_token?.content?.sub;
-        const searchBody: SearchPayload[] | SearchPayload = req.body;
-
-        if (Array.isArray(searchBody)) {
-            const searchResults: Promise<unknown>[] = searchBody.map(s =>
-                search(userId, accessToken, s.projectId, s.query, s.variables, getProject),
-            );
-            const data = await Promise.all(searchResults);
-
-            res.send(data);
-        } else {
-            const data = await search(
-                userId,
-                accessToken,
-                searchBody.projectId,
-                searchBody.query,
-                searchBody.variables,
-                getProject,
-            );
-
-            res.send(data);
-        }
     });
 
     app.postAsync('/searchByIds', keycloak.protect(), async (req, res) => {
