@@ -21,8 +21,9 @@ import { CreateSetBody, Set, SetSqon, UpdateSetContentBody, UpdateSetTagBody } f
 import { calculateSurvivalForSqonResult } from './endpoints/survival';
 import { esHost, keycloakURL } from './env';
 import { globalErrorHandler, globalErrorLogger } from './errors';
-import { ArrangerProject } from './sqon/searchSqon';
 import { injectBodyHttpHeaders } from './middleware/injectBodyHttpHeaders';
+import { resolveSetIdMiddleware } from './middleware/resolveSetIdinSqon';
+import { ArrangerProject } from './sqon/searchSqon';
 
 export default (keycloak: Keycloak, sqs: SQS, getProject: (projectId: string) => ArrangerProject): Express => {
     const app = addAsync.addAsync(express());
@@ -44,6 +45,8 @@ export default (keycloak: Keycloak, sqs: SQS, getProject: (projectId: string) =>
             admin: '/',
         }),
     );
+
+    app.useAsync(resolveSetIdMiddleware());
 
     app.get('/status', (_req, res) =>
         res.send({
