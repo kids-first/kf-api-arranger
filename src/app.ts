@@ -21,7 +21,7 @@ import { calculateSurvivalForSqonResult } from './endpoints/survival';
 import { esHost, keycloakURL } from './env';
 import { globalErrorHandler, globalErrorLogger } from './errors';
 import { injectBodyHttpHeaders } from './middleware/injectBodyHttpHeaders';
-import { resolveSetIdMiddleware } from './middleware/resolveSetIdinSqon';
+import { resolveSetIdMiddleware } from './middleware/resolveSetIdInSqon';
 import { ArrangerProject } from './sqon/searchSqon';
 
 export default (keycloak: Keycloak, sqs: SQS, getProject: (projectId: string) => ArrangerProject): Express => {
