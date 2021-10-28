@@ -1,7 +1,7 @@
 import SQS from 'aws-sdk/clients/sqs';
 import { difference, dropRight, get, union } from 'lodash';
 
-import { maxSetContentSize } from '../../env';
+import { maxSetContentSize, sendUpdateToSqs } from '../../env';
 import {
     CreateUpdateRiffBody,
     deleteRiff,
@@ -69,8 +69,7 @@ export const createSet = async (
     const createResult = await postRiff(accessToken, riffPayload);
 
     const setResult: Set = mapRiffToSet(createResult);
-
-    if (createResult.alias) {
+    if (sendUpdateToSqs && createResult.alias) {
         await sendSetInSQSQueue(sqs, {
             actionType: ActionTypes.CREATE,
             values: {
@@ -114,7 +113,7 @@ export const updateSetTag = async (
 
     const setResult: Set = mapRiffToSet(updateResult);
 
-    if (updateResult.alias) {
+    if (sendUpdateToSqs && updateResult.alias) {
         await sendSetInSQSQueue(sqs, {
             actionType: ActionTypes.UPDATE,
             subActionType: requestBody.subAction,
@@ -171,7 +170,7 @@ export const updateSetContent = async (
 
     const setResult: Set = mapRiffToSet(updateResult);
 
-    if (updateResult.alias) {
+    if (sendUpdateToSqs && updateResult.alias) {
         await sendSetInSQSQueue(sqs, {
             actionType: ActionTypes.UPDATE,
             subActionType: requestBody.subAction,
@@ -190,10 +189,12 @@ export const updateSetContent = async (
 export const deleteSet = async (accessToken: string, setId: string, userId: string, sqs: SQS): Promise<boolean> => {
     const deleteResult = await deleteRiff(accessToken, setId);
 
-    await sendSetInSQSQueue(sqs, {
-        actionType: ActionTypes.DELETE,
-        values: { setIds: [setId], userId } as EventDeleteValues,
-    } as EventDelete);
+    if (sendUpdateToSqs) {
+        await sendSetInSQSQueue(sqs, {
+            actionType: ActionTypes.DELETE,
+            values: { setIds: [setId], userId } as EventDeleteValues,
+        } as EventDelete);
+    }
     return deleteResult;
 };
 

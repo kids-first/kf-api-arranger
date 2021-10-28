@@ -1,6 +1,7 @@
 import { CONSTANTS } from '@arranger/middleware';
 import { get } from 'lodash';
 
+import { idKey } from '../../env';
 import { SetSqon } from '../sets/setsTypes';
 import { SearchByIdsResult, SourceType } from './searchByIdsTypes';
 
@@ -9,7 +10,7 @@ const query = `query ($sqon: JSON, $size: Int, $offset: Int) {
     hits (filters: $sqon, first:$size, offset:$offset){
       edges {
         node {
-          kf_id
+          ${idKey}
           external_id
         }
       }
@@ -23,7 +24,7 @@ const getSqon = (ids = []): SetSqon => ({
         {
             op: CONSTANTS.IN_OP,
             content: {
-                field: 'kf_id',
+                field: `${idKey}`,
                 value: ids,
             },
         },
@@ -42,8 +43,8 @@ const transform = (data: unknown, ids: string[]): SearchByIdsResult[] => {
 
     return ids.map(id => {
         const participantIds = participants
-            .filter(participant => participant.kf_id === id || participant.external_id === id)
-            .map(participant => participant.kf_id);
+            .filter(participant => participant[idKey] === id || participant.external_id === id)
+            .map(participant => participant[idKey]);
 
         return {
             search: id,

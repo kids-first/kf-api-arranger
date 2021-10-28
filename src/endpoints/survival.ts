@@ -1,7 +1,7 @@
 import { get, min } from 'lodash';
 import { Options, PythonShell } from 'python-shell';
 
-import { pythonPath, survivalPyFile } from '../env';
+import { idKey, pythonPath, survivalPyFile } from '../env';
 import { resolveSetsInSqon } from '../sqon/resolveSetInSqon';
 import { ArrangerProject } from '../sqon/searchSqon';
 import { SetSqon } from './sets/setsTypes';
@@ -42,7 +42,7 @@ const getParticipants = async (
         hits  (filters: $sqon, first:$size, offset:$offset){
           edges {
             node {
-              kf_id 
+              ${idKey} 
               outcome {
                 age_at_event_days
                 vital_status
@@ -88,7 +88,7 @@ const getParticipants = async (
         const filteredList = edges
             // get values we need
             .map(edge => ({
-                id: edge.node.kf_id,
+                id: edge.node[idKey],
                 outcomeAge: parseInt(edge.node.outcome.age_at_event_days),
                 censored: convertCensored(edge.node.outcome.vital_status),
                 diagnosesAge: getDiagnosesAge(get(edge, 'node.diagnoses.hits.edges', [])),

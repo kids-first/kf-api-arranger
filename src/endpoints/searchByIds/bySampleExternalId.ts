@@ -1,6 +1,7 @@
 import { CONSTANTS } from '@arranger/middleware';
 import { get } from 'lodash';
 
+import { idKey } from '../../env';
 import { SetSqon } from '../sets/setsTypes';
 import { SearchByIdsResult, SourceType } from './searchByIdsTypes';
 
@@ -9,7 +10,7 @@ const query = `query ($sqon: JSON, $size: Int, $offset: Int) {
     hits (filters: $sqon, first:$size, offset:$offset){
       edges {
         node {
-          kf_id
+          ${idKey}
           biospecimens {
             hits {
               edges {
@@ -47,7 +48,7 @@ const transform = (data: unknown, ids: string[]): SearchByIdsResult[] => {
                 const biospecimens = get(participant, 'biospecimens', []);
                 return biospecimens.some(bio => bio.external_sample_id === id);
             })
-            .map(participant => participant.kf_id);
+            .map(participant => participant[idKey]);
 
         return {
             search: id,

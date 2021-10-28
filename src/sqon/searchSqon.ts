@@ -2,7 +2,7 @@ import { graphql } from 'graphql';
 import { get } from 'lodash';
 
 import { SetSqon, Sort } from '../endpoints/sets/setsTypes';
-import { maxSetContentSize } from '../env';
+import { idKey, maxSetContentSize } from '../env';
 
 export type ArrangerProject = {
     runQuery: ({ query: string, variables: unknown }) => Promise<unknown>;
@@ -44,7 +44,7 @@ export const searchSqon = async (
         throw new Error(get(results, 'errors', undefined));
     }
 
-    const ids: string[] = get(results, `data.${type}.hits.edges`, []).map(edge => edge.node.kf_id);
+    const ids: string[] = get(results, `data.${type}.hits.edges`, []).map(edge => edge.node[idKey]);
 
     return ids;
 };

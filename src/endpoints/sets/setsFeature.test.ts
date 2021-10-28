@@ -19,7 +19,7 @@ jest.mock('../../sqon/resolveSetInSqon');
 jest.mock('../../sqon/searchSqon');
 jest.mock('../../riff/riffClient');
 jest.mock('../../SQS/sendEvent');
-jest.mock('../../env', () => ({ esHost: 'http://localhost:9200', maxSetContentSize: 3 }));
+jest.mock('../../env', () => ({ esHost: 'http://localhost:9200', maxSetContentSize: 3, sendUpdateToSqs: true }));
 
 describe('Set management', () => {
     const sqon = { op: 'and', content: [] };
@@ -136,7 +136,7 @@ describe('Set management', () => {
             expect((sendSetInSQSQueue as jest.Mock).mock.calls.length).toEqual(1);
         });
 
-        it('should resolve ser_id in sqon before saving new set', async () => {
+        it('should resolve set_id in sqon before saving new set', async () => {
             const sqonWithSetId = {
                 op: 'and',
                 content: [{ op: 'in', content: { field: 'kf_id', value: ['set_id:1a1'] } }],
