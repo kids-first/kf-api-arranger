@@ -5,7 +5,7 @@ ecs_service_type_1_standard {
     docker_image_type = "alpine"
     internal_app = "false"
     create_default_iam_role = "0"
-    entrypoint_command = "node dist/index.js"
+    entrypoint_command = "node dist/src/index.js"
     deploy_scripts_version = "master"
     quick_deploy = "true"
     external_config_repo = "false"
