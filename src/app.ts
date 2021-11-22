@@ -23,6 +23,7 @@ import { globalErrorHandler, globalErrorLogger } from './errors';
 import { injectBodyHttpHeaders } from './middleware/injectBodyHttpHeaders';
 import { resolveSetIdMiddleware } from './middleware/resolveSetIdInSqon';
 import { ArrangerProject } from './sqon/searchSqon';
+import statistics from './endpoints/statistics';
 
 export default (keycloak: Keycloak, sqs: SQS, getProject: (projectId: string) => ArrangerProject): Express => {
     const app = addAsync.addAsync(express());
@@ -61,6 +62,10 @@ export default (keycloak: Keycloak, sqs: SQS, getProject: (projectId: string) =>
     );
     app.getAsync('/variantsFeature/suggestions/:prefix', keycloak.protect(), (req, res) =>
         genomicFeatureSuggestions(req, res, SUGGESTIONS_TYPES.VARIANT),
+    );
+
+    app.getAsync('/statistics', (req, res) =>
+        statistics(res)
     );
 
     app.postAsync('/survival', keycloak.protect(), async (req, res) => {
