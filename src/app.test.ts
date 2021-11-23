@@ -16,6 +16,7 @@ import {
     updateSetTag,
 } from './endpoints/sets/setsFeature';
 import { Set, UpdateSetContentBody, UpdateSetTagBody } from './endpoints/sets/setsTypes';
+import { getStatistics, Statistics } from './endpoints/statistics';
 import { calculateSurvivalForSqonResult } from './endpoints/survival';
 import { keycloakClient, keycloakRealm, keycloakURL } from './env';
 import { RiffError } from './riff/riffError';
@@ -23,6 +24,7 @@ import { ArrangerProject } from './sqon/searchSqon';
 
 jest.mock('./endpoints/sets/setsFeature');
 jest.mock('./endpoints/survival');
+jest.mock('./endpoints/statistics');
 jest.mock('./endpoints/searchByIds/searchAllSources');
 
 describe('Express app (without Arranger)', () => {
@@ -51,6 +53,41 @@ describe('Express app (without Arranger)', () => {
         await request(app)
             .get('/status')
             .expect('Content-Type', /json/);
+    });
+
+    describe('GET /statistics', () => {
+        beforeEach(() => {
+            (getStatistics as jest.Mock).mockReset();
+        });
+
+        it('should return 200 if no error occurs', async () => {
+            const expectedStats: Statistics = {
+                files: 27105,
+                fileSize: '441.69 TB',
+                studies: 7,
+                samples: 6111,
+                families: 1291,
+                participants: 4330,
+            };
+            (getStatistics as jest.Mock).mockImplementation(() => expectedStats);
+
+            await request(app)
+                .get('/statistics')
+                .expect(200, expectedStats);
+            expect((getStatistics as jest.Mock).mock.calls.length).toEqual(1);
+        });
+
+        it('should return 500 if an error occurs', async () => {
+            const expectedError = new Error('OOPS');
+            (getStatistics as jest.Mock).mockImplementation(() => {
+                throw expectedError;
+            });
+
+            await request(app)
+                .get('/statistics')
+                .expect(500, { error: 'Internal Server Error' });
+            expect((getStatistics as jest.Mock).mock.calls.length).toEqual(1);
+        });
     });
 
     describe('GET /sets', () => {

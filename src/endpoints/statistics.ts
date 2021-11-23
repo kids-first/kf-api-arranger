@@ -1,9 +1,18 @@
-import { get, set } from 'lodash';
-import filesize from 'filesize';
 import { buildAggregations, flattenAggregations } from '@arranger/middleware';
-import { esFileIndex } from '../env';
+import filesize from 'filesize';
+import { get, set } from 'lodash';
+
 import EsInstance from '../ElasticSearchClientInstance';
-import { Response } from 'express';
+import { esFileIndex } from '../env';
+
+export type Statistics = {
+    files: number;
+    fileSize: string;
+    studies: number;
+    samples: number;
+    families: number;
+    participants: number;
+};
 
 const NESTED_FIELDS = ['participants', 'participants.biospecimens'];
 const STATS = [
@@ -58,29 +67,23 @@ const fetchAggregations = async ({ nestedFields, graphqlFields }) => {
     return flattenAggregations({ aggregations, includeMissing: false });
 };
 
-export default async (res: Response): Promise<void> => {
-    try {
-        const aggregations = await fetchAggregations({
-            nestedFields: NESTED_FIELDS,
-            graphqlFields: STATS.reduce(
-                (obj, { field, query }) => ({
-                    ...obj,
-                    [field.split('.').join('__')]: set({}, query, {}),
-                }),
-                {},
-            ),
-        });
-        res.json(
-            STATS.reduce(
-                (obj, { name, field, format, accessor }) => ({
-                    ...obj,
-                    [name]: format(get(aggregations, [field, ...accessor.split('.')], 0)),
-                }),
-                {},
-            ),
-        );
-    } catch (err) {
-        console.log(err);
-        res.json({ error: err.message });
-    }
+export const getStatistics = async (): Promise<Statistics> => {
+    const aggregations = await fetchAggregations({
+        nestedFields: NESTED_FIELDS,
+        graphqlFields: STATS.reduce(
+            (obj, { field, query }) => ({
+                ...obj,
+                [field.split('.').join('__')]: set({}, query, {}),
+            }),
+            {},
+        ),
+    });
+
+    return STATS.reduce(
+        (obj, { name, field, format, accessor }) => ({
+            ...obj,
+            [name]: format(get(aggregations, [field, ...accessor.split('.')], 0)),
+        }),
+        {},
+    ) as Statistics;
 };

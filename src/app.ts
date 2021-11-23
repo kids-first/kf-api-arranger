@@ -17,13 +17,13 @@ import {
     updateSetTag,
 } from './endpoints/sets/setsFeature';
 import { CreateSetBody, Set, SetSqon, UpdateSetContentBody, UpdateSetTagBody } from './endpoints/sets/setsTypes';
+import { getStatistics } from './endpoints/statistics';
 import { calculateSurvivalForSqonResult } from './endpoints/survival';
 import { esHost, keycloakURL } from './env';
 import { globalErrorHandler, globalErrorLogger } from './errors';
 import { injectBodyHttpHeaders } from './middleware/injectBodyHttpHeaders';
 import { resolveSetIdMiddleware } from './middleware/resolveSetIdInSqon';
 import { ArrangerProject } from './sqon/searchSqon';
-import statistics from './endpoints/statistics';
 
 export default (keycloak: Keycloak, sqs: SQS, getProject: (projectId: string) => ArrangerProject): Express => {
     const app = addAsync.addAsync(express());
@@ -64,9 +64,10 @@ export default (keycloak: Keycloak, sqs: SQS, getProject: (projectId: string) =>
         genomicFeatureSuggestions(req, res, SUGGESTIONS_TYPES.VARIANT),
     );
 
-    app.getAsync('/statistics', (req, res) =>
-        statistics(res)
-    );
+    app.getAsync('/statistics', async (req, res) => {
+        const data = await getStatistics();
+        res.json(data);
+    });
 
     app.postAsync('/survival', keycloak.protect(), async (req, res) => {
         const accessToken = req.headers.authorization;
