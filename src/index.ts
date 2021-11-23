@@ -1,9 +1,13 @@
 /* eslint-disable no-console */
 import 'regenerator-runtime/runtime.js';
+
 import Arranger from '@arranger/server';
+import { getProject } from '@arranger/server';
+import SQS from 'aws-sdk/clients/sqs';
 import Keycloak from 'keycloak-connect';
-import { port, esHost } from './env';
+
 import buildApp from './app';
+import { esHost, port } from './env';
 import keycloakConfig from './keycloak';
 
 process.on('uncaughtException', err => {
@@ -22,7 +26,8 @@ process.on('SIGINT', () => {
 });
 
 const keycloak = new Keycloak({}, keycloakConfig);
-const app = buildApp(keycloak);
+const sqs = new SQS({ apiVersion: '2012-11-05' });
+const app = buildApp(keycloak, sqs, getProject);
 const externalContext = (req, _res, _con) => ({ auth: req.kauth?.grant?.access_token || {} });
 
 Arranger({
