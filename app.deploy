@@ -1,6 +1,8 @@
 @Library(value="kids-first/aws-infra-jenkins-shared-libraries", changelog=false) _
 deploy {
     architecture_type = "aws-ecs-service-type-1"
+    jenkinsfile_name  = "app.deploy" 
+
     projectName = "arranger"
     environments = "qa,prd"
     docker_image_type = "alpine"
@@ -18,5 +20,4 @@ deploy {
     health_check_path = "/status"
     dependencies = "ecr"
     publish_to_public_repo = "true"
-    create_additional_internal_alb = "1"
 }
