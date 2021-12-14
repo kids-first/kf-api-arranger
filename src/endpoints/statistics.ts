@@ -1,9 +1,8 @@
-import { buildAggregations, flattenAggregations } from '@arranger/middleware';
+import { Client } from '@elastic/elasticsearch';
 import filesize from 'filesize';
-import { get, set } from 'lodash';
 
 import EsInstance from '../ElasticSearchClientInstance';
-import { esFileIndex } from '../env';
+import { esFileIndex, esParticipantIndex, esStudyIndex, idKey } from '../env';
 
 export type Statistics = {
     files: number;
@@ -14,76 +13,94 @@ export type Statistics = {
     participants: number;
 };
 
-const NESTED_FIELDS = ['participants', 'participants.biospecimens'];
-const STATS = [
-    {
-        name: 'files',
-        field: 'kf_id',
-    },
-    {
-        name: 'fileSize',
-        field: 'size',
-        query: 'stats.sum',
-        accessor: 'stats.sum',
-        format: filesize,
-    },
-    {
-        name: 'studies',
-        field: 'participants.study.kf_id',
-    },
-    {
-        name: 'samples',
-        field: 'participants.biospecimens.kf_id',
-    },
-    {
-        name: 'families',
-        field: 'participants.family_id',
-    },
-    {
-        name: 'participants',
-        field: 'participants.kf_id',
-    },
-].map(x => ({
-    query: 'buckets.key',
-    accessor: 'buckets.length',
-    format: x => x,
-    ...x,
-}));
-
-const fetchAggregations = async ({ nestedFields, graphqlFields }) => {
-    const client = await EsInstance.getInstance();
+const fetchFileStats = async (client: Client): Promise<number> => {
     const { body } = await client.search({
         index: esFileIndex,
         body: {
-            aggs: buildAggregations({
-                query: {},
-                nestedFields,
-                graphqlFields,
-                aggregationsFilterThemselves: false,
-            }),
+            aggs: { types_count: { value_count: { field: idKey } } },
         },
+        size: 0,
     });
-    const aggregations = body.aggregations;
-    return flattenAggregations({ aggregations, includeMissing: false });
+    return body.aggregations.types_count.value;
+};
+
+const fetchFileSizeStats = async (client: Client): Promise<string> => {
+    const { body } = await client.search({
+        index: esFileIndex,
+        body: {
+            aggs: { types_count: { sum: { field: 'size' } } },
+        },
+        size: 0,
+    });
+    return filesize(body.aggregations.types_count.value);
+};
+
+const fetchStudyStats = async (client: Client): Promise<number> => {
+    const { body } = await client.search({
+        index: esStudyIndex,
+        body: {
+            aggs: { types_count: { value_count: { field: idKey } } },
+        },
+        size: 0,
+    });
+    return body.aggregations.types_count.value;
+};
+
+const fetchParticipantStats = async (client: Client): Promise<number> => {
+    const { body } = await client.search({
+        index: esParticipantIndex,
+        body: {
+            aggs: { types_count: { value_count: { field: idKey } } },
+        },
+        size: 0,
+    });
+    return body.aggregations.types_count.value;
+};
+
+const fetchFamilyStats = async (client: Client): Promise<number> => {
+    const { body } = await client.search({
+        index: esParticipantIndex,
+        body: {
+            aggs: { types_count: { value_count: { field: 'family_id' } } },
+        },
+        size: 0,
+    });
+    return body.aggregations.types_count.value;
+};
+
+const fetchSampleStats = async (client: Client): Promise<number> => {
+    const { body } = await client.search({
+        index: esParticipantIndex,
+        body: {
+            aggs: {
+                list: {
+                    nested: { path: 'biospecimens' },
+                    aggs: { types_count: { value_count: { field: `biospecimens.${idKey}` } } },
+                },
+            },
+        },
+        size: 0,
+    });
+    return body.aggregations.list.doc_count;
 };
 
 export const getStatistics = async (): Promise<Statistics> => {
-    const aggregations = await fetchAggregations({
-        nestedFields: NESTED_FIELDS,
-        graphqlFields: STATS.reduce(
-            (obj, { field, query }) => ({
-                ...obj,
-                [field.split('.').join('__')]: set({}, query, {}),
-            }),
-            {},
-        ),
-    });
+    const client = EsInstance.getInstance();
+    const result = await Promise.all([
+        fetchFileStats(client),
+        fetchStudyStats(client),
+        fetchParticipantStats(client),
+        fetchFamilyStats(client),
+        fetchSampleStats(client),
+        fetchFileSizeStats(client),
+    ]);
 
-    return STATS.reduce(
-        (obj, { name, field, format, accessor }) => ({
-            ...obj,
-            [name]: format(get(aggregations, [field, ...accessor.split('.')], 0)),
-        }),
-        {},
-    ) as Statistics;
+    return {
+        files: result[0],
+        studies: result[1],
+        participants: result[2],
+        families: result[3],
+        samples: result[4],
+        fileSize: result[5],
+    } as Statistics;
 };
