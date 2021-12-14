@@ -3,6 +3,7 @@ import SQS from 'aws-sdk/clients/sqs';
 import cors from 'cors';
 import express, { Express } from 'express';
 import { Keycloak } from 'keycloak-connect';
+import NodeCache from 'node-cache';
 
 import { dependencies, version } from '../package.json';
 import genomicFeatureSuggestions, { SUGGESTIONS_TYPES } from './endpoints/genomicFeatureSuggestions';
@@ -19,14 +20,17 @@ import {
 import { CreateSetBody, Set, SetSqon, UpdateSetContentBody, UpdateSetTagBody } from './endpoints/sets/setsTypes';
 import { getStatistics } from './endpoints/statistics';
 import { calculateSurvivalForSqonResult } from './endpoints/survival';
-import { esHost, keycloakURL } from './env';
+import { cacheTTL, esHost, keycloakURL } from './env';
 import { globalErrorHandler, globalErrorLogger } from './errors';
+import { STATISTICS_CACHE_ID, verifyCache } from './middleware/cache';
 import { injectBodyHttpHeaders } from './middleware/injectBodyHttpHeaders';
 import { resolveSetIdMiddleware } from './middleware/resolveSetIdInSqon';
 import { ArrangerProject } from './sqon/searchSqon';
 
 export default (keycloak: Keycloak, sqs: SQS, getProject: (projectId: string) => ArrangerProject): Express => {
     const app = addAsync.addAsync(express());
+
+    const cache = new NodeCache({ stdTTL: cacheTTL });
 
     app.use(cors());
 
@@ -57,6 +61,11 @@ export default (keycloak: Keycloak, sqs: SQS, getProject: (projectId: string) =>
         }),
     );
 
+    app.post('/cache-clear', keycloak.protect('realm:ADMIN'), async (_req, res) => {
+        cache.flushAll();
+        res.send('OK');
+    });
+
     app.getAsync('/genesFeature/suggestions/:prefix', keycloak.protect(), (req, res) =>
         genomicFeatureSuggestions(req, res, SUGGESTIONS_TYPES.GENE),
     );
@@ -64,8 +73,9 @@ export default (keycloak: Keycloak, sqs: SQS, getProject: (projectId: string) =>
         genomicFeatureSuggestions(req, res, SUGGESTIONS_TYPES.VARIANT),
     );
 
-    app.getAsync('/statistics', async (req, res) => {
+    app.getAsync('/statistics', verifyCache(STATISTICS_CACHE_ID, cache), async (req, res) => {
         const data = await getStatistics();
+        cache.set(STATISTICS_CACHE_ID, data);
         res.json(data);
     });
 

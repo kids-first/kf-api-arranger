@@ -14,7 +14,7 @@ JBCiTrVNMy4wmZruwoG/sae517Jl6cIFePSifpOTsA==
 
 export const publicKey = `MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAJgoVgqi7/C9uSoUsfQeep2Dbw5HfXWQIyypg+XZ3NqsxTA2k2Fr2vmBu82iGsNgwWBKac5IOzSGvyob1l64MkUCAwEAAQ==`;
 
-export const getToken = (expire = 1000, sub = '12345-678-90abcdef') =>
+export const getToken = (expire = 1000, sub = '12345-678-90abcdef', roles = []) =>
     jwt.sign(
         {
             iss: 'https://kf-keycloak-qa.kf-strides.org/auth/realms/kidsfirstdrc',
@@ -27,7 +27,7 @@ export const getToken = (expire = 1000, sub = '12345-678-90abcdef') =>
             session_state: 'ae2d1238-0180-4ea1-978a-8e9a95ba44f4',
             acr: '1',
             realm_access: {
-                roles: [],
+                roles,
             },
             scope: 'email profile',
             email_verified: false,

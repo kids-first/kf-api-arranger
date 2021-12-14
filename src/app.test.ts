@@ -55,6 +55,31 @@ describe('Express app (without Arranger)', () => {
             .expect('Content-Type', /json/);
     });
 
+    describe('POST /cache-clear', () => {
+        it('should return 403 if no Authorization header', async () =>
+            await request(app)
+                .post('/cache-clear')
+                .expect(403));
+
+        it('should return 403 if not an ADMIN', async () => {
+            const token = getToken();
+
+            await request(app)
+                .post('/cache-clear')
+                .set({ Authorization: `Bearer ${token}` })
+                .expect(403);
+        });
+
+        it('should return 200 if no error occurs', async () => {
+            const token = getToken(1000, '12345-678-90abcdef', ['ADMIN']);
+
+            await request(app)
+                .post('/cache-clear')
+                .set({ Authorization: `Bearer ${token}` })
+                .expect(200, 'OK');
+        });
+    });
+
     describe('GET /statistics', () => {
         beforeEach(() => {
             (getStatistics as jest.Mock).mockReset();

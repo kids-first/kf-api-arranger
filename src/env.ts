@@ -28,3 +28,5 @@ export const survivalPyFile = process.env.SURVIVAL_PY_FILE || 'resource/py/survi
 export const pythonPath = process.env.PYTHON_PATH || '/usr/local/bin/python3';
 
 export const idKey = process.env.ID_KEY || 'kf_id';
+
+export const cacheTTL: number = Number.parseInt(process.env.CACHE_TTL_SEC) || 3600;
