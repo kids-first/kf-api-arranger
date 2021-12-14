@@ -10,7 +10,9 @@ export const keycloakClient = process.env.KEYCLOAK_CLIENT || 'kidsfirst-apis';
 
 export const esHost = process.env.ES_HOST || 'http://localhost:9200';
 
-export const esFileIndex = process.env.ES_FILE_INDEX;
+export const esFileIndex = process.env.ES_FILE_INDEX || 'file_centric';
+export const esStudyIndex = process.env.ES_STUDY_INDEX || 'study_centric';
+export const esParticipantIndex = process.env.ES_PARTICIPANT_INDEX || 'participant_centric';
 
 export const maxNOfGenomicFeatureSuggestions = process.env.MAX_NUMBER_OF_GF_SUGGESTIONS || 5;
 
