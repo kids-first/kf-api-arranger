@@ -48,7 +48,7 @@
     "lodash": "^4.17.21",
     "node-cache": "^5.1.2",
     "node-fetch": "^2.6.5",
-    "python-shell": "^3.0.0",
+    "python-shell": "^3.0.1",
     "regenerator-runtime": "^0.13.9"
   },
   "devDependencies": {
