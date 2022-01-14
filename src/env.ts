@@ -13,6 +13,7 @@ export const esHost = process.env.ES_HOST || 'http://localhost:9200';
 export const esFileIndex = process.env.ES_FILE_INDEX || 'file_centric';
 export const esStudyIndex = process.env.ES_STUDY_INDEX || 'study_centric';
 export const esParticipantIndex = process.env.ES_PARTICIPANT_INDEX || 'participant_centric';
+export const esBiospecimenIndex = process.env.ES_BIOSPECIMEN_INDEX || 'biospecimen_centric';
 
 export const maxNOfGenomicFeatureSuggestions = process.env.MAX_NUMBER_OF_GF_SUGGESTIONS || 5;
 
@@ -28,5 +29,9 @@ export const survivalPyFile = process.env.SURVIVAL_PY_FILE || 'resource/py/survi
 export const pythonPath = process.env.PYTHON_PATH || '/usr/local/bin/python3';
 
 export const idKey = process.env.ID_KEY || 'kf_id';
+export const fileIdKey = process.env.FILE_ID_KEY || 'kf_id';
+export const studyIdKey = process.env.STUDY_ID_KEY || 'kf_id';
+export const participantIdKey = process.env.PARTICIPANT_ID_KEY || 'kf_id';
+export const biospecimenIdKey = process.env.BIOSPECIMEN_ID_KEY || 'kf_id';
 
 export const cacheTTL: number = Number.parseInt(process.env.CACHE_TTL_SEC) || 3600;
