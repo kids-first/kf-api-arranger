@@ -2,7 +2,17 @@ import { Client } from '@elastic/elasticsearch';
 import filesize from 'filesize';
 
 import EsInstance from '../ElasticSearchClientInstance';
-import { esFileIndex, esParticipantIndex, esStudyIndex, idKey } from '../env';
+import {
+    biospecimenIdKey,
+    esBiospecimenIndex,
+    esFileIndex,
+    esParticipantIndex,
+    esStudyIndex,
+    fileIdKey,
+    keycloakRealm,
+    participantIdKey,
+    studyIdKey,
+} from '../env';
 
 export type Statistics = {
     files: number;
@@ -17,7 +27,7 @@ const fetchFileStats = async (client: Client): Promise<number> => {
     const { body } = await client.search({
         index: esFileIndex,
         body: {
-            aggs: { types_count: { value_count: { field: idKey } } },
+            aggs: { types_count: { value_count: { field: fileIdKey } } },
         },
         size: 0,
     });
@@ -39,7 +49,7 @@ const fetchStudyStats = async (client: Client): Promise<number> => {
     const { body } = await client.search({
         index: esStudyIndex,
         body: {
-            aggs: { types_count: { value_count: { field: idKey } } },
+            aggs: { types_count: { value_count: { field: studyIdKey } } },
         },
         size: 0,
     });
@@ -50,7 +60,7 @@ const fetchParticipantStats = async (client: Client): Promise<number> => {
     const { body } = await client.search({
         index: esParticipantIndex,
         body: {
-            aggs: { types_count: { value_count: { field: idKey } } },
+            aggs: { types_count: { value_count: { field: participantIdKey } } },
         },
         size: 0,
     });
@@ -75,13 +85,36 @@ const fetchSampleStats = async (client: Client): Promise<number> => {
             aggs: {
                 list: {
                     nested: { path: 'biospecimens' },
-                    aggs: { types_count: { value_count: { field: `biospecimens.${idKey}` } } },
+                    aggs: { types_count: { value_count: { field: `biospecimens.${biospecimenIdKey}` } } },
                 },
             },
         },
         size: 0,
     });
     return body.aggregations.list.doc_count;
+};
+
+const fetchBiospecimenStats = async (client: Client): Promise<number> => {
+    const { body } = await client.search({
+        index: esBiospecimenIndex,
+        body: {
+            aggs: { types_count: { value_count: { field: biospecimenIdKey } } },
+        },
+        size: 0,
+    });
+    return body.aggregations.types_count.value;
+};
+
+const fetchSampleOrBiospecimenStats = async (client: Client): Promise<number> => {
+    if (keycloakRealm === 'kidsfirstdrc') {
+        return fetchSampleStats(client);
+    }
+
+    if (keycloakRealm === 'includedcc') {
+        return fetchBiospecimenStats(client);
+    }
+
+    return Promise.resolve(0);
 };
 
 export const getStatistics = async (): Promise<Statistics> => {
@@ -91,7 +124,7 @@ export const getStatistics = async (): Promise<Statistics> => {
         fetchStudyStats(client),
         fetchParticipantStats(client),
         fetchFamilyStats(client),
-        fetchSampleStats(client),
+        fetchSampleOrBiospecimenStats(client),
         fetchFileSizeStats(client),
     ]);
 
