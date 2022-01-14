@@ -2,6 +2,10 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+export const PROJECT_KIDSFIRST = 'KidsFirst';
+export const PROJECT_INCLUDE = 'Include';
+
+export const project = process.env.PROJECT || PROJECT_KIDSFIRST;
 export const port = process.env.PORT || 5050;
 
 export const keycloakURL = process.env.KEYCLOAK_URL || 'https://kf-keycloak-qa.kf-strides.org/auth';

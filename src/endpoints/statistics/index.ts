@@ -1,18 +1,20 @@
 import { Client } from '@elastic/elasticsearch';
 import filesize from 'filesize';
 
-import EsInstance from '../ElasticSearchClientInstance';
+import EsInstance from '../../ElasticSearchClientInstance';
 import {
-    biospecimenIdKey,
-    esBiospecimenIndex,
     esFileIndex,
     esParticipantIndex,
     esStudyIndex,
     fileIdKey,
-    keycloakRealm,
     participantIdKey,
+    project,
+    PROJECT_INCLUDE,
+    PROJECT_KIDSFIRST,
     studyIdKey,
-} from '../env';
+} from '../../env';
+import { fetchBiospecimenStats as fetchIncludeBiospecimen } from './includeBiospecimen';
+import { fetchBiospecimenStats as fetchKidsfirstBiospecimen } from './kidsfirstBiospecimen';
 
 export type Statistics = {
     files: number;
@@ -78,40 +80,13 @@ const fetchFamilyStats = async (client: Client): Promise<number> => {
     return body.aggregations.types_count.value;
 };
 
-const fetchSampleStats = async (client: Client): Promise<number> => {
-    const { body } = await client.search({
-        index: esParticipantIndex,
-        body: {
-            aggs: {
-                list: {
-                    nested: { path: 'biospecimens' },
-                    aggs: { types_count: { value_count: { field: `biospecimens.${biospecimenIdKey}` } } },
-                },
-            },
-        },
-        size: 0,
-    });
-    return body.aggregations.list.doc_count;
-};
-
 const fetchBiospecimenStats = async (client: Client): Promise<number> => {
-    const { body } = await client.search({
-        index: esBiospecimenIndex,
-        body: {
-            aggs: { types_count: { value_count: { field: biospecimenIdKey } } },
-        },
-        size: 0,
-    });
-    return body.aggregations.types_count.value;
-};
-
-const fetchSampleOrBiospecimenStats = async (client: Client): Promise<number> => {
-    if (keycloakRealm === 'kidsfirstdrc') {
-        return fetchSampleStats(client);
+    if (project === PROJECT_KIDSFIRST) {
+        return fetchKidsfirstBiospecimen(client);
     }
 
-    if (keycloakRealm === 'includedcc') {
-        return fetchBiospecimenStats(client);
+    if (project === PROJECT_INCLUDE) {
+        return fetchIncludeBiospecimen(client);
     }
 
     return Promise.resolve(0);
@@ -124,7 +99,7 @@ export const getStatistics = async (): Promise<Statistics> => {
         fetchStudyStats(client),
         fetchParticipantStats(client),
         fetchFamilyStats(client),
-        fetchSampleOrBiospecimenStats(client),
+        fetchBiospecimenStats(client),
         fetchFileSizeStats(client),
     ]);
 
