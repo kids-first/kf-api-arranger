@@ -10,7 +10,7 @@ This is an instantiation of the [@arranger/server](https://github.com/overture-s
 
 Arranger server is an application that wraps Elasticsearch and provides a GraphQL search API for consumption by the [Kids First Portal UI](https://github.com/kids-first/kf-portal-ui).
 
-## Development:
+## Development
 
 * Execute: `npm run build` then `npm run start`
 
