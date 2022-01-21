@@ -20,7 +20,7 @@ Arranger server is an application that wraps Elasticsearch and provides a GraphQ
 
 * When adding a new env var, update the .env.example. Otherwise, an error will be thrown.
 
-* Installing dependencies: `npm install`
+* Installing dependencies: `npm install`.
 
 ### Test
 
