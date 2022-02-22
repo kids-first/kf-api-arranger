@@ -19,5 +19,4 @@ deploy {
     memory_task = "4096"
     health_check_path = "/status"
     dependencies = "ecr"
-    publish_to_public_repo = "true"
 }
