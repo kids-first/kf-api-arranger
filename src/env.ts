@@ -37,5 +37,6 @@ export const fileIdKey = process.env.FILE_ID_KEY || 'kf_id';
 export const studyIdKey = process.env.STUDY_ID_KEY || 'kf_id';
 export const participantIdKey = process.env.PARTICIPANT_ID_KEY || 'kf_id';
 export const biospecimenIdKey = process.env.BIOSPECIMEN_ID_KEY || 'kf_id';
+export const familyIdKey = process.env.FAMILY_ID_KEY || 'family_id';
 
 export const cacheTTL: number = Number.parseInt(process.env.CACHE_TTL_SEC) || 3600;
