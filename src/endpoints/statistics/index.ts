@@ -5,7 +5,7 @@ import EsInstance from '../../ElasticSearchClientInstance';
 import {
     esFileIndex,
     esParticipantIndex,
-    esStudyIndex,
+    esStudyIndex, familyIdKey,
     fileIdKey,
     participantIdKey,
     project,
@@ -73,7 +73,7 @@ const fetchFamilyStats = async (client: Client): Promise<number> => {
     const { body } = await client.search({
         index: esParticipantIndex,
         body: {
-            aggs: { types_count: { value_count: { field: 'family_id' } } },
+            aggs: { types_count: { value_count: { field: familyIdKey } } },
         },
         size: 0,
     });
