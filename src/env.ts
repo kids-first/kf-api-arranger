@@ -25,9 +25,9 @@ export const indexNameGeneFeatureSuggestion = process.env.GENES_SUGGESTIONS_INDE
 export const indexNameVariantFeatureSuggestion = process.env.VARIANTS_SUGGESTIONS_INDEX_NAME;
 
 export const riffURL = process.env.RIFF_URL || 'https://riff-qa.kf-strides.org';
-export const sendUpdateToSqs = process.env.SEND_UPDATE_TO_SQS === 'false' ? false : true;
+export const sendUpdateToSqs = process.env.SEND_UPDATE_TO_SQS !== 'false';
 export const sqsQueueUrl = process.env.SQS_QUEUE_URL || '';
-export const maxSetContentSize: number = Number.parseInt(process.env.MAX_SET_CONTENT_SIZE) || 1000;
+export const maxSetContentSize: number = Number.parseInt(process.env.MAX_SET_CONTENT_SIZE) || 100000;
 
 export const survivalPyFile = process.env.SURVIVAL_PY_FILE || 'resource/py/survival.py';
 export const pythonPath = process.env.PYTHON_PATH || '/usr/local/bin/python3';
