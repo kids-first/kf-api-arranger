@@ -25,6 +25,7 @@ export const indexNameGeneFeatureSuggestion = process.env.GENES_SUGGESTIONS_INDE
 export const indexNameVariantFeatureSuggestion = process.env.VARIANTS_SUGGESTIONS_INDEX_NAME;
 
 export const riffURL = process.env.RIFF_URL || 'https://riff-qa.kf-strides.org';
+export const userApiURL = process.env.USER_API_URL || 'https://include-users-api-qa.373997854230.d3b.io';
 export const sendUpdateToSqs = process.env.SEND_UPDATE_TO_SQS !== 'false';
 export const sqsQueueUrl = process.env.SQS_QUEUE_URL || '';
 export const maxSetContentSize: number = Number.parseInt(process.env.MAX_SET_CONTENT_SIZE) || 100000;

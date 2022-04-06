@@ -1,22 +1,23 @@
 import fetch from 'node-fetch';
 
 import { CreateUpdateBody, deleteRiff, getRiffs, postRiff, putRiff, Output, Content } from '../riff/riffClient';
-import { RiffError } from './riffError';
+import { UserApiError } from './userApiError';
+import {getUserContents} from "./userApiClient";
 
 jest.mock('node-fetch');
 
-describe('Riff Client', () => {
+describe('UserApi Client', () => {
     const accessToken = 'Bearer bearer';
     const userId = 'user_id';
     const setId = '1ea';
 
-    const createUpdateRiffPayload = {
+    const createUpdatePayload = {
         alias: 'tag',
         content: {},
         sharedPublicly: false,
     } as CreateUpdateBody;
 
-    const riff = {
+    const output = {
         id: setId,
         uid: 'abcedfghijkl',
         content: {} as Content,
@@ -26,22 +27,22 @@ describe('Riff Client', () => {
         updatedDate: new Date(),
     } as Output;
 
-    describe('Get user riffs', () => {
+    describe('Get user Sets', () => {
         beforeEach(() => {
             ((fetch as unknown) as jest.Mock).mockReset();
         });
 
         it('should return body if status is 200', async () => {
-            const mockResponse = { status: 200, json: () => [riff, riff] };
+            const mockResponse = { status: 200, json: () => [output, output] };
             ((fetch as unknown) as jest.Mock).mockImplementation(() => mockResponse);
 
-            const result = await getRiffs(accessToken, userId);
+            const result = await getUserContents(accessToken);
 
-            expect(result).toEqual([riff, riff]);
+            expect(result).toEqual([output, output]);
             expect(((fetch as unknown) as jest.Mock).mock.calls.length).toEqual(1);
         });
 
-        it('should throw a RiffError if status is not 200', async () => {
+        it('should throw a UserApiError if status is not 200', async () => {
             const expectedUnauthorized = {
                 timestamp: '2021-09-24T15:12:06.959+00:00',
                 status: 401,
@@ -50,13 +51,13 @@ describe('Riff Client', () => {
                 path: '/riff/user_id',
             };
 
-            const expectedError = new RiffError(400, expectedUnauthorized);
+            const expectedError = new UserApiError(400, expectedUnauthorized);
             const mockResponse = { status: 400, json: () => expectedUnauthorized };
 
             ((fetch as unknown) as jest.Mock).mockImplementation(() => mockResponse);
 
             try {
-                await getRiffs(accessToken, userId);
+                await getUserContents(accessToken);
             } catch (e) {
                 expect(e).toEqual(expectedError);
             } finally {
@@ -65,22 +66,22 @@ describe('Riff Client', () => {
         });
     });
 
-    describe('Post riff', () => {
+    describe('Post userContents', () => {
         beforeEach(() => {
             ((fetch as unknown) as jest.Mock).mockReset();
         });
 
         it('should return body if status is 200', async () => {
-            const mockResponse = { status: 200, json: () => riff };
+            const mockResponse = { status: 200, json: () => output };
             ((fetch as unknown) as jest.Mock).mockImplementation(() => mockResponse);
 
-            const result = await postRiff(accessToken, createUpdateRiffPayload);
+            const result = await postRiff(accessToken, createUpdatePayload);
 
-            expect(result).toEqual(riff);
+            expect(result).toEqual(output);
             expect(((fetch as unknown) as jest.Mock).mock.calls.length).toEqual(1);
         });
 
-        it('should throw a RiffError if status is not 200', async () => {
+        it('should throw a UserApiError if status is not 200', async () => {
             const expectedBadRequest = {
                 timestamp: '2021-09-24T15:08:44.482+00:00',
                 status: 400,
@@ -89,13 +90,13 @@ describe('Riff Client', () => {
                 path: '/riff/shorten',
             };
 
-            const expectedError = new RiffError(400, expectedBadRequest);
+            const expectedError = new UserApiError(400, expectedBadRequest);
             const mockResponse = { status: 400, json: () => expectedBadRequest };
 
             ((fetch as unknown) as jest.Mock).mockImplementation(() => mockResponse);
 
             try {
-                await postRiff(accessToken, createUpdateRiffPayload);
+                await postRiff(accessToken, createUpdatePayload);
             } catch (e) {
                 expect(e).toEqual(expectedError);
             } finally {
@@ -104,23 +105,23 @@ describe('Riff Client', () => {
         });
     });
 
-    describe('Put riff', () => {
+    describe('Put User Content', () => {
         beforeEach(() => {
             ((fetch as unknown) as jest.Mock).mockReset();
         });
 
         it('should return body if status is 200', async () => {
-            const updateRiff = { ...riff, alias: 'tag updated', updatedDate: new Date() };
+            const updateRiff = { ...output, alias: 'tag updated', updatedDate: new Date() };
             const mockResponse = { status: 200, json: () => updateRiff };
             ((fetch as unknown) as jest.Mock).mockImplementation(() => mockResponse);
 
-            const result = await putRiff(accessToken, { ...createUpdateRiffPayload, alias: 'tag updated' }, setId);
+            const result = await putRiff(accessToken, { ...createUpdatePayload, alias: 'tag updated' }, setId);
 
             expect(result).toEqual(updateRiff);
             expect(((fetch as unknown) as jest.Mock).mock.calls.length).toEqual(1);
         });
 
-        it('should throw a RiffError if status is not 200', async () => {
+        it('should throw a UserApiError if status is not 200', async () => {
             const expectedNotFound = {
                 timestamp: '2021-09-24T15:41:35.842+00:00',
                 status: 404,
@@ -129,13 +130,13 @@ describe('Riff Client', () => {
                 path: '/riff/1ea',
             };
 
-            const expectedError = new RiffError(404, expectedNotFound);
+            const expectedError = new UserApiError(404, expectedNotFound);
             const mockResponse = { status: 404, json: () => expectedNotFound };
 
             ((fetch as unknown) as jest.Mock).mockImplementation(() => mockResponse);
 
             try {
-                await putRiff(accessToken, { ...createUpdateRiffPayload, alias: 'tag updated' }, setId);
+                await putRiff(accessToken, { ...createUpdatePayload, alias: 'tag updated' }, setId);
             } catch (e) {
                 expect(e).toEqual(expectedError);
             } finally {
@@ -144,7 +145,7 @@ describe('Riff Client', () => {
         });
     });
 
-    describe('Delete riff', () => {
+    describe('Delete User Content', () => {
         beforeEach(() => {
             ((fetch as unknown) as jest.Mock).mockReset();
         });
@@ -168,7 +169,7 @@ describe('Riff Client', () => {
                 path: '/riff/1ea',
             };
 
-            const expectedError = new RiffError(401, expectedUnauthorized);
+            const expectedError = new UserApiError(401, expectedUnauthorized);
             const mockResponse = { status: 401, json: () => expectedUnauthorized };
 
             ((fetch as unknown) as jest.Mock).mockImplementation(() => mockResponse);

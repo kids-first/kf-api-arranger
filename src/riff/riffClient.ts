@@ -6,13 +6,13 @@ import { RiffError } from './riffError';
 
 export const RIFF_TYPE_SET = 'set';
 
-export type CreateUpdateRiffBody = {
+export type CreateUpdateBody = {
     alias: string;
-    content: RiffContent;
+    content: Content;
     sharedPublicly: boolean;
 };
 
-export type RiffContent = {
+export type Content = {
     setType: string;
     riffType: string;
     ids: string[];
@@ -21,17 +21,17 @@ export type RiffContent = {
     idField: string;
 };
 
-export type Riff = {
+export type Output = {
     id: string;
     uid: string;
-    content: RiffContent;
+    content: Content;
     alias: string;
     sharedPublicly: boolean;
     creationDate: Date;
     updatedDate: Date;
 };
 
-export const getRiffs = async (accessToken: string, userId: string): Promise<Riff[]> => {
+export const getRiffs = async (accessToken: string, userId: string): Promise<Output[]> => {
     const uri = `${riffURL}/riff/user/${userId}`;
 
     const response = await fetch(encodeURI(uri), {
@@ -51,7 +51,7 @@ export const getRiffs = async (accessToken: string, userId: string): Promise<Rif
     throw new RiffError(response.status, body);
 };
 
-export const postRiff = async (accessToken: string, set: CreateUpdateRiffBody): Promise<Riff> => {
+export const postRiff = async (accessToken: string, set: CreateUpdateBody): Promise<Output> => {
     const uri = `${riffURL}/riff/shorten`;
 
     const response = await fetch(encodeURI(uri), {
@@ -72,7 +72,7 @@ export const postRiff = async (accessToken: string, set: CreateUpdateRiffBody): 
     throw new RiffError(response.status, body);
 };
 
-export const putRiff = async (accessToken: string, set: CreateUpdateRiffBody, setId: string): Promise<Riff> => {
+export const putRiff = async (accessToken: string, set: CreateUpdateBody, setId: string): Promise<Output> => {
     const uri = `${riffURL}/riff/${setId}`;
 
     const response = await fetch(encodeURI(uri), {
