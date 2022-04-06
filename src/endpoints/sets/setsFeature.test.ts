@@ -1,12 +1,12 @@
 import AWS from 'aws-sdk';
 
 import {
-    CreateUpdateRiffBody,
+    CreateUpdateBody,
     deleteRiff,
     getRiffs,
     postRiff,
     putRiff,
-    Riff,
+    Output,
     RIFF_TYPE_SET,
 } from '../../riff/riffClient';
 import { resolveSetsInSqon } from '../../sqon/resolveSetInSqon';
@@ -19,7 +19,14 @@ jest.mock('../../sqon/resolveSetInSqon');
 jest.mock('../../sqon/searchSqon');
 jest.mock('../../riff/riffClient');
 jest.mock('../../SQS/sendEvent');
-jest.mock('../../env', () => ({ esHost: 'http://localhost:9200', maxSetContentSize: 3, sendUpdateToSqs: true }));
+jest.mock('../../env', () => ({
+    esHost: 'http://localhost:9200',
+    maxSetContentSize: 3,
+    sendUpdateToSqs: true,
+    PROJECT_INCLUDE: 'Include',
+    PROJECT_KIDSFIRST: 'KidsFirst',
+    project: 'KidsFirst',
+}));
 
 describe('Set management', () => {
     const sqon = { op: 'and', content: [] };
@@ -48,7 +55,7 @@ describe('Set management', () => {
         uid: 'abcedfghijkl',
         creationDate: new Date(),
         updatedDate: new Date(),
-    } as Riff;
+    } as Output;
 
     const setFromRiff: Set = {
         id: setId,
@@ -97,7 +104,7 @@ describe('Set management', () => {
             type,
         };
 
-        const expectedCreateRiffBody: CreateUpdateRiffBody = {
+        const expectedCreateRiffBody: CreateUpdateBody = {
             alias: tag,
             sharedPublicly: false,
             content: {
@@ -260,13 +267,13 @@ describe('Set management', () => {
 
         const mockExistingSets = [riff];
 
-        const expectedUpdateRiffBody: CreateUpdateRiffBody = {
+        const expectedUpdateRiffBody: CreateUpdateBody = {
             alias: updateSetTagBody.newTag,
             sharedPublicly: riff.sharedPublicly,
             content: riff.content,
         };
 
-        const updatedRiff: Riff = {
+        const updatedRiff: Output = {
             ...riff,
             alias: 'tag updated',
             updatedDate: new Date(),
@@ -376,7 +383,7 @@ describe('Set management', () => {
         it('should send put riff and return result - case add ids', async () => {
             const setFromUpdatedRiff: Set = { ...setFromRiff, size: 3 };
             const expectedAddSqon = { op: 'or', content: [sqon, newSqon] };
-            const expectedUpdateRiffBody: CreateUpdateRiffBody = {
+            const expectedUpdateRiffBody: CreateUpdateBody = {
                 alias: riff.alias,
                 sharedPublicly: riff.sharedPublicly,
                 content: {
@@ -425,7 +432,7 @@ describe('Set management', () => {
             };
             const setFromUpdatedRiff: Set = { ...setFromRiff, size: 3 };
             const expectedAddSqon = { op: 'or', content: [sqon, newSqonWithSetId] };
-            const expectedUpdateRiffBody: CreateUpdateRiffBody = {
+            const expectedUpdateRiffBody: CreateUpdateBody = {
                 alias: riff.alias,
                 sharedPublicly: riff.sharedPublicly,
                 content: {
@@ -475,7 +482,7 @@ describe('Set management', () => {
         it('should not send message in SQS for empty tag sets', async () => {
             const setFromUpdatedRiff: Set = { ...setFromRiff, size: 3, tag: '' };
             const expectedAddSqon = { op: 'or', content: [sqon, newSqon] };
-            const updatedRiff: Riff = {
+            const updatedRiff: Output = {
                 ...riff,
                 alias: '',
                 content: {
@@ -507,7 +514,7 @@ describe('Set management', () => {
                 op: 'and',
                 content: [sqon, { op: 'not', content: [newSqon] }],
             };
-            const expectedUpdateRiffBody: CreateUpdateRiffBody = {
+            const expectedUpdateRiffBody: CreateUpdateBody = {
                 alias: riff.alias,
                 sharedPublicly: riff.sharedPublicly,
                 content: {

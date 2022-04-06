@@ -1,5 +1,5 @@
 import { SetSqon } from '../endpoints/sets/setsTypes';
-import { getRiffs, Riff, RIFF_TYPE_SET } from '../riff/riffClient';
+import { getRiffs, Output, RIFF_TYPE_SET } from '../riff/riffClient';
 import { resolveSetsInSqon } from './resolveSetInSqon';
 
 jest.mock('../riff/riffClient');
@@ -63,7 +63,7 @@ describe('resolveSetsInSqon', () => {
             uid: 'uid-1ez',
             creationDate: new Date(),
             updatedDate: new Date(),
-        } as Riff;
+        } as Output;
 
         const riff1ey = {
             id: '1ey',
@@ -78,7 +78,7 @@ describe('resolveSetsInSqon', () => {
             uid: 'uid-1ey',
             creationDate: new Date(),
             updatedDate: new Date(),
-        } as Riff;
+        } as Output;
 
         const anotherRiff = {
             id: '1ea',
@@ -93,7 +93,7 @@ describe('resolveSetsInSqon', () => {
             uid: 'uid-1ea',
             creationDate: new Date(),
             updatedDate: new Date(),
-        } as Riff;
+        } as Output;
 
         const getRiffsMockResponse = [riff1ey, anotherRiff, riff1ez];
 
@@ -159,7 +159,7 @@ describe('resolveSetsInSqon', () => {
             uid: 'uid-1ez',
             creationDate: new Date(),
             updatedDate: new Date(),
-        } as Riff;
+        } as Output;
 
         const anotherRiff = {
             id: '1ea',
@@ -174,7 +174,7 @@ describe('resolveSetsInSqon', () => {
             uid: 'uid-1ea',
             creationDate: new Date(),
             updatedDate: new Date(),
-        } as Riff;
+        } as Output;
 
         const getRiffsMockResponse = [anotherRiff, riff1ez];
 
