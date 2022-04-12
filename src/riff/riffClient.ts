@@ -29,6 +29,7 @@ export type Output = {
     sharedPublicly: boolean;
     creationDate: Date;
     updatedDate: Date;
+    updated_date: Date;
 };
 
 export const getRiffs = async (accessToken: string, userId: string): Promise<Output[]> => {

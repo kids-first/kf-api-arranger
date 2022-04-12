@@ -1,14 +1,14 @@
 import SQS from 'aws-sdk/clients/sqs';
 import { difference, dropRight, get, union } from 'lodash';
 
-import { maxSetContentSize, sendUpdateToSqs, project, PROJECT_INCLUDE } from '../../env';
+import { maxSetContentSize, project, PROJECT_INCLUDE, sendUpdateToSqs } from '../../env';
 import {
     CreateUpdateBody,
     deleteRiff,
     getRiffs,
+    Output,
     postRiff,
     putRiff,
-    Output,
     RIFF_TYPE_SET,
 } from '../../riff/riffClient';
 import { addSqonToSetSqon, removeSqonToSetSqon } from '../../sqon/manipulateSqon';
@@ -27,7 +27,6 @@ import { sendSetInSQSQueue } from '../../SQS/sendEvent';
 import { SetNotFoundError } from './setError';
 import { CreateSetBody, Set, UpdateSetContentBody, UpdateSetTagBody } from './setsTypes';
 import { deleteUserContent, getUserContents, postUserContent, putUserContent } from '../../userApi/userApiClient';
-import { UserApiError } from '../../userApi/userApiError';
 
 const projectType = project;
 
@@ -56,6 +55,7 @@ const getUserSet = async (accessToken: string, userId: string, setId: string): P
 export const getSets = async (accessToken: string, userId: string): Promise<Set[]> => {
     if (projectType === PROJECT_INCLUDE) {
         const userContents = await getUserContents(accessToken);
+
         return userContents.map(set => mapResultToSet(set));
     } else {
         const userContents = await getRiffs(accessToken, userId);
@@ -64,7 +64,6 @@ export const getSets = async (accessToken: string, userId: string): Promise<Set[
             .filter(riff => riff.alias)
             .map(riff => mapResultToSet(riff));
     }
-    // return [{ id: 't', tag: 'tt', size: 0 }];
 };
 
 export const createSet = async (
@@ -88,6 +87,9 @@ export const createSet = async (
 
     let createResult;
     if (projectType === PROJECT_INCLUDE) {
+        if (!payload.alias || !payload.content.ids) {
+            throw Error(`Set must have ${!payload.alias ? 'a name' : 'no set ids'}`);
+        }
         createResult = await postUserContent(accessToken, payload);
     } else {
         createResult = await postRiff(accessToken, payload);
@@ -247,7 +249,13 @@ export const deleteSet = async (accessToken: string, setId: string, userId: stri
 };
 
 const mapResultToSet = (output: Output): Set =>
-    ({ id: output.id, tag: output.alias, size: output.content.ids.length } as Set);
+    ({
+        id: output.id,
+        tag: output.alias,
+        size: output.content.ids.length,
+        updated_date: output.updated_date,
+        setType: output.content.setType
+    } as Set);
 
 const truncateIds = (ids: string[]): string[] => {
     if (ids.length <= maxSetContentSize) {
