@@ -60,7 +60,7 @@ describe('Set management', () => {
     const setFromRiff: Set = {
         id: setId,
         tag,
-        size: mockParticipantIds.length,
+        size: mockParticipantIds.length
     };
 
     describe('Get user sets using Riff API', () => {
