@@ -7,7 +7,7 @@ import SQS from 'aws-sdk/clients/sqs';
 import Keycloak from 'keycloak-connect';
 
 import buildApp from './app';
-import { esHost, port } from './env';
+import { esHost, esUser, esPass, port } from './env';
 import keycloakConfig from './keycloak';
 
 process.on('uncaughtException', err => {
@@ -32,6 +32,8 @@ const externalContext = (req, _res, _con) => ({ auth: req.kauth?.grant?.access_t
 
 Arranger({
     esHost,
+    esUser,
+    esPass,
     graphqlOptions: {
         context: externalContext,
     },
