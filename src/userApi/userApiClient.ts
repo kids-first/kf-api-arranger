@@ -66,7 +66,7 @@ export const putUserContent = async (accessToken: string, set: CreateUpdateBody,
     throw new UserApiError(response.status, body);
 };
 
-export const deleteUserContent = async (accessToken: string, setId: string): Promise<boolean> => {
+export const deleteUserContent = async (accessToken: string, setId: string): Promise<string> => {
     const uri = `${userApiURL}/user-sets/${setId}`;
 
     const response = await fetch(encodeURI(uri), {
@@ -78,7 +78,7 @@ export const deleteUserContent = async (accessToken: string, setId: string): Pro
     });
 
     if (response.status === 200) {
-        return true;
+        return setId;
     }
 
     throw new UserApiError(response.status, response.body);
