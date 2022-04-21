@@ -26,6 +26,7 @@ import { STATISTICS_CACHE_ID, verifyCache } from './middleware/cache';
 import { injectBodyHttpHeaders } from './middleware/injectBodyHttpHeaders';
 import { resolveSetIdMiddleware } from './middleware/resolveSetIdInSqon';
 import { ArrangerProject } from './sqon/searchSqon';
+import { getPhenotypesNodes } from './endpoints/phenotypes';
 
 export default (keycloak: Keycloak, sqs: SQS, getProject: (projectId: string) => ArrangerProject): Express => {
     const app = addAsync.addAsync(express());
@@ -143,6 +144,15 @@ export default (keycloak: Keycloak, sqs: SQS, getProject: (projectId: string) =>
         const deletedResult = await deleteSet(accessToken, setId, userId, sqs);
 
         res.send(deletedResult);
+    });
+
+    app.postAsync('/phenotypes', keycloak.protect(), async (req, res) => {
+        const sqon: SetSqon = req.body.sqon;
+        const type: string = req.body.type;
+        const projectId: string = req.body.project;
+        const data = await getPhenotypesNodes(sqon, projectId, getProject, type);
+
+        res.send({ data });
     });
 
     app.use(globalErrorLogger, globalErrorHandler);
