@@ -147,10 +147,21 @@ export default (keycloak: Keycloak, sqs: SQS, getProject: (projectId: string) =>
     });
 
     app.postAsync('/phenotypes', keycloak.protect(), async (req, res) => {
+        const accessToken = req.headers.authorization;
+        const userId = req['kauth']?.grant?.access_token?.content?.sub;
         const sqon: SetSqon = req.body.sqon;
         const type: string = req.body.type;
         const projectId: string = req.body.project;
-        const data = await getPhenotypesNodes(sqon, projectId, getProject, type);
+        const aggregations_filter_themselves: boolean = req.body.aggregations_filter_themselves || false;
+        const data = await getPhenotypesNodes(
+            sqon,
+            projectId,
+            getProject,
+            type,
+            aggregations_filter_themselves,
+            accessToken,
+            userId,
+        );
 
         res.send({ data });
     });

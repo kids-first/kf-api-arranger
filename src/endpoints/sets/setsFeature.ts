@@ -42,14 +42,19 @@ const ActionTypes = {
     UPDATE: 'UPDATE',
 };
 
-const getUserSet = async (accessToken: string, userId: string, setId: string): Promise<Output[]> => {
+export const getUserSet = async (accessToken: string, userId: string, setId: string): Promise<Output> => {
     let existingSetsFilterById;
     if (projectType === PROJECT_INCLUDE) {
         existingSetsFilterById = (await getUserContents(accessToken)).filter(r => r.id === setId);
     } else {
         existingSetsFilterById = (await getRiffs(accessToken, userId)).filter(r => r.id === setId);
     }
-    return existingSetsFilterById;
+
+    if (existingSetsFilterById.length !== 1) {
+        throw new SetNotFoundError('Set to update can not be found !');
+    }
+
+    return existingSetsFilterById[0];
 };
 
 export const getSets = async (accessToken: string, userId: string): Promise<Set[]> => {
@@ -123,13 +128,7 @@ export const updateSetTag = async (
     setId: string,
     sqs: SQS,
 ): Promise<Set> => {
-    const existingSetsFilterById = await getUserSet(accessToken, userId, setId);
-
-    if (existingSetsFilterById.length !== 1) {
-        throw new SetNotFoundError('Set to update can not be found !');
-    }
-
-    const setToUpdate: Output = existingSetsFilterById[0];
+    const setToUpdate = await getUserSet(accessToken, userId, setId);
 
     const payload = {
         alias: requestBody.newTag,
@@ -165,13 +164,7 @@ export const updateSetContent = async (
     sqs: SQS,
     getProject: (projectId: string) => ArrangerProject,
 ): Promise<Set> => {
-    const existingSetsFilterById = await getUserSet(accessToken, userId, setId);
-
-    if (existingSetsFilterById.length !== 1) {
-        throw new SetNotFoundError('Set to update can not be found !');
-    }
-
-    const setToUpdate: Output = existingSetsFilterById[0];
+    const setToUpdate = await getUserSet(accessToken, userId, setId);
 
     const { sqon, ids, setType } = setToUpdate.content;
 
@@ -254,7 +247,7 @@ const mapResultToSet = (output: Output): Set =>
         tag: output.alias,
         size: output.content.ids.length,
         updated_date: output.updated_date,
-        setType: output.content.setType
+        setType: output.content.setType,
     } as Set);
 
 const truncateIds = (ids: string[]): string[] => {
