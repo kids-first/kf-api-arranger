@@ -47,6 +47,7 @@ export const resolveSetsInSqon = async (sqon: SetSqon, userId: string, accessTok
             setIds.map(id => `set_id:${id}`),
             ids,
         );
+
         return injectIdsIntoSqon(sqon, setIdsToValueMap);
     } else {
         return sqon;

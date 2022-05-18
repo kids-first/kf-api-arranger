@@ -22,28 +22,22 @@ export type SearchPayload = {
 };
 
 export const resolveSetIdMiddleware = () => async (req: Request, _res: Response, next: NextFunction): Promise<void> => {
+    const userId = req['kauth']?.grant?.access_token?.content?.sub;
+    const accessToken = req.headers.authorization;
     if (req.body && req.body.variables) {
-        const userId = req['kauth']?.grant?.access_token?.content?.sub;
-        const accessToken = req.headers.authorization;
-        const searchPayloadAfterReplace = await resolveSetIdForSearchPayload(req.body, userId, accessToken);
-        req.body = searchPayloadAfterReplace;
+        req.body = await resolveSetIdForSearchPayload(req.body, userId, accessToken);
     }
 
     if (req.body && Array.isArray(req.body)) {
         const searchBody: SearchPayload[] = req.body;
-        const userId = req['kauth']?.grant?.access_token?.content?.sub;
-        const accessToken = req.headers.authorization;
-        const searchPayloadAfterReplace = await Promise.all(
+        req.body = await Promise.all(
             searchBody.map(searchPayload => resolveSetIdForSearchPayload(searchPayload, userId, accessToken)),
         );
-        req.body = searchPayloadAfterReplace;
     }
 
     if (req.body && req.body.params) {
         const params = JSON.parse(req.body.params);
         const files = params.files || [];
-        const userId = req['kauth']?.grant?.access_token?.content?.sub;
-        const accessToken = req.headers.authorization;
         const filesUpdated = await Promise.all(
             files.map((file: File) => resolveSetIdForFile(file, userId, accessToken)),
         );
@@ -60,16 +54,26 @@ const resolveSetIdForFile = async (file: File, userId: string, accessToken: stri
     };
 };
 
+const sqonNameRegex = /^.*_{0,1}sqon$/;
+
 const resolveSetIdForSearchPayload = async (
     searchPayload: SearchPayload,
     userId: string,
     accessToken: string,
 ): Promise<SearchPayload> => {
     let variablesAfterReplace = searchPayload.variables;
-    if (searchPayload.variables && searchPayload.variables.sqon) {
-        const sqonAfterReplace = await resolveSetsInSqon(searchPayload.variables.sqon, userId, accessToken);
-        variablesAfterReplace = { ...searchPayload.variables, sqon: sqonAfterReplace };
+
+    const variablesKeys = Object.keys(searchPayload.variables);
+    const originalVariables = searchPayload.variables;
+
+    const isSqonKey = key => sqonNameRegex.test(key); // rename it to fit your needs
+    for (const key of variablesKeys) {
+        const newSqonForKey = isSqonKey
+            ? await resolveSetsInSqon(searchPayload.variables[key], userId, accessToken)
+            : originalVariables[key];
+        variablesAfterReplace = { ...variablesAfterReplace, [key]: newSqonForKey };
     }
+
     return {
         ...searchPayload,
         variables: variablesAfterReplace,
