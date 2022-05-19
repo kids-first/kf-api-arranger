@@ -63,10 +63,10 @@ const resolveSetIdForSearchPayload = async (
 ): Promise<SearchPayload> => {
     let variablesAfterReplace = searchPayload.variables;
 
-    const variablesKeys = Object.keys(searchPayload.variables);
+    const variablesKeys = Object.keys(searchPayload.variables || {});
     const originalVariables = searchPayload.variables;
+    const isSqonKey = key => sqonNameRegex.test(key);
 
-    const isSqonKey = key => sqonNameRegex.test(key); // rename it to fit your needs
     for (const key of variablesKeys) {
         const newSqonForKey = isSqonKey
             ? await resolveSetsInSqon(searchPayload.variables[key], userId, accessToken)
