@@ -1,0 +1,35 @@
+version: "3.9"
+services:
+  kf_arranger:
+    image: node:16.13-alpine
+    working_dir: /code
+    volumes:
+      - .:/code
+    command: sh -c 'npm install && npm run build && npm start'
+    profiles:
+      - dev
+    ports:
+      - "5050:5050"
+  kf_arranger_with_local_es:
+    image: node:16.13-alpine
+    working_dir: /code
+    volumes:
+      - .:/code
+    command: sh -c 'npm install && npm run build && npm start'
+    profiles:
+      - dev_with_local_es
+    ports:
+      - "5050:5050"
+    networks:
+      - es-net
+  kf_arranger_test:
+    image: node:16.13-alpine
+    working_dir: /code
+    volumes:
+      - .:/code
+    command: sh -c 'npm install && npm run test'
+    profiles:
+      - test
+networks:
+  es-net:
+    external: true
