@@ -6,3 +6,5 @@ node_modules
 /dist
 /docker/esdata/
 /.idea/
+dev/es_data/*
+*.env-dev
