@@ -33,7 +33,7 @@ console.info(`admin-project-script - Starting script`);
 
 //values are hardcoded for now, but as soon as possible, we should use env var from env.ts
 const projectIndices =
-    ['migration_test_participant_centric', 'migration_test_study_centric', 'member']?.filter(p => !!p)?.map(p => p?.trim()) ?? [];
+    ['migration_test_participant_centric', 'migration_test_study_centric', 'member', 'variant_centric']?.filter(p => !!p)?.map(p => p?.trim()) ?? [];
 
 if (projectIndices.length === 0) {
     console.warn(
@@ -46,6 +46,7 @@ const allProjectsConf = projectsConfig();
 
 const projectsConf = allProjectsConf.filter(p => {
     const indicesInConf = p.indices.map(i => i.esIndex);
+    // indices in conf are the same as target indices from env vars?
     return sameIndices(indicesInConf, projectIndices);
 });
 
