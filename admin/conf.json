@@ -8,6 +8,10 @@
             {
                 "graphqlField": "Participant",
                 "esIndex": "migration_test_participant_centric"
+            },
+            {
+                "graphqlField": "Member",
+                "esIndex": "member"
             }
         ],
         "extendedMappingMutations": [
@@ -28,6 +32,20 @@
             {
                 "field": "data_category",
                 "graphqlField": "Study",
+                "extendedFieldMappingInput": {
+                    "isArray": true
+                }
+            },
+            {
+                "field": "roles",
+                "graphqlField": "Member",
+                "extendedFieldMappingInput": {
+                    "isArray": true
+                }
+            },
+            {
+                "field": "interests",
+                "graphqlField": "Member",
                 "extendedFieldMappingInput": {
                     "isArray": true
                 }

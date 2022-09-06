@@ -33,7 +33,7 @@ console.info(`admin-project-script - Starting script`);
 
 //values are hardcoded for now, but as soon as possible, we should use env var from env.ts
 const projectIndices =
-    ['migration_test_participant_centric', 'migration_test_study_centric']?.filter(p => !!p)?.map(p => p?.trim()) ?? [];
+    ['migration_test_participant_centric', 'migration_test_study_centric', 'member']?.filter(p => !!p)?.map(p => p?.trim()) ?? [];
 
 if (projectIndices.length === 0) {
     console.warn(

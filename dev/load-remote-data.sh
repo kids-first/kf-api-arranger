@@ -33,14 +33,14 @@ for ES_INDEX in "${INDICES_TO_IMPORT[@]}"; do
       esac
 
   echo '### about to fetch mapping ###'
-  docker run --rm -ti --network=host elasticdump/elasticsearch-dump \
+  docker run --rm -ti --network=host -e NODE_TLS_REJECT_UNAUTHORIZED=0 elasticdump/elasticsearch-dump \
     --input="$URL_REMOTE_ES"/"$ES_INDEX" \
     --output=http://localhost:9200/"$ES_INDEX" \
     --size="$SIZE" \
     --type=mapping
 
   echo '### about to fetch data ###'
-  docker run --rm -ti --network=host elasticdump/elasticsearch-dump \
+  docker run --rm -ti --network=host -e NODE_TLS_REJECT_UNAUTHORIZED=0 elasticdump/elasticsearch-dump \
     --input="$URL_REMOTE_ES"/"$ES_INDEX" \
     --output=http://localhost:9200/"$ES_INDEX" \
     --size="$SIZE" \
