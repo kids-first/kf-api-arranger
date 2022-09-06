@@ -12,6 +12,10 @@
             {
                 "graphqlField": "Member",
                 "esIndex": "member"
+            },
+            {
+                "graphqlField": "Variant",
+                "esIndex": "variant_centric"
             }
         ],
         "extendedMappingMutations": [
@@ -46,6 +50,125 @@
             {
                 "field": "interests",
                 "graphqlField": "Member",
+                "extendedFieldMappingInput": {
+                    "isArray": true
+                }
+            },
+            {
+                "field": "acls",
+                "graphqlField": "Variant",
+                "extendedFieldMappingInput": {
+                    "isArray": true
+                }
+            },
+            {
+                "field": "gene_external_reference",
+                "graphqlField": "Variant",
+                "extendedFieldMappingInput": {
+                    "isArray": true
+                }
+            },
+            {
+                "field": "external_study_ids",
+                "graphqlField": "Variant",
+                "extendedFieldMappingInput": {
+                    "isArray": true
+                }
+            },
+            {
+                "field": "variant_external_reference",
+                "graphqlField": "Variant",
+                "extendedFieldMappingInput": {
+                    "isArray": true
+                }
+            },
+            {
+                "field": "vep_impacts",
+                "graphqlField": "Variant",
+                "extendedFieldMappingInput": {
+                    "isArray": true
+                }
+            },
+            {
+                "field": "zygosity",
+                "graphqlField": "Variant",
+                "extendedFieldMappingInput": {
+                    "isArray": true
+                }
+            },
+            {
+                "field": "transmissions",
+                "graphqlField": "Variant",
+                "extendedFieldMappingInput": {
+                    "isArray": true
+                }
+            },
+            {
+                "field": "studies.acls",
+                "graphqlField": "Variant",
+                "extendedFieldMappingInput": {
+                    "isArray": true
+                }
+            },
+            {
+                "field": "studies.external_study_ids",
+                "graphqlField": "Variant",
+                "extendedFieldMappingInput": {
+                    "isArray": true
+                }
+            },
+            {
+                "field": "studies.transmissions",
+                "graphqlField": "Variant",
+                "extendedFieldMappingInput": {
+                    "isArray": true
+                }
+            },
+            {
+                "field": "studies.participant_ids",
+                "graphqlField": "Variant",
+                "extendedFieldMappingInput": {
+                    "isArray": true
+                }
+            },
+            {
+                "field": "genes.alias",
+                "graphqlField": "Variant",
+                "extendedFieldMappingInput": {
+                    "isArray": true
+                }
+            },
+            {
+                "field": "genes.omim.inheritance",
+                "graphqlField": "Variant",
+                "extendedFieldMappingInput": {
+                    "isArray": true
+                }
+            },
+            {
+                "field": "genes.omim.inheritance_code",
+                "graphqlField": "Variant",
+                "extendedFieldMappingInput": {
+                    "isArray": true
+                }
+            },
+            {
+                "field": "genes.orphanet.inheritance",
+                "graphqlField": "Variant",
+                "extendedFieldMappingInput": {
+                    "isArray": true
+                }
+            },
+            {
+                "field": "consequences",
+                "graphqlField": "Variant",
+                "extendedFieldMappingInput": {
+                    "isArray": true
+                }
+            },
+            {
+                "field": "consequences.consequences",
+                "graphqlField": "Variant",
                 "extendedFieldMappingInput": {
                     "isArray": true
                 }
