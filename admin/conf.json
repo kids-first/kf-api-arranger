@@ -6,7 +6,7 @@
                 "esIndex": "migration_test_study_centric"
             },
             {
-                "graphqlField": "participants",
+                "graphqlField": "participant",
                 "esIndex": "migration_test_participant_centric"
             },
             {
