@@ -33,7 +33,9 @@ console.info(`admin-project-script - Starting script`);
 
 //values are hardcoded for now, but as soon as possible, we should use env var from env.ts
 const projectIndices =
-    ['migration_test_participant_centric', 'migration_test_study_centric', 'variant_centric']?.filter(p => !!p)?.map(p => p?.trim()) ?? [];
+    ['migration_test_participant_centric', 'migration_test_study_centric', 'variant_centric', 'gene_centric']
+        ?.filter(p => !!p)
+        ?.map(p => p?.trim()) ?? [];
 
 if (projectIndices.length === 0) {
     console.warn(
@@ -51,7 +53,9 @@ const projectsConf = allProjectsConf.filter(p => {
 });
 
 if (projectsConf.length === 0) {
-    console.info('admin-project-script - Terminating. Found no project configuration to process.');
+    console.info(
+        'admin-project-script - Terminating. Found no sane project configuration to process. Make sure it exists and that if matches with project indices.',
+    );
     process.exit(0);
 } else if (projectsConf.length > 1) {
     console.info(
