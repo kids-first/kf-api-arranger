@@ -16,6 +16,14 @@
             {
                 "graphqlField": "genes",
                 "esIndex": "gene_centric"
+            },
+            {
+                "graphqlField": "biospecimens",
+                "esIndex": "migration_test_biospecimen_centric"
+            },
+            {
+                "graphqlField": "files",
+                "esIndex": "migration_test_file_centric"
             }
         ],
         "extendedMappingMutations": [
@@ -160,8 +168,22 @@
                 }
             },
             {
+                "field": "variant_class",
+                "graphqlField": "variants",
+                "extendedFieldMappingInput": {
+                    "displayName": "Variant Type"
+                }
+            },
+            {
                 "field": "alias",
                 "graphqlField": "genes",
+                "extendedFieldMappingInput": {
+                    "isArray": true
+                }
+            },
+            {
+                "field": "acl",
+                "graphqlField": "files",
                 "extendedFieldMappingInput": {
                     "isArray": true
                 }
