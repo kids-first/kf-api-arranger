@@ -190,6 +190,13 @@
                 }
             },
             {
+                "field": "clinvar.interpretations",
+                "graphqlField": "variants",
+                "extendedFieldMappingInput": {
+                    "isArray": true
+                }
+            },
+            {
                 "field": "alias",
                 "graphqlField": "genes",
                 "extendedFieldMappingInput": {
