@@ -168,10 +168,10 @@
                 }
             },
             {
-                "field": "variant_class",
+                "field": "clinvar.clin_sig",
                 "graphqlField": "variants",
                 "extendedFieldMappingInput": {
-                    "displayName": "Variant Type"
+                    "isArray": true
                 }
             },
             {
