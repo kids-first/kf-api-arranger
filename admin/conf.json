@@ -174,7 +174,6 @@
                     "isArray": true
                 }
             },
-
             {
                 "field": "clinvar.conditions",
                 "graphqlField": "variants",
@@ -206,6 +205,20 @@
             {
                 "field": "acl",
                 "graphqlField": "files",
+                "extendedFieldMappingInput": {
+                    "isArray": true
+                }
+            },
+            {
+                "field": "observed_phenotype.parents",
+                "graphqlField": "participant",
+                "extendedFieldMappingInput": {
+                    "isArray": true
+                }
+            },
+            {
+                "field": "observed_phenotype.age_at_event_days",
+                "graphqlField": "participant",
                 "extendedFieldMappingInput": {
                     "isArray": true
                 }
