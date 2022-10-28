@@ -3,7 +3,7 @@
         "indices": [
             {
                 "graphqlField": "members",
-                "esIndex": "members"
+                "esIndex": "members-public"
             },
             {
                 "graphqlField": "studies",

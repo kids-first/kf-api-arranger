@@ -40,7 +40,7 @@ const projectIndices =
         'migration_test_file_centric',
         'variant_centric',
         'gene_centric',
-        'members',
+        'members-public',
     ]
         ?.filter(p => !!p)
         ?.map(p => p?.trim()) ?? [];
