@@ -2,6 +2,10 @@
     "migration_test_qa": {
         "indices": [
             {
+                "graphqlField": "members",
+                "esIndex": "members"
+            },
+            {
                 "graphqlField": "studies",
                 "esIndex": "migration_test_study_centric"
             },
@@ -219,6 +223,27 @@
             {
                 "field": "observed_phenotype.age_at_event_days",
                 "graphqlField": "participant",
+                "extendedFieldMappingInput": {
+                    "isArray": true
+                }
+            },
+            {
+                "field": "roles",
+                "graphqlField": "members",
+                "extendedFieldMappingInput": {
+                    "isArray": true
+                }
+            },
+            {
+                "field": "searchableInterests",
+                "graphqlField": "members",
+                "extendedFieldMappingInput": {
+                    "isArray": true
+                }
+            },
+            {
+                "field": "interests",
+                "graphqlField": "members",
                 "extendedFieldMappingInput": {
                     "isArray": true
                 }
