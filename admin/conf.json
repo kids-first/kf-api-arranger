@@ -67,6 +67,13 @@
                 }
             },
             {
+                "field": "genes.cosmic.tumour_types_germline",
+                "graphqlField": "variants",
+                "extendedFieldMappingInput": {
+                    "isArray": true
+                }
+            },
+            {
                 "field": "external_study_ids",
                 "graphqlField": "variants",
                 "extendedFieldMappingInput": {
