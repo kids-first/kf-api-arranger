@@ -4,7 +4,7 @@ deploy {
     architecture_type = "aws-ecs-service-type-1"
     jenkinsfile_name  = "next.deploy" 
 
-    projectName = "arranger-next"
+    projectName = "kf-api-arranger-next"
     environments = "qa,prd"
     docker_image_type = "alpine"
     internal_app = "false"
