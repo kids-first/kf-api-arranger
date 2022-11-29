@@ -2,7 +2,7 @@
 deploy {
     architecture_type = "aws-ecs-service-type-1"
     jenkinsfile_name  = "app.deploy" 
-
+    prd_cidr          = "0.0.0.0/0"
     projectName = "arranger"
     environments = "qa,prd"
     docker_image_type = "alpine"
