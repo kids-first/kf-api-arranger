@@ -189,6 +189,13 @@
                 }
             },
             {
+                "field": "genes.cosmic.tumour_types_germline",
+                "graphqlField": "variants",
+                "extendedFieldMappingInput": {
+                    "isArray": true
+                }
+            },
+            {
                 "field": "clinvar.interpretations",
                 "graphqlField": "variants",
                 "extendedFieldMappingInput": {
