@@ -39,7 +39,8 @@ const projectIndices =
         'migration_test_biospecimen_centric',
         'migration_test_file_centric',
         'variant_centric',
-        'gene_centric'
+        'gene_centric',
+        'members-public',
     ]
         ?.filter(p => !!p)
         ?.map(p => p?.trim()) ?? [];
