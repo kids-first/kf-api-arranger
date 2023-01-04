@@ -12,7 +12,8 @@
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "buildAndRun": "npm run build; npm start",
-    "admin-project": "node --experimental-modules=node --es-module-specifier-resolution=node admin/run.mjs"
+    "admin-project": "node --experimental-modules=node --es-module-specifier-resolution=node admin/run.mjs",
+    "post-re-alias-helper": "node --experimental-modules=node --es-module-specifier-resolution=node admin/postReleaseIndicesToAliasesHelper.mjs"
   },
   "repository": {
     "type": "git",
