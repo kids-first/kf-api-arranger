@@ -44,7 +44,7 @@ export const searchSqon = async (
         throw new Error(get(results, 'errors', undefined));
     }
 
-    const ids: string[] = get(results, `data.${type}.hits.edges`, []).map(edge => edge.node[idKey]);
+    const ids: string[] = get(results, `data.${type}.hits.edges`, []).map(edge => edge.node[idField]);
 
     return ids;
 };
