@@ -13,7 +13,8 @@ import {
 } from '../../riff/riffClient';
 import { addSqonToSetSqon, removeSqonToSetSqon } from '../../sqon/manipulateSqon';
 import { resolveSetsInSqon } from '../../sqon/resolveSetInSqon';
-import { ArrangerProject, searchSqon } from '../../sqon/searchSqon';
+import { searchSqon } from '../../sqon/searchSqon';
+import { ArrangerProject } from '../../arrangerUtils';
 import {
     EventCreate,
     EventCreateValue,
