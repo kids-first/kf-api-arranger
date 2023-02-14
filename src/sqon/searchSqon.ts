@@ -1,12 +1,10 @@
 import { graphql } from 'graphql';
 import { get } from 'lodash';
 
+import { ArrangerProject } from '../arrangerUtils';
 import { SetSqon, Sort } from '../endpoints/sets/setsTypes';
 import { maxSetContentSize } from '../env';
 
-export type ArrangerProject = {
-    runQuery: ({ query: string, variables: unknown }) => Promise<unknown>;
-};
 export const searchSqon = async (
     sqon: SetSqon,
     projectId: string,
@@ -49,7 +47,7 @@ export const searchSqon = async (
     return ids;
 };
 
-export const runQuery = ({ query, variables, mock, project }) => {
+const runQuery = ({ query, variables, mock, project }) => {
     const schema = mock ? project.mockSchema : project.schema;
     return graphql({
         schema,

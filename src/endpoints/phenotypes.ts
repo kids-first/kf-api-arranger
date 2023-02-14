@@ -1,7 +1,10 @@
+import { ExecutionResult } from 'graphql/execution/execute';
 import { get } from 'lodash';
 
+import { runProjectQuery } from '../arrangerUtils';
+import { ArrangerProject } from '../arrangerUtils';
 import { idKey } from '../env';
-import { ArrangerProject, runQuery } from '../sqon/searchSqon';
+import { throwErrorsFromGqlQueryIfExist } from '../errors';
 import { replaceSetByIds } from '../sqon/setSqon';
 import { SetSqon } from './sets/setsTypes';
 
@@ -9,19 +12,15 @@ const MAX_PHENOTYPES = 100000;
 
 const extractPsIds = (resp): string[] => (resp?.data?.participant?.hits?.edges || []).map(edge => edge.node[idKey]);
 
-const throwErrorsFromGqlQueryIfExist = resp => {
-    if (resp.errors) {
-        throw new Error(resp.errors.join(','));
-    }
-};
 const getParticipantIds = async (
     sqon: SetSqon,
     projectId: string,
     getProject: (projectId: string) => ArrangerProject,
 ) => {
     const project = getProject(projectId);
-    const runQueryOpts = { mock: false, project };
-    const countRes = await runQuery({
+    const runQuery = runProjectQuery(project);
+
+    const countRes: ExecutionResult = await runQuery({
         query: `query getParticipantCount($sqon: JSON) {
           participant {
             hits(filters: $sqon) {
@@ -31,9 +30,7 @@ const getParticipantIds = async (
         }
         `,
         variables: { sqon },
-        ...runQueryOpts,
     });
-
     const psCount = countRes?.data?.participant?.hits?.total ?? 0;
     if (psCount === 0) {
         return [];
@@ -55,12 +52,11 @@ const getParticipantIds = async (
             }
         `,
         variables: gqlVariables,
-        ...runQueryOpts,
     });
 
     throwErrorsFromGqlQueryIfExist(psResp);
 
-    const state = { searchAfter: [], ids: [...extractPsIds(psResp)] };
+    const state = { searchAfter: [], ids: extractPsIds(psResp) };
     const nOfBatches = Math.ceil(psCount / batchSize);
     const remainingNOfBatches = nOfBatches - 1; //subtract 1 since first batch has been consumed already
     const it = Array(remainingNOfBatches).keys();
@@ -83,7 +79,6 @@ const getParticipantIds = async (
             }
         `,
             variables: { ...gqlVariables, searchAfter: lastFetchedId },
-            ...runQueryOpts,
         });
 
         throwErrorsFromGqlQueryIfExist(psResp);
