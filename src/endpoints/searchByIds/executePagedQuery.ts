@@ -1,6 +1,6 @@
 import { get } from 'lodash';
 
-import { ArrangerProject } from '../../sqon/searchSqon';
+import { ArrangerProject } from '../../arrangerUtils';
 import { SetSqon } from '../sets/setsTypes';
 import { normalizeResults } from './normalizeResults';
 

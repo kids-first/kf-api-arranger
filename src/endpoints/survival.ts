@@ -1,9 +1,9 @@
 import { get, min } from 'lodash';
 import { Options, PythonShell } from 'python-shell';
 
+import { ArrangerProject } from '../arrangerUtils';
 import { idKey, pythonPath, survivalPyFile } from '../env';
 import { resolveSetsInSqon } from '../sqon/resolveSetInSqon';
-import { ArrangerProject } from '../sqon/searchSqon';
 import { SetSqon } from './sets/setsTypes';
 
 const pyOptions: Options = { pythonPath, mode: 'text', pythonOptions: ['-u'] };

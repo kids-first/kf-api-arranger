@@ -25,7 +25,7 @@ import { globalErrorHandler, globalErrorLogger } from './errors';
 import { STATISTICS_CACHE_ID, verifyCache } from './middleware/cache';
 import { injectBodyHttpHeaders } from './middleware/injectBodyHttpHeaders';
 import { resolveSetIdMiddleware } from './middleware/resolveSetIdInSqon';
-import { ArrangerProject } from './sqon/searchSqon';
+import { ArrangerProject } from './arrangerUtils';
 import { getPhenotypesNodes } from './endpoints/phenotypes';
 
 export default (keycloak: Keycloak, sqs: SQS, getProject: (projectId: string) => ArrangerProject): Express => {

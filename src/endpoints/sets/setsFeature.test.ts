@@ -10,7 +10,8 @@ import {
     RIFF_TYPE_SET,
 } from '../../riff/riffClient';
 import { resolveSetsInSqon } from '../../sqon/resolveSetInSqon';
-import { ArrangerProject, searchSqon } from '../../sqon/searchSqon';
+import { searchSqon } from '../../sqon/searchSqon';
+import { ArrangerProject } from '../../arrangerUtils';
 import { sendSetInSQSQueue } from '../../SQS/sendEvent';
 import { createSet, deleteSet, getSets, SubActionTypes, updateSetContent, updateSetTag } from './setsFeature';
 import { CreateSetBody, Set, Sort, UpdateSetContentBody, UpdateSetTagBody } from './setsTypes';
@@ -60,7 +61,7 @@ describe('Set management', () => {
     const setFromRiff: Set = {
         id: setId,
         tag,
-        size: mockParticipantIds.length
+        size: mockParticipantIds.length,
     };
 
     describe('Get user sets using Riff API', () => {

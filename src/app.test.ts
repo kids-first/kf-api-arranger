@@ -20,7 +20,7 @@ import { getStatistics, Statistics } from './endpoints/statistics';
 import { calculateSurvivalForSqonResult } from './endpoints/survival';
 import { keycloakClient, keycloakRealm, keycloakURL } from './env';
 import { RiffError } from './riff/riffError';
-import { ArrangerProject } from './sqon/searchSqon';
+import { ArrangerProject} from "./arrangerUtils";
 
 jest.mock('./endpoints/sets/setsFeature');
 jest.mock('./endpoints/survival');

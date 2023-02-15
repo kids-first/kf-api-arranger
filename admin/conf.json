@@ -1,5 +1,5 @@
 {
-    "migration_test_qa": {
+    "next_qa": {
         "indices": [
             {
                 "graphqlField": "members",
@@ -7,11 +7,11 @@
             },
             {
                 "graphqlField": "studies",
-                "esIndex": "migration_test_study_centric"
+                "esIndex": "next_study_centric"
             },
             {
                 "graphqlField": "participant",
-                "esIndex": "migration_test_participant_centric"
+                "esIndex": "next_participant_centric"
             },
             {
                 "graphqlField": "variants",
@@ -23,11 +23,11 @@
             },
             {
                 "graphqlField": "biospecimens",
-                "esIndex": "migration_test_biospecimen_centric"
+                "esIndex": "next_biospecimen_centric"
             },
             {
                 "graphqlField": "files",
-                "esIndex": "migration_test_file_centric"
+                "esIndex": "next_file_centric"
             }
         ],
         "extendedMappingMutations": [
@@ -251,6 +251,63 @@
             {
                 "field": "interests",
                 "graphqlField": "members",
+                "extendedFieldMappingInput": {
+                    "isArray": true
+                }
+            },
+
+            {
+                "field": "participants.study.search_text",
+                "graphqlField": "files",
+                "extendedFieldMappingInput": {
+                    "isArray": true
+                }
+            },
+            {
+                "field": "study.search_text",
+                "graphqlField": "files",
+                "extendedFieldMappingInput": {
+                    "isArray": true
+                }
+            },
+            {
+                "field": "study.search_text",
+                "graphqlField": "participant",
+                "extendedFieldMappingInput": {
+                    "isArray": true
+                }
+            },
+            {
+                "field": "search_text",
+                "graphqlField": "studies",
+                "extendedFieldMappingInput": {
+                    "isArray": true
+                }
+            },
+            {
+                "field": "participant.study.search_text",
+                "graphqlField": "biospecimens",
+                "extendedFieldMappingInput": {
+                    "isArray": true
+                }
+            },
+            {
+                "field": "study.search_text",
+                "graphqlField": "biospecimens",
+                "extendedFieldMappingInput": {
+                    "isArray": true
+                }
+            },
+            {
+                "field": "participants.study",
+                "graphqlField": "files",
+                "extendedFieldMappingInput": {
+                    "type": "object"
+                }
+            },
+            {
+                "field": "sequencing_experiment",
+                "graphqlField": "files",
                 "extendedFieldMappingInput": {
                     "isArray": true
                 }
