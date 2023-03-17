@@ -311,6 +311,27 @@
                 "extendedFieldMappingInput": {
                     "isArray": true
                 }
+            },
+            {
+                "field": "source_text_tumor_location",
+                "graphqlField": "biospecimens",
+                "extendedFieldMappingInput": {
+                    "isArray": true
+                }
+            },
+            {
+                "field": "diagnosis_icd",
+                "graphqlField": "biospecimens",
+                "extendedFieldMappingInput": {
+                    "isArray": true
+                }
+            },
+            {
+                "field": "files.acl",
+                "graphqlField": "biospecimens",
+                "extendedFieldMappingInput": {
+                    "isArray": true
+                }
             }
         ]
     }
