@@ -1,12 +1,19 @@
+/* eslint-disable no-console */
 import { Client } from '@elastic/elasticsearch';
 
-import { esHost } from './env';
+import { esHost, esPass, esUser } from './env';
 
 class EsInstance {
     private instance: Client;
     constructor() {
         if (!this.instance) {
-            this.instance = new Client({ node: esHost });
+            if (esUser && esPass) {
+                console.log('Using basic auth');
+                this.instance = new Client({ node: esHost, auth: { username: esUser, password: esPass } });
+            } else {
+                console.log('Not using basic auth');
+                this.instance = new Client({ node: esHost });
+            }
         }
     }
 
