@@ -48,7 +48,6 @@ Arranger({
             console.error('Grant Validation Error', err);
             throw err;
         });
-    console.log((keycloak as any).config);
 
     app.listen(port, async () => {
         console.log(`⚡️ Listening on port ${port} ⚡️`);
