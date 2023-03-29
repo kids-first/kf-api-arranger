@@ -8,10 +8,10 @@ class EsInstance {
     constructor() {
         if (!this.instance) {
             if (esUser && esPass) {
-                console.log('Using basic auth');
+                console.debug('Using basic auth');
                 this.instance = new Client({ node: esHost, auth: { username: esUser, password: esPass } });
             } else {
-                console.log('Not using basic auth');
+                console.debug('Not using basic auth');
                 this.instance = new Client({ node: esHost });
             }
         }
