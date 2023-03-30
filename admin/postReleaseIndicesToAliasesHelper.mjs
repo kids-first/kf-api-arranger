@@ -18,10 +18,11 @@
  *  - next_participant_centric
  *  - next_file_centric
  * */
+import { Client } from '@elastic/elasticsearch';
 import assert from 'node:assert/strict';
 import readline from 'readline';
-import { Client } from '@elastic/elasticsearch';
-import { esHost } from '../dist/src/env.js';
+
+import { esHost, esPass, esUser } from '../dist/src/env.js';
 
 const args = process.argv.slice(2);
 const releaseArgument = args.find(a => a.startsWith('release:')) ?? '';
@@ -33,7 +34,9 @@ const userReadline = readline.createInterface({
     output: process.stdout,
 });
 
-const client = new Client({ node: esHost });
+const client = esUser
+    ? new Client({ node: esHost, auth: { username: esUser, password: esPass } })
+    : new Client({ node: esHost });
 
 const catIndicesResponse = await client.cat.indices({
     index: `*_${releaseTag}`,
@@ -43,7 +46,7 @@ const catIndicesResponse = await client.cat.indices({
 
 if (catIndicesResponse.statusCode !== 200) {
     console.error('Received bad response', catIndicesResponse, ' Terminating.');
-    process.exit(1)
+    process.exit(1);
 }
 
 const releaseIndices = catIndicesResponse.body.map(x => x.index);

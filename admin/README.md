@@ -8,6 +8,8 @@ The Law of the Land is: 1 arranger project per environment (qa, staging, prod). 
 
 ## Variables
 - **ES_HOST**: Elastic search instance.
+- **ES_USER**: (Optional) Elastic search user.
+- **ES_PASS**: (Optional) Elastic search password.
 
 ### Steps
 
