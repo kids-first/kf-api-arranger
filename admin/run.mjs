@@ -33,15 +33,7 @@ console.info(`admin-project-script - Starting script`);
 
 //values are hardcoded for now, but as soon as possible, we should use env var from env.ts
 const projectIndices =
-    [
-        'next_participant_centric',
-        'next_study_centric',
-        'next_biospecimen_centric',
-        'next_file_centric',
-        'variant_centric',
-        'gene_centric',
-        'members-public',
-    ]
+    ['participant_centric', 'study_centric', 'biospecimen_centric', 'file_centric', 'variant_centric', 'gene_centric']
         ?.filter(p => !!p)
         ?.map(p => p?.trim()) ?? [];
 
