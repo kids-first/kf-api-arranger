@@ -19,4 +19,5 @@ deploy {
     memory_task = "4096"
     health_check_path = "/status"
     dependencies = "ecr"
+    prd_cidr = "0.0.0.0/0"
 }
