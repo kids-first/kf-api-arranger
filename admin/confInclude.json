@@ -1,5 +1,5 @@
 {
-    "2023_01_26_v1": {
+    "include": {
         "indices": [
             {
                 "graphqlField": "study",
