@@ -49,6 +49,15 @@ if (catIndicesResponse.statusCode !== 200) {
 const releaseIndices = catIndicesResponse.body.map(x => x.index);
 assert(Array.isArray(releaseIndices) && releaseIndices.length > 0, 'No index found. Terminating');
 
+
+const INDEX_CATEGORIES = ["file", "participant", "study", "biospecimen"]
+const hasAllTypeOfIndices= INDEX_CATEGORIES
+    .every(
+        wordStem => releaseIndices.some(x => x.includes(wordStem))
+    )
+
+assert(hasAllTypeOfIndices, `Oops it seems like there is at least one type missing. Requires: ${INDEX_CATEGORIES.join(", ")}. Terminating`);
+
 const displayIndicesQuestion = () =>
     new Promise(resolve => {
         userReadline.question(`${releaseIndices.length} were found. Do you want to display them y/n? > `, answer => {
@@ -71,9 +80,9 @@ const actions = releaseIndices.reduce((xs, x) => {
     return [
         ...xs,
         {
-            add: {
+            remove: {
                 index: x,
-                alias: `next_${prefix}`,
+                alias: `${prefix}`,
             },
         },
     ];

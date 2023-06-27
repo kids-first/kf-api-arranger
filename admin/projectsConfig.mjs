@@ -1,4 +1,4 @@
-import config from './conf.json';
+import config from './confInclude.json';
 
 export const projectsConfig = () =>
     Object.entries(config).map(([key, value]) => {
