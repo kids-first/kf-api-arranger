@@ -3,6 +3,7 @@ ecs_service_type_1_standard {
     projectName = "kf-api-arranger"
     environments = "qa,prd"
     docker_image_type = "alpine"
+    branch = "bugfix/cbl/fix-aws-cli"
     internal_app = "false"
     create_default_iam_role = "0"
     entrypoint_command = "node dist/src/index.js"
