@@ -4,7 +4,7 @@ deploy {
     jenkinsfile_name  = "app.deploy" 
 
     projectName = "arranger"
-    environments = "qa,prd"
+    environments = "dev,qa,prd"
     docker_image_type = "alpine"
     internal_app = "false"
     create_default_iam_role = "0"
@@ -19,4 +19,6 @@ deploy {
     memory_task = "4096"
     health_check_path = "/status"
     dependencies = "ecr"
+
+    branch = "feature/cbl/add-cloudfront"
 }
