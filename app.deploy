@@ -19,6 +19,7 @@ deploy {
     memory_task = "4096"
     health_check_path = "/status"
     dependencies = "ecr"
+    dev_cidr = "0.0.0.0/0"
 
     branch = "feature/cbl/add-cloudfront"
 }
