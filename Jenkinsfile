@@ -19,4 +19,6 @@ ecs_service_type_1_standard {
     dependencies = "ecr"
     publish_to_public_repo = "true"
     create_additional_internal_alb = "1"
+
+    branch = "feature/cbl/add-cloudfront"
 }
