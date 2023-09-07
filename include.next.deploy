@@ -20,4 +20,5 @@ deploy {
     health_check_path = "/status"
     dependencies = "ecr"
     prd_cidr = "0.0.0.0/0"
+    add_cloudfront = "1"
 }
