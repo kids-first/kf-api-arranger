@@ -1,3 +1,4 @@
+// docker run -u node -it --rm --network host -v ${PWD}:/code --workdir /code node:16.13-alpine sh
 /* eslint-disable no-console */
 import 'regenerator-runtime/runtime';
 
@@ -34,12 +35,15 @@ console.info(`admin-project-script - Starting script`);
 //values are hardcoded for now, but as soon as possible, we should use env var from env.ts
 const projectIndices =
     [
-        'participant_centric',
-        'study_centric',
-        'biospecimen_centric',
-        'file_centric',
+        'next_participant_centric',
+        'next_study_centric',
+        'next_biospecimen_centric',
+        'next_file_centric',
         'gene_centric',
-        'variant_centric'
+        'variant_centric',
+        'next_variant_centric',
+        'next_gene_centric',
+        'members-public'
     ]
         ?.filter(p => !!p)
         ?.map(p => p?.trim()) ?? [];
