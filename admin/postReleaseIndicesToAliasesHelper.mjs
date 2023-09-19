@@ -80,9 +80,9 @@ const actions = releaseIndices.reduce((xs, x) => {
     return [
         ...xs,
         {
-            remove: {
+            add: {
                 index: x,
-                alias: `${prefix}`,
+                alias: `next_${prefix}`,
             },
         },
     ];
