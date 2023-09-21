@@ -40,6 +40,27 @@
         ],
         "extendedMappingMutations": [
             {
+                "field": "source_text_tumor_location",
+                "graphqlField": "biospecimen",
+                "extendedFieldMappingInput": {
+                    "isArray": true
+                }
+            },
+            {
+                "field": "participants.biospecimens.source_text_tumor_location",
+                "graphqlField": "file",
+                "extendedFieldMappingInput": {
+                    "isArray": true
+                }
+            },
+            {
+                "field" : "files.biospecimens.source_text_tumor_location",
+                "graphqlField": "participant",
+                "extendedFieldMappingInput": {
+                    "isArray": true
+                }
+            },
+            {
                 "field": "roles",
                 "graphqlField": "members",
                 "extendedFieldMappingInput": {
