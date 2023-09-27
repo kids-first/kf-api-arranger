@@ -7,7 +7,7 @@ RUN npm run clean
 RUN npm run build
 
 # Second image, that creates an image for production
-FROM nikolaik/python-nodejs:python3.9-nodejs16-alpine AS prod-image
+FROM --platform=linux/amd64 nikolaik/python-nodejs:python3.9-nodejs16-alpine AS prod-image
 WORKDIR /app
 COPY --from=build-image ./app/dist ./dist
 COPY package* ./
