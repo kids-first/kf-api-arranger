@@ -46,7 +46,7 @@ if (catIndicesResponse.statusCode !== 200) {
     process.exit(1)
 }
 
-const releaseIndices = catIndicesResponse.body.map(x => x.index);
+const releaseIndices = catIndicesResponse.body.map(x => x.index).sort();
 assert(Array.isArray(releaseIndices) && releaseIndices.length > 0, 'No index found. Terminating');
 
 
@@ -69,10 +69,10 @@ const displayIndicesQuestion = () =>
     });
 await displayIndicesQuestion();
 
-const PREFIXES_TO_ALIAS = ['biospecimen_centric', 'participant_centric', 'study_centric', 'file_centric'];
+const INDICES_PREFIXES = ['biospecimen_centric', 'participant_centric', 'study_centric', 'file_centric'];
 
 const actions = releaseIndices.reduce((xs, x) => {
-    const prefix = PREFIXES_TO_ALIAS.find(p => x.startsWith(p));
+    const prefix = INDICES_PREFIXES.find(p => x.startsWith(p));
     if (!prefix) {
         // Must never happen
         return xs;
