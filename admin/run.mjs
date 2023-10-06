@@ -39,8 +39,6 @@ const projectIndices =
         'next_study_centric',
         'next_biospecimen_centric',
         'next_file_centric',
-        'gene_centric',
-        'variant_centric',
         'next_variant_centric',
         'next_gene_centric',
         'members-public'
