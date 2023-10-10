@@ -23,7 +23,7 @@ import {
 import { CreateSetBody, Set, SetSqon, UpdateSetContentBody, UpdateSetTagBody } from './endpoints/sets/setsTypes';
 import { getStatistics } from './endpoints/statistics';
 import { calculateSurvivalForSqonResult } from './endpoints/survival';
-import { cacheTTL, esHost, keycloakURL } from './env';
+import { cacheTTL, esHost, keycloakURL, userApiURL } from './env';
 import { globalErrorHandler, globalErrorLogger } from './errors';
 import { STATISTICS_CACHE_ID, verifyCache } from './middleware/cache';
 import { injectBodyHttpHeaders } from './middleware/injectBodyHttpHeaders';
@@ -54,14 +54,16 @@ export default (keycloak: Keycloak, sqs: SQS, getProject: (projectId: string) =>
 
     app.useAsync(resolveSetIdMiddleware());
 
-    app.get('/status', (_req, res) =>
+    app.get('/status', (_req, res) => {
+        console.log('Received GET /status');
         res.send({
             dependencies,
             version,
             keycloak: keycloakURL,
             elasticsearch: esHost,
-        }),
-    );
+            users: userApiURL,
+        });
+    });
 
     app.post('/cache-clear', keycloak.protect('realm:ADMIN'), async (_req, res) => {
         cache.flushAll();
@@ -76,6 +78,7 @@ export default (keycloak: Keycloak, sqs: SQS, getProject: (projectId: string) =>
     );
 
     app.getAsync('/statistics', verifyCache(STATISTICS_CACHE_ID, cache), async (req, res) => {
+        console.log('Received GET /statistics');
         const data = await getStatistics();
         cache.set(STATISTICS_CACHE_ID, data);
         res.json(data);
