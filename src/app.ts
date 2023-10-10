@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import addAsync from '@awaitjs/express';
 import SQS from 'aws-sdk/clients/sqs';
 import cors from 'cors';
@@ -6,7 +7,9 @@ import { Keycloak } from 'keycloak-connect';
 import NodeCache from 'node-cache';
 
 import { dependencies, version } from '../package.json';
+import { ArrangerProject } from './arrangerUtils';
 import genomicFeatureSuggestions, { SUGGESTIONS_TYPES } from './endpoints/genomicFeatureSuggestions';
+import { getPhenotypesNodes } from './endpoints/phenotypes';
 import { searchAllSources } from './endpoints/searchByIds/searchAllSources';
 import { SearchByIdsResult } from './endpoints/searchByIds/searchByIdsTypes';
 import {
@@ -25,8 +28,6 @@ import { globalErrorHandler, globalErrorLogger } from './errors';
 import { STATISTICS_CACHE_ID, verifyCache } from './middleware/cache';
 import { injectBodyHttpHeaders } from './middleware/injectBodyHttpHeaders';
 import { resolveSetIdMiddleware } from './middleware/resolveSetIdInSqon';
-import { ArrangerProject } from './arrangerUtils';
-import { getPhenotypesNodes } from './endpoints/phenotypes';
 
 export default (keycloak: Keycloak, sqs: SQS, getProject: (projectId: string) => ArrangerProject): Express => {
     const app = addAsync.addAsync(express());
@@ -99,6 +100,7 @@ export default (keycloak: Keycloak, sqs: SQS, getProject: (projectId: string) =>
     });
 
     app.getAsync('/sets', keycloak.protect(), async (req, res) => {
+        console.log('Received GET /sets for userID', req['kauth']?.grant?.access_token?.content?.sub);
         const accessToken = req.headers.authorization;
         const userId = req['kauth']?.grant?.access_token?.content?.sub;
         const userSets = await getSets(accessToken, userId);
