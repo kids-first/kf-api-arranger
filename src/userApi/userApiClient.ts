@@ -1,11 +1,14 @@
+/* eslint-disable no-console */
 import fetch from 'node-fetch';
 
 import { userApiURL } from '../env';
-import { UserApiError } from './userApiError';
 import { CreateUpdateBody, Output } from '../riff/riffClient';
+import { UserApiError } from './userApiError';
 
 export const getUserContents = async (accessToken: string): Promise<Output[]> => {
     const uri = `${userApiURL}/user-sets`;
+
+    console.log('user sets uri', uri);
 
     const response = await fetch(encodeURI(uri), {
         method: 'get',
@@ -18,6 +21,8 @@ export const getUserContents = async (accessToken: string): Promise<Output[]> =>
     const body = await response.json();
 
     if (response.status === 200) {
+        console.log('user sets response body', JSON.stringify(body));
+
         return body;
     }
 
