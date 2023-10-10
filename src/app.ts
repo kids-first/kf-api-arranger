@@ -126,6 +126,15 @@ export default (keycloak: Keycloak, sqs: SQS, getProject: (projectId: string) =>
         res.send(userSets);
     });
 
+    app.getAsync('/setsNext', keycloak.protect(), async (req, res) => {
+        console.log('Received GET /setsNext for userID', req['kauth']?.grant?.access_token?.content?.sub);
+        const accessToken = req.headers.authorization;
+        const userId = req['kauth']?.grant?.access_token?.content?.sub;
+        const userSets = await getSets(accessToken, userId);
+
+        res.send(userSets);
+    });
+
     app.postAsync('/sets', keycloak.protect(), async (req, res) => {
         const accessToken = req.headers.authorization;
         const userId = req['kauth']?.grant?.access_token?.content?.sub;
