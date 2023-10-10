@@ -5,6 +5,7 @@ import request from 'supertest';
 
 import { getToken, publicKey } from '../test/authTestUtils';
 import buildApp from './app';
+import { ArrangerProject } from './arrangerUtils';
 import { searchAllSources } from './endpoints/searchByIds/searchAllSources';
 import { SetNotFoundError } from './endpoints/sets/setError';
 import {
@@ -20,7 +21,6 @@ import { getStatistics, Statistics } from './endpoints/statistics';
 import { calculateSurvivalForSqonResult } from './endpoints/survival';
 import { keycloakClient, keycloakRealm, keycloakURL } from './env';
 import { RiffError } from './riff/riffError';
-import { ArrangerProject} from "./arrangerUtils";
 
 jest.mock('./endpoints/sets/setsFeature');
 jest.mock('./endpoints/survival');
