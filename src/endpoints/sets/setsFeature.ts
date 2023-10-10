@@ -1,6 +1,8 @@
+/* eslint-disable no-console */
 import SQS from 'aws-sdk/clients/sqs';
 import { difference, dropRight, get, union } from 'lodash';
 
+import { ArrangerProject } from '../../arrangerUtils';
 import { maxSetContentSize, project, PROJECT_INCLUDE, sendUpdateToSqs } from '../../env';
 import {
     CreateUpdateBody,
@@ -14,7 +16,6 @@ import {
 import { addSqonToSetSqon, removeSqonToSetSqon } from '../../sqon/manipulateSqon';
 import { resolveSetsInSqon } from '../../sqon/resolveSetInSqon';
 import { searchSqon } from '../../sqon/searchSqon';
-import { ArrangerProject } from '../../arrangerUtils';
 import {
     EventCreate,
     EventCreateValue,
@@ -25,9 +26,9 @@ import {
     UpdateTagValue,
 } from '../../SQS/eventTypes';
 import { sendSetInSQSQueue } from '../../SQS/sendEvent';
+import { deleteUserContent, getUserContents, postUserContent, putUserContent } from '../../userApi/userApiClient';
 import { SetNotFoundError } from './setError';
 import { CreateSetBody, Set, UpdateSetContentBody, UpdateSetTagBody } from './setsTypes';
-import { deleteUserContent, getUserContents, postUserContent, putUserContent } from '../../userApi/userApiClient';
 
 const projectType = project;
 
@@ -59,6 +60,7 @@ export const getUserSet = async (accessToken: string, userId: string, setId: str
 };
 
 export const getSets = async (accessToken: string, userId: string): Promise<Set[]> => {
+    console.log('getSets for project', projectType);
     if (projectType === PROJECT_INCLUDE) {
         const userContents = await getUserContents(accessToken);
 
