@@ -67,6 +67,19 @@ export default (keycloak: Keycloak, sqs: SQS, getProject: (projectId: string) =>
         });
     });
 
+    app.get('/statusNext', (_req, res) => {
+        console.log('Received GET /statusNext');
+        console.log('Users API Next', userApiURL);
+        res.send({
+            dependencies,
+            version: '2.0',
+            keycloak: keycloakURL,
+            elasticsearch: esHost,
+            users: userApiURL,
+            arrangerNext: 'this is true',
+        });
+    });
+
     app.post('/cache-clear', keycloak.protect('realm:ADMIN'), async (_req, res) => {
         cache.flushAll();
         res.send('OK');
