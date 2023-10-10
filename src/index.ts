@@ -50,6 +50,7 @@ Arranger({
         });
 
     app.listen(port, async () => {
+        console.log('Arranger-Next Starting');
         console.log(`⚡️ Listening on port ${port} ⚡️`);
     });
 });
