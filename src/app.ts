@@ -56,12 +56,14 @@ export default (keycloak: Keycloak, sqs: SQS, getProject: (projectId: string) =>
 
     app.get('/status', (_req, res) => {
         console.log('Received GET /status');
+        console.log('Users API', userApiURL);
         res.send({
             dependencies,
             version,
             keycloak: keycloakURL,
             elasticsearch: esHost,
             users: userApiURL,
+            arrangerNext: true,
         });
     });
 
