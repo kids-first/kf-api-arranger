@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import addAsync from '@awaitjs/express';
 import SQS from 'aws-sdk/clients/sqs';
 import cors from 'cors';
@@ -55,8 +54,6 @@ export default (keycloak: Keycloak, sqs: SQS, getProject: (projectId: string) =>
     app.useAsync(resolveSetIdMiddleware());
 
     app.get('/status', (_req, res) => {
-        console.log('Received GET /status');
-        console.log('Users API', userApiURL);
         res.send({
             dependencies,
             version,
@@ -64,19 +61,6 @@ export default (keycloak: Keycloak, sqs: SQS, getProject: (projectId: string) =>
             elasticsearch: esHost,
             users: userApiURL,
             arrangerNext: true,
-        });
-    });
-
-    app.get('/statusNext', (_req, res) => {
-        console.log('Received GET /statusNext');
-        console.log('Users API Next', userApiURL);
-        res.send({
-            dependencies,
-            version: '2.0',
-            keycloak: keycloakURL,
-            elasticsearch: esHost,
-            users: userApiURL,
-            arrangerNext: 'this is true',
         });
     });
 
@@ -93,7 +77,6 @@ export default (keycloak: Keycloak, sqs: SQS, getProject: (projectId: string) =>
     );
 
     app.getAsync('/statistics', verifyCache(STATISTICS_CACHE_ID, cache), async (req, res) => {
-        console.log('Received GET /statistics');
         const data = await getStatistics();
         cache.set(STATISTICS_CACHE_ID, data);
         res.json(data);
@@ -118,16 +101,6 @@ export default (keycloak: Keycloak, sqs: SQS, getProject: (projectId: string) =>
     });
 
     app.getAsync('/sets', keycloak.protect(), async (req, res) => {
-        console.log('Received GET /sets for userID', req['kauth']?.grant?.access_token?.content?.sub);
-        const accessToken = req.headers.authorization;
-        const userId = req['kauth']?.grant?.access_token?.content?.sub;
-        const userSets = await getSets(accessToken, userId);
-
-        res.send(userSets);
-    });
-
-    app.getAsync('/setsNext', keycloak.protect(), async (req, res) => {
-        console.log('Received GET /setsNext for userID', req['kauth']?.grant?.access_token?.content?.sub);
         const accessToken = req.headers.authorization;
         const userId = req['kauth']?.grant?.access_token?.content?.sub;
         const userSets = await getSets(accessToken, userId);

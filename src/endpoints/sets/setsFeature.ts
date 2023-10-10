@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import SQS from 'aws-sdk/clients/sqs';
 import { difference, dropRight, get, union } from 'lodash';
 
@@ -60,7 +59,6 @@ export const getUserSet = async (accessToken: string, userId: string, setId: str
 };
 
 export const getSets = async (accessToken: string, userId: string): Promise<Set[]> => {
-    console.log('getSets for project', projectType);
     if (projectType === PROJECT_INCLUDE) {
         const userContents = await getUserContents(accessToken);
 
