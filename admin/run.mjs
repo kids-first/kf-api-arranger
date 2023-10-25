@@ -1,4 +1,5 @@
 // docker run -u node -it --rm --network host -v ${PWD}:/code --workdir /code node:16.13-alpine sh
+// examples: npm run admin-project e:include OR npm run admin-project (will default to kf)
 /* eslint-disable no-console */
 import 'regenerator-runtime/runtime';
 
@@ -29,10 +30,32 @@ const sameIndices = (xs, ys) => {
     return xs.length === ys.length && xs.every(x => s.has(x));
 };
 
+const ENV = {
+    kf: 'kf',
+    include: 'include',
+};
+
+const args = process.argv.slice(2);
+const envArg = args.find(a => a.startsWith('e:')) ?? '';
+let envVal = ENV.kf;
+if (envArg) {
+    const value = envArg.split(':')[1].toLocaleLowerCase();
+    if (Object.values(ENV).includes(value)) {
+        envVal = ENV[value];
+    } else {
+        console.warn(
+            `admin-project-script - Unsupported project "${value}". Supported projects are: "${Object.values(ENV).join(
+                ', ',
+            )}"`,
+        );
+    }
+}
+
 //===== Start =====//
 console.info(`admin-project-script - Starting script`);
-
+console.info(`admin-project-script - Project value is=${envVal}`);
 //values are hardcoded for now, but as soon as possible, we should use env var from env.ts
+<<<<<<< Updated upstream
 const projectIndices =
     [
         'next_participant_centric',
@@ -45,6 +68,36 @@ const projectIndices =
     ]
         ?.filter(p => !!p)
         ?.map(p => p?.trim()) ?? [];
+=======
+
+const kfNext = [
+    'next_participant_centric',
+    'next_study_centric',
+    'next_biospecimen_centric',
+    'next_file_centric',
+    'next_variant_centric',
+    'next_gene_centric',
+    'members-public',
+];
+
+const include = [
+    'participant_centric',
+    'study_centric',
+    'biospecimen_centric',
+    'file_centric',
+    'variant_centric',
+    'gene_centric',
+];
+
+const envToIndicesPrefixes = {
+    kf: kfNext,
+    include: include,
+};
+
+const indicesPrefixes = envToIndicesPrefixes[envVal];
+
+const projectIndices = indicesPrefixes?.filter(p => !!p)?.map(p => p?.trim()) ?? [];
+>>>>>>> Stashed changes
 
 if (projectIndices.length === 0) {
     console.warn(
@@ -53,10 +106,11 @@ if (projectIndices.length === 0) {
     process.exit(0);
 }
 
-const allProjectsConf = projectsConfig();
-
+const allProjectsConf = projectsConfig(envVal);
+console.log(allProjectsConf)
 const projectsConf = allProjectsConf.filter(p => {
     const indicesInConf = p.indices.map(i => i.esIndex);
+    console.log(indicesInConf)
     // indices in conf are the same as target indices from env vars?
     return sameIndices(indicesInConf, projectIndices);
 });
