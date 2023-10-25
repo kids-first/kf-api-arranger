@@ -31,8 +31,6 @@ const userReadline = readline.createInterface({
     output: process.stdout,
 });
 
-process.exit(0)
-
 const client = new Client({ node: esHost });
 
 const catIndicesResponse = await client.cat.indices({
