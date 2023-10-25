@@ -55,21 +55,6 @@ if (envArg) {
 console.info(`admin-project-script - Starting script`);
 console.info(`admin-project-script - Project value is=${envVal}`);
 //values are hardcoded for now, but as soon as possible, we should use env var from env.ts
-<<<<<<< Updated upstream
-const projectIndices =
-    [
-        'next_participant_centric',
-        'next_study_centric',
-        'next_biospecimen_centric',
-        'next_file_centric',
-        'next_variant_centric',
-        'next_gene_centric',
-        'members-public'
-    ]
-        ?.filter(p => !!p)
-        ?.map(p => p?.trim()) ?? [];
-=======
-
 const kfNext = [
     'next_participant_centric',
     'next_study_centric',
@@ -97,7 +82,6 @@ const envToIndicesPrefixes = {
 const indicesPrefixes = envToIndicesPrefixes[envVal];
 
 const projectIndices = indicesPrefixes?.filter(p => !!p)?.map(p => p?.trim()) ?? [];
->>>>>>> Stashed changes
 
 if (projectIndices.length === 0) {
     console.warn(
@@ -107,10 +91,9 @@ if (projectIndices.length === 0) {
 }
 
 const allProjectsConf = projectsConfig(envVal);
-console.log(allProjectsConf)
+
 const projectsConf = allProjectsConf.filter(p => {
     const indicesInConf = p.indices.map(i => i.esIndex);
-    console.log(indicesInConf)
     // indices in conf are the same as target indices from env vars?
     return sameIndices(indicesInConf, projectIndices);
 });
