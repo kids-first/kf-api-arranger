@@ -1,5 +1,5 @@
 {
-    "include": {
+    "2023_01_26_v1": {
         "indices": [
             {
                 "graphqlField": "study",
@@ -10,23 +10,44 @@
                 "esIndex": "participant_centric"
             },
             {
-                "graphqlField": "variants",
-                "esIndex": "variant_centric"
-            },
-            {
-                "graphqlField": "genes",
-                "esIndex": "gene_centric"
-            },
-            {
                 "graphqlField": "biospecimen",
                 "esIndex": "biospecimen_centric"
             },
             {
                 "graphqlField": "file",
                 "esIndex": "file_centric"
+            },
+            {
+                "graphqlField": "variants",
+                "esIndex": "variant_centric"
+            },
+            {
+                "graphqlField": "genes",
+                "esIndex": "gene_centric"
             }
         ],
         "extendedMappingMutations": [
+            {
+                "field": "source_text_tumor_location",
+                "graphqlField": "biospecimen",
+                "extendedFieldMappingInput": {
+                    "isArray": true
+                }
+            },
+            {
+                "field": "participants.biospecimens.source_text_tumor_location",
+                "graphqlField": "file",
+                "extendedFieldMappingInput": {
+                    "isArray": true
+                }
+            },
+            {
+                "field": "files.biospecimens.source_text_tumor_location",
+                "graphqlField": "participant",
+                "extendedFieldMappingInput": {
+                    "isArray": true
+                }
+            },
             {
                 "field": "source_text_tumor_location",
                 "graphqlField": "biospecimen",

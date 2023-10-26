@@ -1,7 +1,12 @@
-import config from './conf.json';
+import includeConf from './confInclude.json';
+import kfConf from './conf.json';
 
-export const projectsConfig = () =>
-    Object.entries(config).map(([key, value]) => {
+export const projectsConfig = env => {
+    const envToConf = {
+        kf: kfConf,
+        include: includeConf,
+    };
+    return Object.entries(envToConf[env]).map(([key, value]) => {
         const lambda = x => ({ ...x, projectId: key });
         return {
             name: key,
@@ -9,3 +14,4 @@ export const projectsConfig = () =>
             extendedMappingMutations: [...value.extendedMappingMutations].map(lambda),
         };
     });
+};

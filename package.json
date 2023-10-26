@@ -14,7 +14,8 @@
     "buildAndRun": "npm run build; npm start",
     "cbs": "npm run clean && npm run build; npm start",
     "admin-project": "node --experimental-modules=node --es-module-specifier-resolution=node admin/run.mjs",
-    "post-re-alias-helper": "node --experimental-modules=node --es-module-specifier-resolution=node admin/postReleaseIndicesToAliasesHelper.mjs"
+    "post-re-alias-helper": "node --experimental-modules=node --es-module-specifier-resolution=node admin/postReleaseIndicesToAliasesHelper.mjs",
+    "post-re-delete-indices-helper": "node --experimental-modules=node --es-module-specifier-resolution=node admin/deleteIndicesFromRelease.mjs"
   },
   "repository": {
     "type": "git",
