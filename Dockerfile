@@ -1,5 +1,5 @@
 # First image to compile typescript to javascript
-FROM node:16.13-alpine AS build-image
+FROM node:18-alpine3.18 AS build-image
 WORKDIR /app
 COPY . .
 RUN npm ci
@@ -7,7 +7,7 @@ RUN npm run clean
 RUN npm run build
 
 # Second image, that creates an image for production
-FROM --platform=linux/amd64 nikolaik/python-nodejs:python3.9-nodejs16-alpine AS prod-image
+FROM --platform=linux/amd64 nikolaik/python-nodejs:python3.11-nodejs18-alpine AS prod-image
 WORKDIR /app
 COPY --from=build-image ./app/dist ./dist
 COPY package* ./
