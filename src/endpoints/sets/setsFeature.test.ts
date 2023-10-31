@@ -1,4 +1,4 @@
-import AWS from 'aws-sdk';
+import { SQS } from '@aws-sdk/client-sqs';
 
 import { ArrangerProject } from '../../arrangerUtils';
 import {
@@ -132,7 +132,7 @@ describe('Set management', () => {
             },
         };
 
-        const sqs = new AWS.SQS({ apiVersion: '2012-11-05' });
+        const sqs = new SQS({ apiVersion: '2012-11-05' });
 
         beforeEach(() => {
             (resolveSetsInSqon as jest.Mock).mockReset();
@@ -294,7 +294,7 @@ describe('Set management', () => {
             updatedDate: new Date(),
         };
 
-        const sqs = new AWS.SQS({ apiVersion: '2012-11-05' });
+        const sqs = new SQS({ apiVersion: '2012-11-05' });
 
         beforeEach(() => {
             (getRiffs as jest.Mock).mockReset();
@@ -389,7 +389,7 @@ describe('Set management', () => {
 
         const updateSetContentRemoveSqon = { ...updateSetContentAddSqon, subAction: SubActionTypes.REMOVE_IDS };
 
-        const sqs = new AWS.SQS({ apiVersion: '2012-11-05' });
+        const sqs = new SQS({ apiVersion: '2012-11-05' });
 
         beforeEach(() => {
             (getRiffs as jest.Mock).mockReset();
@@ -622,7 +622,7 @@ describe('Set management', () => {
     });
 
     describe('Delete set using Riff API', () => {
-        const sqs = new AWS.SQS({ apiVersion: '2012-11-05' });
+        const sqs = new SQS({ apiVersion: '2012-11-05' });
 
         beforeEach(() => {
             (searchSqon as jest.Mock).mockReset();

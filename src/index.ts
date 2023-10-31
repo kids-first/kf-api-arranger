@@ -3,7 +3,7 @@ import 'regenerator-runtime/runtime.js';
 
 import Arranger from '@arranger/server';
 import { getProject } from '@arranger/server';
-import SQS from 'aws-sdk/clients/sqs';
+import { SQSClient } from '@aws-sdk/client-sqs';
 import Keycloak from 'keycloak-connect';
 
 import buildApp from './app';
@@ -26,7 +26,8 @@ process.on('SIGINT', () => {
 });
 
 const keycloak = new Keycloak({}, keycloakConfig);
-const sqs = new SQS({ apiVersion: '2012-11-05' });
+
+const sqs = new SQSClient({});
 const app = buildApp(keycloak, sqs, getProject);
 const externalContext = (req, _res, _con) => ({ auth: req.kauth?.grant?.access_token || {} });
 
