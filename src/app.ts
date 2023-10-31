@@ -1,5 +1,5 @@
 import addAsync from '@awaitjs/express';
-import SQS from 'aws-sdk/clients/sqs';
+import { SQSClient } from '@aws-sdk/client-sqs';
 import cors from 'cors';
 import express, { Express } from 'express';
 import { Keycloak } from 'keycloak-connect';
@@ -28,7 +28,7 @@ import { STATISTICS_CACHE_ID, verifyCache } from './middleware/cache';
 import { injectBodyHttpHeaders } from './middleware/injectBodyHttpHeaders';
 import { resolveSetIdMiddleware } from './middleware/resolveSetIdInSqon';
 
-export default (keycloak: Keycloak, sqs: SQS, getProject: (projectId: string) => ArrangerProject): Express => {
+export default (keycloak: Keycloak, sqs: SQSClient, getProject: (projectId: string) => ArrangerProject): Express => {
     const app = addAsync.addAsync(express());
 
     const cache = new NodeCache({ stdTTL: cacheTTL });

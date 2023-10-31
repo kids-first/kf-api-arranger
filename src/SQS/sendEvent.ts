@@ -1,13 +1,18 @@
-import AWS from 'aws-sdk';
-import { PromiseResult } from 'aws-sdk/lib/request';
+import { SendMessageCommand, SendMessageCommandOutput, SQSClient } from '@aws-sdk/client-sqs';
 
 import { sqsQueueUrl } from '../env';
 import { EventCreate, EventDelete, EventUpdate } from './eventTypes';
 
 export const sendSetInSQSQueue = async (
-    sqs: AWS.SQS,
+    sqs: SQSClient,
     data: EventCreate | EventUpdate | EventDelete,
-): Promise<PromiseResult<AWS.SQS.SendMessageResult, AWS.AWSError>> => {
-    const params = { MessageBody: JSON.stringify(data), QueueUrl: sqsQueueUrl };
-    return sqs.sendMessage(params).promise();
+): Promise<SendMessageCommandOutput> => {
+    const command = new SendMessageCommand({
+        QueueUrl: sqsQueueUrl,
+        DelaySeconds: 10,
+        MessageAttributes: {},
+        MessageBody: JSON.stringify(data),
+    });
+    const response = await sqs.send(command);
+    return response;
 };

@@ -1,4 +1,4 @@
-import SQS from 'aws-sdk/clients/sqs';
+import { SQSClient } from '@aws-sdk/client-sqs';
 import { difference, dropRight, get, union } from 'lodash';
 
 import { ArrangerProject } from '../../arrangerUtils';
@@ -75,7 +75,7 @@ export const createSet = async (
     requestBody: CreateSetBody,
     accessToken: string,
     userId: string,
-    sqs: SQS,
+    sqs: SQSClient,
     getProject: (projectId: string) => ArrangerProject,
 ): Promise<Set> => {
     const { sqon, sort, projectId, type, idField, tag } = requestBody;
@@ -126,7 +126,7 @@ export const updateSetTag = async (
     accessToken: string,
     userId: string,
     setId: string,
-    sqs: SQS,
+    sqs: SQSClient,
 ): Promise<Set> => {
     const setToUpdate: UserSetOutput = await getUserSet(accessToken, userId, setId);
 
@@ -161,7 +161,7 @@ export const updateSetContent = async (
     accessToken: string,
     userId: string,
     setId: string,
-    sqs: SQS,
+    sqs: SQSClient,
     getProject: (projectId: string) => ArrangerProject,
 ): Promise<Set> => {
     const setToUpdate = await getUserSet(accessToken, userId, setId);
@@ -223,7 +223,12 @@ export const updateSetContent = async (
     return setResult;
 };
 
-export const deleteSet = async (accessToken: string, setId: string, userId: string, sqs: SQS): Promise<boolean> => {
+export const deleteSet = async (
+    accessToken: string,
+    setId: string,
+    userId: string,
+    sqs: SQSClient,
+): Promise<boolean> => {
     let deleteResult;
 
     if (projectType === PROJECT_INCLUDE) {

@@ -1,9 +1,9 @@
-import AWS from 'aws-sdk';
+import { SQSClient } from '@aws-sdk/client-sqs';
 import { Express } from 'express';
 import Keycloak from 'keycloak-connect';
 import request from 'supertest';
 
-import { getToken, publicKey } from '../test/authTestUtils';
+import { fakeKeycloakClient, fakeKeycloakRealm, fakeKeycloakUrl, getToken, publicKey } from '../test/authTestUtils';
 import buildApp from './app';
 import { ArrangerProject } from './arrangerUtils';
 import { searchAllSources } from './endpoints/searchByIds/searchAllSources';
@@ -19,7 +19,6 @@ import {
 import { Set, UpdateSetContentBody, UpdateSetTagBody } from './endpoints/sets/setsTypes';
 import { getStatistics, Statistics } from './endpoints/statistics';
 import { calculateSurvivalForSqonResult } from './endpoints/survival';
-import { keycloakClient, keycloakRealm, keycloakURL } from './env';
 import { RiffError } from './riff/riffError';
 
 jest.mock('./endpoints/sets/setsFeature');
@@ -34,15 +33,15 @@ describe('Express app (without Arranger)', () => {
     const getProject = (_s: string) => ({} as ArrangerProject);
 
     beforeEach(() => {
-        const sqs = new AWS.SQS({ apiVersion: '2012-11-05' });
+        const sqs = new SQSClient({});
         const publicKeyToVerify = publicKey;
         keycloakFakeConfig = {
-            realm: keycloakRealm,
+            realm: fakeKeycloakRealm,
             'confidential-port': 0,
             'bearer-only': true,
-            'auth-server-url': keycloakURL,
+            'auth-server-url': fakeKeycloakUrl,
             'ssl-required': 'external',
-            resource: keycloakClient,
+            resource: fakeKeycloakClient,
             'realm-public-key': publicKeyToVerify, // For test purpose, we use public key to validate token.
         };
         const keycloak = new Keycloak({}, keycloakFakeConfig);
