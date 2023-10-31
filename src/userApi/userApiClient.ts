@@ -1,8 +1,48 @@
 import fetch from 'node-fetch';
 
+import { SetSqon, Sort } from '../endpoints/sets/setsTypes';
 import { userApiURL } from '../env';
-import { CreateUpdateBody, Output } from '../riff/riffClient';
+import { CreateUpdateBody } from '../riff/riffClient';
 import { UserApiError } from './userApiError';
+
+export type Content = {
+    setType: string;
+    riffType: string;
+    ids: string[];
+    sqon: SetSqon;
+    sort: Sort[];
+    idField: string;
+};
+
+export type Output = {
+    id: string;
+    keycloak_id: string;
+    content: Content;
+    alias: string;
+    sharedpublicly: boolean;
+    creation_date: Date;
+    updated_date: Date;
+};
+
+export const getSharedSet = async (accessToken: string, setId: string): Promise<Output> => {
+    const uri = `${userApiURL}/user-sets/shared/${setId}`;
+
+    const response = await fetch(encodeURI(uri), {
+        method: 'get',
+        headers: {
+            Authorization: accessToken,
+            'Content-Type': 'application/json',
+        },
+    });
+
+    const body = await response.json();
+
+    if (response.status === 200) {
+        return body;
+    }
+
+    throw new UserApiError(response.status, body);
+};
 
 export const getUserContents = async (accessToken: string): Promise<Output[]> => {
     const uri = `${userApiURL}/user-sets`;
