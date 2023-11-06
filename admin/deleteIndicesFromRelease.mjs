@@ -1,6 +1,6 @@
 //FIXE: DUPLICATED CODE
 /**
- *  npm run post-re-delete-indices-helper -- release:re_test_023
+ *  npm run post-re-delete-indices-helper -- release:re_20231030_1
  *
  * */
 import assert from 'node:assert/strict';
@@ -42,17 +42,25 @@ assert(
     `Oops it seems like there is at least one type missing. Requires: ${INDEX_CATEGORIES.join(', ')}. Terminating`,
 );
 
-const displayIndicesQuestion = () =>
+const displayShowIndicesQuestion = () =>
     new Promise(resolve => {
         userReadline.question(`${releaseIndices.length} were found. Do you want to display them y/n? > `, answer => {
             const yes = answer === 'y';
             if (yes) {
                 console.log(releaseIndices);
             }
-            resolve(yes);
+            resolve();
         });
     });
 
+await displayShowIndicesQuestion()
+const displayIndicesQuestion = () =>
+    new Promise(resolve => {
+        userReadline.question(`Do you want to delete them y/n? > `, answer => {
+            const yes = answer === 'y';
+            resolve(yes);
+        });
+    });
 const proceedToDeletion = await displayIndicesQuestion();
 if (proceedToDeletion) {
     const deleteResponse = await client.indices.delete({

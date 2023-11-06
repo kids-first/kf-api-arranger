@@ -1,5 +1,5 @@
-// docker run -u node -it --rm --network host -v ${PWD}:/code --workdir /code node:16.13-alpine sh
-// examples: npm run admin-project e:include OR npm run admin-project (will default to kf)
+// docker run -u node -it --rm --network host -v ${PWD}:/code --workdir /code node:18-alpine3.18 sh
+// examples: npm run admin-project p:include e:include OR npm run admin-project p:next_prd (will default to kf)
 /* eslint-disable no-console */
 import 'regenerator-runtime/runtime';
 
@@ -36,6 +36,17 @@ const ENV = {
 };
 
 const args = process.argv.slice(2);
+
+//de-hardcode when possible
+const SUPPORTED_PROJECT_NAMES = ['next_prd', 'next_qa', '2023_01_26_v1', 'include'];
+const projectArg = args.find(a => a.startsWith('p:'))?.split(":")[1];
+if (!projectArg || !SUPPORTED_PROJECT_NAMES.some(sp => sp === projectArg)) {
+    console.warn(
+        `admin-project-script - You must input a supported arranger project name. Got "${projectArg}" where supported values are: "${SUPPORTED_PROJECT_NAMES.join(', ')}"`,
+    );
+    process.exit(1);
+}
+
 const envArg = args.find(a => a.startsWith('e:')) ?? '';
 let envVal = ENV.kf;
 if (envArg) {
@@ -124,7 +135,7 @@ if (hasCreatedIndex) {
     );
 }
 
-const projectName = projectConf.name;
+const projectName = projectArg;
 
 const resolveSanityConditions = async () =>
     await Promise.all([

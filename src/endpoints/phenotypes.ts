@@ -88,7 +88,12 @@ const getParticipantIds = async (
     }
 
     if (psCount !== state.ids.length) {
-        throw new Error('Participants count differs from the number of retrieve ids');
+        const duplicateDetected = new Set(state.ids).size !== state.ids.length;
+        throw new Error(
+            `Participants count differs from the number of retrieve ids. Got ${psCount} for count but got ${
+                state.ids.length
+            } for the number of retrieved ids. ${duplicateDetected ? 'Besides, duplicates were detected.' : ''}`,
+        );
     }
     return state.ids;
 };

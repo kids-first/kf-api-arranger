@@ -81,6 +81,8 @@ const isNextFormat = allAliases.body
             x.startsWith('next_study_centric') ||
             x.startsWith('next_participant_centric') ||
             x.startsWith('next_biospecimen_centric') ||
+            x.startsWith('next_variant_centric') ||
+            x.startsWith('next_gene_centric') ||
             x.startsWith('next_file_centric'),
     );
 
