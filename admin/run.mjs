@@ -101,7 +101,10 @@ if (projectIndices.length === 0) {
     process.exit(0);
 }
 
-const allProjectsConf = projectsConfig(envVal);
+const projectName = projectArg;
+
+//TODO: refactor to tolerate only 1 project per conf
+const allProjectsConf = projectsConfig(projectName, envVal);
 
 const projectsConf = allProjectsConf.filter(p => {
     const indicesInConf = p.indices.map(i => i.esIndex);
@@ -134,8 +137,6 @@ if (hasCreatedIndex) {
         `admin-project-script - Created this index: '${ArrangerApi.constants.ARRANGER_PROJECT_INDEX}'. Since no existing arranger projects detected.`,
     );
 }
-
-const projectName = projectArg;
 
 const resolveSanityConditions = async () =>
     await Promise.all([

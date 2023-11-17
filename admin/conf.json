@@ -45,8 +45,51 @@
             }
         },
         {
-            "field": "files.biospecimens.source_text_tumor_location",
-            "graphqlField": "participant",
+            "field": "acl",
+            "graphqlField": "file",
+            "extendedFieldMappingInput": {
+                "isArray": true
+            }
+        },
+        {
+            "field": "participants",
+            "graphqlField": "file",
+            "extendedFieldMappingInput": {
+                "isArray": true
+            }
+        },
+        {
+            "field": "participants.biospecimens",
+            "graphqlField": "file",
+            "extendedFieldMappingInput": {
+                "isArray": true
+            }
+        },
+        {
+            "field": "participants.down_syndrome_diagnosis",
+            "graphqlField": "file",
+            "extendedFieldMappingInput": {
+                "isArray": true
+            }
+        },
+        {
+            "field": "sequencing_experiment",
+            "graphqlField": "file",
+            "extendedFieldMappingInput": {
+                "isArray": true,
+                "type": "nested"
+            }
+        },
+        {
+            "field": "files",
+            "graphqlField": "file",
+            "extendedFieldMappingInput": {
+                "isArray": true
+            }
+        },
+        {
+            "field": "alias",
+            "graphqlField": "genes",
             "extendedFieldMappingInput": {
                 "isArray": true
             }
@@ -73,22 +116,8 @@
             }
         },
         {
-            "field": "experimental_strategy",
-            "graphqlField": "study",
-            "extendedFieldMappingInput": {
-                "isArray": true
-            }
-        },
-        {
-            "field": "controlled_access",
-            "graphqlField": "study",
-            "extendedFieldMappingInput": {
-                "isArray": true
-            }
-        },
-        {
-            "field": "data_category",
-            "graphqlField": "study",
+            "field": "files.biospecimens.source_text_tumor_location",
+            "graphqlField": "participant",
             "extendedFieldMappingInput": {
                 "isArray": true
             }
@@ -122,35 +151,6 @@
             }
         },
         {
-            "field": "alias",
-            "graphqlField": "genes",
-            "extendedFieldMappingInput": {
-                "isArray": true
-            }
-        },
-        {
-            "field": "acl",
-            "graphqlField": "file",
-            "extendedFieldMappingInput": {
-                "isArray": true
-            }
-        },
-        {
-            "field": "participants.down_syndrome_diagnosis",
-            "graphqlField": "file",
-            "extendedFieldMappingInput": {
-                "isArray": true
-            }
-        },
-        {
-            "field": "sequencing_experiment",
-            "graphqlField": "file",
-            "extendedFieldMappingInput": {
-                "isArray": true,
-                "type": "nested"
-            }
-        },
-        {
             "field": "files.sequencing_experiment",
             "graphqlField": "participant",
             "extendedFieldMappingInput": {
@@ -159,8 +159,22 @@
             }
         },
         {
-            "field": "files",
-            "graphqlField": "file",
+            "field": "experimental_strategy",
+            "graphqlField": "study",
+            "extendedFieldMappingInput": {
+                "isArray": true
+            }
+        },
+        {
+            "field": "controlled_access",
+            "graphqlField": "study",
+            "extendedFieldMappingInput": {
+                "isArray": true
+            }
+        },
+        {
+            "field": "data_category",
+            "graphqlField": "study",
             "extendedFieldMappingInput": {
                 "isArray": true
             }
