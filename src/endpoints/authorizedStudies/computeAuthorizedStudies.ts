@@ -22,9 +22,12 @@ export const computeAuthorizedStudiesForFence = async (
 
     const dataAggregations: StudyDataSpecific[] = buckets.map((b: SearchBucket) => ({
         study_id: b.key,
-        user_acl: b.acls.buckets.map(b => b.key),
+        // Filtering out study files acls that are not included in the user's acls.
+        // It Would be better to do the filtering in the query itself, but it is simpler here.
+        user_acl_in_study: b.acls.buckets.filter(b => userAcl.includes(b.key)).map(b => b.key),
+        study_code: b.top_study_hits.hits.hits[0]._source.study.study_code,
         title: b.top_study_hits.hits.hits[0]._source.study.study_name,
-        authorized_files_count: b.doc_count,
+        authorized_controlled_files_count: b.doc_count,
     }));
 
     const allStudyIds = dataAggregations.map(x => x.study_id);
@@ -48,27 +51,27 @@ export const computeAuthorizedStudiesForFence = async (
                 accessCounts.slice(i * size, i * size + size)[index].hits.total.value;
             return {
                 ...x,
-                files_count: extractMSearchHitsTotal(M_SEARCH.indexOfTotalNOfFiles),
-                controlled_files_count: extractMSearchHitsTotal(M_SEARCH.indexOfControlledNOfFiles),
-                uncontrolled_files_count: extractMSearchHitsTotal(M_SEARCH.indexOfRegisteredNOfFiles),
+                total_files_count: extractMSearchHitsTotal(M_SEARCH.indexOfTotalNOfFiles),
+                total_controlled_files_count: extractMSearchHitsTotal(M_SEARCH.indexOfControlledNOfFiles),
+                total_uncontrolled_files_count: extractMSearchHitsTotal(M_SEARCH.indexOfRegisteredNOfFiles),
             };
         }),
     };
 };
 
 export const computeAuthorizedStudiesForAllFences = async (req: Request, res: Response): Promise<Response> => {
-    const { fences, acl: userAcls = [] } = req.body;
+    const { fences, acl: userAcls } = req.body;
 
     const fencesAreProcessable =
         Array.isArray(fences) && fences.length > 0 && fences.every(f => SUPPORTED_FENCES.includes(f));
     if (!fencesAreProcessable) {
-        return res.status(StatusCodes.UNPROCESSABLE_ENTITY).send('Unsupported Fence(s)');
+        return res.status(StatusCodes.UNPROCESSABLE_ENTITY).send('Unsupported Fence(s) format or value');
     }
 
     const MAX_ACL_SIZE = 500;
     const aclAreProcessable = Array.isArray(userAcls) && userAcls.length <= MAX_ACL_SIZE;
     if (!aclAreProcessable) {
-        if (userAcls.length > MAX_ACL_SIZE) {
+        if (Array.isArray(userAcls) && userAcls.length > MAX_ACL_SIZE) {
             // eslint-disable-next-line no-console
             console.log(`Authorized-Studies: Acl size from user input exceed the hard limit of: ${MAX_ACL_SIZE}`);
         }
@@ -97,8 +100,7 @@ export const computeAuthorizedStudiesForAllFences = async (req: Request, res: Re
                 data,
             };
         } catch (e) {
-            // eslint-disable-next-line no-console
-            console.log(`Authorized-Studies:\n`, e);
+            console.error(`Authorized-Studies (${computeAuthorizedStudiesForFence.name}):\n`, e);
             state[fence] = {
                 ...state[fence],
                 error: true,
@@ -108,3 +110,5 @@ export const computeAuthorizedStudiesForAllFences = async (req: Request, res: Re
 
     return res.send(state);
 };
+
+//study_code

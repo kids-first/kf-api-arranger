@@ -1,5 +1,6 @@
 import { computeAuthorizedStudiesForFence } from './computeAuthorizedStudies';
 import { multiSearchFilesAccessCounts, searchAggregatedAuthorizedStudiesForFence } from './searchers';
+import { AuthStudiesData } from './types';
 
 jest.mock('./searchers');
 jest.mock('../../ElasticSearchClientInstance', () => jest.fn());
@@ -98,7 +99,7 @@ describe('Compute Authorized Studies', () => {
                 ]),
             );
 
-            const r = await computeAuthorizedStudiesForFence(null, 'gen3', [
+            const r: { data: AuthStudiesData } = await computeAuthorizedStudiesForFence(null, 'gen3', [
                 'phs001138.c1',
                 'phs001138.c999',
                 'phs002330.c2',
@@ -110,21 +111,23 @@ describe('Compute Authorized Studies', () => {
             expect(r.data).toEqual([
                 {
                     study_id: 'SD_PREASA7S',
-                    user_acl: ['SD_PREASA7S', 'phs001138.c999', 'phs001138.c1'],
+                    user_acl_in_study: ['phs001138.c999', 'phs001138.c1'],
+                    study_code: 'KF-CHD',
                     title: 'National Heart, Lung, and Blood Institute...',
-                    authorized_files_count: 100,
-                    files_count: 100,
-                    controlled_files_count: 100,
-                    uncontrolled_files_count: 0,
+                    authorized_controlled_files_count: 100,
+                    total_files_count: 100,
+                    total_controlled_files_count: 100,
+                    total_uncontrolled_files_count: 0,
                 },
                 {
                     study_id: 'SD_Z6MWD3H0',
-                    user_acl: ['SD_Z6MWD3H0', 'phs002330.c2', 'phs002330.c999'],
+                    user_acl_in_study: ['phs002330.c2'],
+                    study_code: 'KF-CHDALL',
                     title: 'Kids First: Genomic Analysis of Congenital...',
-                    authorized_files_count: 4,
-                    files_count: 100,
-                    controlled_files_count: 75,
-                    uncontrolled_files_count: 25,
+                    authorized_controlled_files_count: 4,
+                    total_files_count: 100,
+                    total_controlled_files_count: 75,
+                    total_uncontrolled_files_count: 25,
                 },
             ]);
         });

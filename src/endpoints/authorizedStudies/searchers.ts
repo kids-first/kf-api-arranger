@@ -47,6 +47,7 @@ export const searchAggregatedAuthorizedStudiesForFence = async (
                         size: MAX_SIZE_FOR_HITS,
                     },
                     aggs: {
+                        // Nice to have/do: filter out all the acl values that the user does not have.
                         acls: {
                             terms: {
                                 field: 'acl',

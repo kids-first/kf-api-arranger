@@ -1,21 +1,21 @@
 export type SearchBucket = {
     key: string;
     acls: { buckets: { key: string }[] };
-    top_study_hits: { hits: { hits: { _source: { study: { study_name: string } } }[] } };
+    top_study_hits: { hits: { hits: { _source: { study: { study_name: string; study_code: string } } }[] } };
     doc_count: number;
 };
 
 export type StudyDataSpecific = {
     study_id: string;
-    user_acl: string[];
+    user_acl_in_study: string[];
     title: string;
-    authorized_files_count: number;
+    authorized_controlled_files_count: number;
 };
 
 export type StudyDataGlobal = {
-    files_count: number;
-    controlled_files_count: number;
-    uncontrolled_files_count: number;
+    total_files_count: number;
+    total_controlled_files_count: number;
+    total_uncontrolled_files_count: number;
 };
 
 export type AuthStudiesData = (StudyDataSpecific | StudyDataGlobal)[];
