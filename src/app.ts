@@ -27,6 +27,7 @@ import { globalErrorHandler, globalErrorLogger } from './errors';
 import { STATISTICS_CACHE_ID, verifyCache } from './middleware/cache';
 import { injectBodyHttpHeaders } from './middleware/injectBodyHttpHeaders';
 import { resolveSetIdMiddleware } from './middleware/resolveSetIdInSqon';
+import { computeAuthorizedStudiesForAllFences } from './endpoints/authorizedStudies/computeAuthorizedStudies';
 
 export default (keycloak: Keycloak, sqs: SQSClient, getProject: (projectId: string) => ArrangerProject): Express => {
     const app = addAsync.addAsync(express());
@@ -167,6 +168,8 @@ export default (keycloak: Keycloak, sqs: SQSClient, getProject: (projectId: stri
 
         res.send({ data });
     });
+
+    app.postAsync('/authorized-studies', keycloak.protect(), computeAuthorizedStudiesForAllFences);
 
     app.use(globalErrorLogger, globalErrorHandler);
 
