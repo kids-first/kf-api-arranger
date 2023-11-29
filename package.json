@@ -7,7 +7,7 @@
     "start": "node ./dist/src/index.js",
     "test": "jest",
     "test:watch": "jest --watch",
-    "cleanAndbuild": "rm -rf ./dist/* && tsc --build",
+    "cleanAndBuild": "rm -rf ./dist/* && tsc --build",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "cbs": "npm run cleanAndbuild && npm start",

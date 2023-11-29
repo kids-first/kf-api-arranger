@@ -21,7 +21,6 @@ import { getStatistics, Statistics } from './endpoints/statistics';
 import { RiffError } from './riff/riffError';
 
 jest.mock('./endpoints/sets/setsFeature');
-jest.mock('./endpoints/survival');
 jest.mock('./endpoints/statistics');
 jest.mock('./endpoints/searchByIds/searchAllSources');
 
