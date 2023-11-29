@@ -18,7 +18,6 @@ import {
 } from './endpoints/sets/setsFeature';
 import { Set, UpdateSetContentBody, UpdateSetTagBody } from './endpoints/sets/setsTypes';
 import { getStatistics, Statistics } from './endpoints/statistics';
-import { calculateSurvivalForSqonResult } from './endpoints/survival';
 import { RiffError } from './riff/riffError';
 
 jest.mock('./endpoints/sets/setsFeature');
@@ -384,97 +383,6 @@ describe('Express app (without Arranger)', () => {
                 .set({ Authorization: `Bearer ${token}` })
                 .expect(500, { error: 'Internal Server Error' });
             expect((deleteSet as jest.Mock).mock.calls.length).toEqual(1);
-        });
-    });
-
-    describe('POST /survival', () => {
-        const requestBody = {
-            project: '2021_05_03_v2',
-            sqon: {
-                op: 'and',
-                content: [{ op: 'in', content: { field: 'gender', value: ['Female'] } }],
-            },
-        };
-
-        beforeEach(() => {
-            (calculateSurvivalForSqonResult as jest.Mock).mockReset();
-        });
-
-        it('should return 403 if no Authorization header', () =>
-            request(app)
-                .post('/survival')
-                .expect(403));
-
-        it('should return 200 if Authorization header contains valid token and no error occurs', async () => {
-            const mockSurvivalResponse = [
-                {
-                    start: 0,
-                    end: 1,
-                    died: 7,
-                    censored: 467,
-                    cumulativeSurvival: 1,
-                    donors: [
-                        {
-                            time: 0,
-                            censored: true,
-                            meta: {
-                                id: 'PT_HXDR3ZX6',
-                            },
-                        },
-                    ],
-                },
-                {
-                    start: 1,
-                    end: 3,
-                    died: 1,
-                    censored: 1,
-                    cumulativeSurvival: 0.9944223107569721,
-                    donors: [
-                        {
-                            time: 2,
-                            censored: true,
-                            meta: {
-                                id: 'PT_A0V7V4N0',
-                            },
-                        },
-                        {
-                            time: 3,
-                            censored: false,
-                            meta: {
-                                id: 'PT_Y7GFMG49',
-                            },
-                        },
-                    ],
-                },
-            ];
-            (calculateSurvivalForSqonResult as jest.Mock).mockImplementation(() => mockSurvivalResponse);
-
-            const token = getToken();
-
-            await request(app)
-                .post('/survival')
-                .send(requestBody)
-                .set('Content-type', 'application/json')
-                .set({ Authorization: `Bearer ${token}` })
-                .expect(200, { data: mockSurvivalResponse });
-            expect((calculateSurvivalForSqonResult as jest.Mock).mock.calls.length).toEqual(1);
-        });
-
-        it('should return 500 if Authorization header contains valid token but an error occurs', async () => {
-            const expectedError = new Error('OOPS');
-            (calculateSurvivalForSqonResult as jest.Mock).mockImplementation(() => {
-                throw expectedError;
-            });
-
-            const token = getToken();
-
-            await request(app)
-                .post('/survival')
-                .send(requestBody)
-                .set('Content-type', 'application/json')
-                .set({ Authorization: `Bearer ${token}` })
-                .expect(500, { error: 'Internal Server Error' });
-            expect((calculateSurvivalForSqonResult as jest.Mock).mock.calls.length).toEqual(1);
         });
     });
 

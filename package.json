@@ -7,12 +7,10 @@
     "start": "node ./dist/src/index.js",
     "test": "jest",
     "test:watch": "jest --watch",
-    "clean": "rm -rf ./dist/* ",
-    "build": "npm run clean; tsc ",
+    "cleanAndbuild": "rm -rf ./dist/* && tsc --build",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
-    "buildAndRun": "npm run build; npm start",
-    "cbs": "npm run clean && npm run build; npm start",
+    "cbs": "npm run cleanAndbuild && npm start",
     "admin-project": "node --experimental-modules=node --es-module-specifier-resolution=node admin/run.mjs",
     "post-re-alias-helper": "node --experimental-modules=node --es-module-specifier-resolution=node admin/postReleaseIndicesToAliasesHelper.mjs",
     "post-re-delete-indices-helper": "node --experimental-modules=node --es-module-specifier-resolution=node admin/deleteIndicesFromRelease.mjs"
@@ -53,7 +51,6 @@
     "lodash": "^4.17.21",
     "node-cache": "^5.1.2",
     "node-fetch": "^2.6.5",
-    "python-shell": "^3.0.0",
     "regenerator-runtime": "^0.13.9"
   },
   "devDependencies": {
@@ -75,7 +72,6 @@
     "prettier": "^1.19.1",
     "supertest": "^6.1.2",
     "ts-jest": "^27.0.4",
-    "ts-node": "^10.1.0",
     "typescript": "^4.3.5"
   }
 }

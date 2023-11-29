@@ -1,18 +1,7 @@
-# First image to compile typescript to javascript
-FROM node:18-alpine3.18 AS build-image
+FROM node:20-alpine3.18
 WORKDIR /app
 COPY . .
-RUN npm ci
-RUN npm run clean
-RUN npm run build
-
-# Second image, that creates an image for production
-FROM --platform=linux/amd64 nikolaik/python-nodejs:python3.11-nodejs18-alpine AS prod-image
-WORKDIR /app
-COPY --from=build-image ./app/dist ./dist
-COPY package* ./
-COPY ./resource ./resource
-RUN npm ci --production
-RUN pip3 install -r resource/py/requirements.txt
+# Alas, we must install devDep too. Would be nice to fix if possible.
+RUN npm ci && npm run cleanAndbuild
 
 CMD [ "node", "./dist/src/index.js" ]
