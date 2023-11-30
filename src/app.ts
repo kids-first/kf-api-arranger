@@ -7,6 +7,7 @@ import NodeCache from 'node-cache';
 
 import { dependencies, version } from '../package.json';
 import { ArrangerProject } from './arrangerUtils';
+import { computeAuthorizedStudiesForAllFences } from './endpoints/authorizedStudies/computeAuthorizedStudies';
 import genomicFeatureSuggestions, { SUGGESTIONS_TYPES } from './endpoints/genomicFeatureSuggestions';
 import { getPhenotypesNodes } from './endpoints/phenotypes';
 import { searchAllSources } from './endpoints/searchByIds/searchAllSources';
@@ -21,13 +22,11 @@ import {
 } from './endpoints/sets/setsFeature';
 import { CreateSetBody, Set, SetSqon, UpdateSetContentBody, UpdateSetTagBody } from './endpoints/sets/setsTypes';
 import { getStatistics } from './endpoints/statistics';
-import { calculateSurvivalForSqonResult } from './endpoints/survival';
 import { cacheTTL, esHost, keycloakURL, userApiURL } from './env';
 import { globalErrorHandler, globalErrorLogger } from './errors';
 import { STATISTICS_CACHE_ID, verifyCache } from './middleware/cache';
 import { injectBodyHttpHeaders } from './middleware/injectBodyHttpHeaders';
 import { resolveSetIdMiddleware } from './middleware/resolveSetIdInSqon';
-import { computeAuthorizedStudiesForAllFences } from './endpoints/authorizedStudies/computeAuthorizedStudies';
 
 export default (keycloak: Keycloak, sqs: SQSClient, getProject: (projectId: string) => ArrangerProject): Express => {
     const app = addAsync.addAsync(express());
@@ -81,16 +80,6 @@ export default (keycloak: Keycloak, sqs: SQSClient, getProject: (projectId: stri
         const data = await getStatistics();
         cache.set(STATISTICS_CACHE_ID, data);
         res.json(data);
-    });
-
-    app.postAsync('/survival', keycloak.protect(), async (req, res) => {
-        const accessToken = req.headers.authorization;
-        const userId = req['kauth']?.grant?.access_token?.content?.sub;
-        const sqon: SetSqon = req.body.sqon;
-        const projectId: string = req.body.project;
-        const data = await calculateSurvivalForSqonResult(sqon, projectId, userId, accessToken, getProject);
-
-        res.send({ data });
     });
 
     app.postAsync('/searchByIds', keycloak.protect(), async (req, res) => {

@@ -12,7 +12,9 @@ Arranger server is an application that wraps Elasticsearch and provides a GraphQ
 
 ## Development
 
-* Execute: `npm run build` then `npm run start`
+* Execute: `npm run cbs`
+
+Note: You can execute this project in a docker container if you prefer: `docker run -u node -it --rm --network host -v ${PWD}:/app --workdir /app node:20-alpine3.18 sh`
 
 ### General
 
