@@ -1,10 +1,10 @@
-// docker run -u node -it --rm --network host -v ${PWD}:/code --workdir /code node:18-alpine3.18 sh
+// docker run -u node -it --rm --network host -v ${PWD}:/code --workdir /code node:20-alpine3.18 sh
 // examples: npm run admin-project p:include e:include OR npm run admin-project p:next_prd (will default to kf)
 /* eslint-disable no-console */
-import 'regenerator-runtime/runtime';
+import 'regenerator-runtime/runtime.js';
 
-import EsInstance from '../dist/src/ElasticSearchClientInstance';
-import { countNOfDocs, createIndexIfNeeded } from '../dist/src/esUtils';
+import EsInstance from '../dist/src/ElasticSearchClientInstance.js';
+import { countNOfDocs, createIndexIfNeeded } from '../dist/src/esUtils.js';
 
 import { ArrangerApi } from './arrangerApi.mjs';
 import { projectsConfig } from './projectsConfig.mjs';
@@ -38,7 +38,7 @@ const ENV = {
 const args = process.argv.slice(2);
 
 //de-hardcode when possible
-const SUPPORTED_PROJECT_NAMES = ['next_prd', 'next_qa', '2023_01_26_v1', 'include'];
+const SUPPORTED_PROJECT_NAMES = ['next_prd', 'next_qa', 'include'];
 const projectArg = args.find(a => a.startsWith('p:'))?.split(":")[1];
 if (!projectArg || !SUPPORTED_PROJECT_NAMES.some(sp => sp === projectArg)) {
     console.warn(

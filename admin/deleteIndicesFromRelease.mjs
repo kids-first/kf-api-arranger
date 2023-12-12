@@ -53,7 +53,7 @@ const displayShowIndicesQuestion = () =>
         });
     });
 
-await displayShowIndicesQuestion()
+await displayShowIndicesQuestion();
 const displayIndicesQuestion = () =>
     new Promise(resolve => {
         userReadline.question(`Do you want to delete them y/n? > `, answer => {
