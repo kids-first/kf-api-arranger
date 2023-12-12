@@ -78,11 +78,17 @@ export const computeAuthorizedStudiesForAllFences = async (req: Request, res: Re
     }
 
     const MAX_ACL_SIZE = 500;
-    const aclAreProcessable = Object.values(body).every(x => Array.isArray(x.acl) && x.acl.length <= MAX_ACL_SIZE);
+    const MAX_ALC_LENGTH_VALUE = 100;
+    const aclAreProcessable = Object.values(body).every(
+        x =>
+            Array.isArray(x.acl) &&
+            x.acl.length <= MAX_ACL_SIZE &&
+            x.acl.every(a => typeof a === 'string' && a.length < MAX_ALC_LENGTH_VALUE),
+    );
     if (!aclAreProcessable) {
         return res
             .status(StatusCodes.UNPROCESSABLE_ENTITY)
-            .send(`Acls must be a list for each fence and not exceed a certain size`);
+            .send(`Acls must be a list of acl values for each fence and not exceed a certain size`);
     }
 
     const state: ResponseResult = Object.fromEntries(
