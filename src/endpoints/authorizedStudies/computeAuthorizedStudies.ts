@@ -11,9 +11,9 @@ const SUPPORTED_FENCES = ['gen3', 'dcf'];
 export const computeAuthorizedStudiesForFence = async (
     client: Client,
     fence: string,
-    userAcl: string[],
+    userAclForFence: string[],
 ): Promise<{ data: AuthStudiesData }> => {
-    const buckets: SearchBucket[] = await searchAggregatedAuthorizedStudiesForFence(client, fence, userAcl);
+    const buckets: SearchBucket[] = await searchAggregatedAuthorizedStudiesForFence(client, fence, userAclForFence);
     if (buckets.length === 0) {
         return {
             data: [],
@@ -24,7 +24,7 @@ export const computeAuthorizedStudiesForFence = async (
         study_id: b.key,
         // Filtering out study files acls that are not included in the user's acls.
         // It Would be better to do the filtering in the query itself, but it is simpler here.
-        user_acl_in_study: b.acls.buckets.filter(b => userAcl.includes(b.key)).map(b => b.key),
+        user_acl_in_study: b.acls.buckets.filter(b => userAclForFence.includes(b.key)).map(b => b.key),
         study_code: b.top_study_hits.hits.hits[0]._source.study.study_code,
         title: b.top_study_hits.hits.hits[0]._source.study.study_name,
         authorized_controlled_files_count: b.doc_count,
@@ -60,8 +60,17 @@ export const computeAuthorizedStudiesForFence = async (
 };
 
 export const computeAuthorizedStudiesForAllFences = async (req: Request, res: Response): Promise<Response> => {
-    const { fences, acl: userAcls } = req.body;
+    const body: {
+        gen3: {
+            acl: string[];
+        };
+        dcf: {
+            acl: string[];
+        };
+    } = req.body;
 
+    //===== INPUT Validations
+    const fences = Object.keys(body);
     const fencesAreProcessable =
         Array.isArray(fences) && fences.length > 0 && fences.every(f => SUPPORTED_FENCES.includes(f));
     if (!fencesAreProcessable) {
@@ -69,13 +78,17 @@ export const computeAuthorizedStudiesForAllFences = async (req: Request, res: Re
     }
 
     const MAX_ACL_SIZE = 500;
-    const aclAreProcessable = Array.isArray(userAcls) && userAcls.length <= MAX_ACL_SIZE;
+    const MAX_ALC_LENGTH_VALUE = 100;
+    const aclAreProcessable = Object.values(body).every(
+        x =>
+            Array.isArray(x.acl) &&
+            x.acl.length <= MAX_ACL_SIZE &&
+            x.acl.every(a => typeof a === 'string' && a.length < MAX_ALC_LENGTH_VALUE),
+    );
     if (!aclAreProcessable) {
-        if (Array.isArray(userAcls) && userAcls.length > MAX_ACL_SIZE) {
-            // eslint-disable-next-line no-console
-            console.log(`Authorized-Studies: Acl size from user input exceed the hard limit of: ${MAX_ACL_SIZE}`);
-        }
-        return res.status(StatusCodes.UNPROCESSABLE_ENTITY).send('Acl must be a list');
+        return res
+            .status(StatusCodes.UNPROCESSABLE_ENTITY)
+            .send(`Acls must be a list of acl values for each fence and not exceed a certain size`);
     }
 
     const state: ResponseResult = Object.fromEntries(
@@ -94,7 +107,7 @@ export const computeAuthorizedStudiesForAllFences = async (req: Request, res: Re
     const client = EsInstance.getInstance();
     for (const fence of fences) {
         try {
-            const { data } = await computeAuthorizedStudiesForFence(client, fence, userAcls);
+            const { data } = await computeAuthorizedStudiesForFence(client, fence, body[fence].acl);
             state[fence] = {
                 ...state[fence],
                 data,
@@ -110,5 +123,3 @@ export const computeAuthorizedStudiesForAllFences = async (req: Request, res: Re
 
     return res.send(state);
 };
-
-//study_code
