@@ -1,4 +1,4 @@
-//FIXE: DUPLICATED CODE
+//FIX: DUPLICATED CODE
 /**
  *  npm run post-re-delete-indices-helper -- release:re_20231030_1
  *
@@ -11,7 +11,8 @@ import { esHost } from '../dist/src/env.js';
 const args = process.argv.slice(2);
 const releaseArgument = args.find(a => a.startsWith('release:')) ?? '';
 const releaseTag = releaseArgument.split(':')[1];
-assert(!!releaseTag, 'You must instruct a release tag. For instance, "-- release:re_xyz"');
+assert(!!releaseTag, 'You must instruct a release tag. For instance, "-- release:re_xyz --interactive"');
+const isInteractive = args.some(a => a === '--interactive');
 
 const userReadline = readline.createInterface({
     input: process.stdin,
@@ -35,10 +36,13 @@ const releaseIndices = catIndicesResponse.body.map(x => x.index).sort();
 assert(Array.isArray(releaseIndices) && releaseIndices.length > 0, 'No index found. Terminating');
 
 const INDEX_CATEGORIES = ['file', 'participant', 'study', 'biospecimen'];
-const hasAllTypeOfIndices = INDEX_CATEGORIES.every(wordStem => releaseIndices.some(x => x.includes(wordStem)));
+const hasOnlyClinicalIndices = releaseIndices.every(r => {
+    const indexPrefix = r.split('_')[0];
+    return INDEX_CATEGORIES.includes(indexPrefix);
+});
 
 assert(
-    hasAllTypeOfIndices,
+    hasOnlyClinicalIndices,
     `Oops it seems like there is at least one type missing. Requires: ${INDEX_CATEGORIES.join(', ')}. Terminating`,
 );
 
@@ -53,16 +57,25 @@ const displayShowIndicesQuestion = () =>
         });
     });
 
-await displayShowIndicesQuestion();
+isInteractive && (await displayShowIndicesQuestion());
+
 const displayIndicesQuestion = () =>
     new Promise(resolve => {
         userReadline.question(`Do you want to delete them y/n? > `, answer => {
-            const yes = answer === 'y';
-            resolve(yes);
+            const isYes = answer === 'y';
+            resolve(isYes);
         });
     });
-const proceedToDeletion = await displayIndicesQuestion();
+const proceedToDeletion = isInteractive ? await displayIndicesQuestion() : true;
 if (proceedToDeletion) {
+    if (!isInteractive) {
+        const maxDisplay = 5;
+        console.log(
+            `Deleting ${releaseIndices.length} indices: ${releaseIndices.slice(0, maxDisplay).join(', ')} ${
+                releaseIndices.length > maxDisplay ? '...' : ''
+            }`,
+        );
+    }
     const deleteResponse = await client.indices.delete({
         index: releaseIndices,
     });

@@ -18,8 +18,8 @@ The Law of the Land is: 1 arranger project per environment (qa, staging, prod). 
   npm run admin-project
 or 
  # run the script with docker (PWD = root of the project) 
-docker run -it --network host --rm -v ${PWD}:/code --workdir /code node:16.13-alpine sh -c "npm install && npm run build && npm run admin-project" 
+docker run -it --network host --rm -v ${PWD}:/code --workdir /code node:20-alpine3.18 sh -c "npm install && npm run build && npm run admin-project" 
  # run the script with docker (PWD = root of the project) and local elastic search (from /dev) 
-docker run -it --rm --network es-net -v ${PWD}:/code --workdir /code node:16.13-alpine sh -c "npm install && npm run build && npm run admin-project"
+docker run -it --rm --network es-net -v ${PWD}:/code --workdir /code node:20-alpine3.18 sh -c "npm install && npm run build && npm run admin-project"
 ```
 
