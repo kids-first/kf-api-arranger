@@ -1,8 +1,10 @@
+// docker run -u node -it --rm --network host -v ${PWD}:/code --workdir /code node:20-alpine3.18 sh
+// examples: npm run admin-project p:include e:include OR npm run admin-project p:next_prd (will default to kf)
 /* eslint-disable no-console */
-import 'regenerator-runtime/runtime';
+import 'regenerator-runtime/runtime.js';
 
-import EsInstance from '../dist/src/ElasticSearchClientInstance';
-import { countNOfDocs, createIndexIfNeeded } from '../dist/src/esUtils';
+import EsInstance from '../dist/src/ElasticSearchClientInstance.js';
+import { countNOfDocs, createIndexIfNeeded } from '../dist/src/esUtils.js';
 
 import { ArrangerApi } from './arrangerApi.mjs';
 import { projectsConfig } from './projectsConfig.mjs';
@@ -28,22 +30,69 @@ const sameIndices = (xs, ys) => {
     return xs.length === ys.length && xs.every(x => s.has(x));
 };
 
+const ENV = {
+    kf: 'kf',
+    include: 'include',
+};
+
+const args = process.argv.slice(2);
+
+//de-hardcode when possible
+const SUPPORTED_PROJECT_NAMES = ['next_prd', 'next_qa', 'include'];
+const projectArg = args.find(a => a.startsWith('p:'))?.split(":")[1];
+if (!projectArg || !SUPPORTED_PROJECT_NAMES.some(sp => sp === projectArg)) {
+    console.warn(
+        `admin-project-script - You must input a supported arranger project name. Got "${projectArg}" where supported values are: "${SUPPORTED_PROJECT_NAMES.join(', ')}"`,
+    );
+    process.exit(1);
+}
+
+const envArg = args.find(a => a.startsWith('e:')) ?? '';
+let envVal = ENV.kf;
+if (envArg) {
+    const value = envArg.split(':')[1].toLocaleLowerCase();
+    if (Object.values(ENV).includes(value)) {
+        envVal = ENV[value];
+    } else {
+        console.warn(
+            `admin-project-script - Unsupported project "${value}". Supported projects are: "${Object.values(ENV).join(
+                ', ',
+            )}"`,
+        );
+    }
+}
+
 //===== Start =====//
 console.info(`admin-project-script - Starting script`);
-
+console.info(`admin-project-script - Project value is=${envVal}`);
 //values are hardcoded for now, but as soon as possible, we should use env var from env.ts
-const projectIndices =
-    [
-        'migration_test_participant_centric',
-        'migration_test_study_centric',
-        'migration_test_biospecimen_centric',
-        'migration_test_file_centric',
-        'variant_centric',
-        'gene_centric',
-        'members-public',
-    ]
-        ?.filter(p => !!p)
-        ?.map(p => p?.trim()) ?? [];
+const kfNext = [
+    'next_participant_centric',
+    'next_study_centric',
+    'next_biospecimen_centric',
+    'next_file_centric',
+    'next_variant_centric',
+    'next_gene_centric',
+    'members-public',
+];
+
+const include = [
+    'participant_centric',
+    'study_centric',
+    'biospecimen_centric',
+    'file_centric',
+    'variant_centric',
+    'gene_centric',
+];
+
+const envToIndicesPrefixes = {
+    kf: kfNext,
+    include: include,
+};
+
+const indicesPrefixes = envToIndicesPrefixes[envVal];
+
+const projectIndices = indicesPrefixes?.filter(p => !!p)?.map(p => p?.trim()) ?? [];
 
 if (projectIndices.length === 0) {
     console.warn(
@@ -52,7 +101,10 @@ if (projectIndices.length === 0) {
     process.exit(0);
 }
 
-const allProjectsConf = projectsConfig();
+const projectName = projectArg;
+
+//TODO: refactor to tolerate only 1 project per conf
+const allProjectsConf = projectsConfig(projectName, envVal);
 
 const projectsConf = allProjectsConf.filter(p => {
     const indicesInConf = p.indices.map(i => i.esIndex);
@@ -85,8 +137,6 @@ if (hasCreatedIndex) {
         `admin-project-script - Created this index: '${ArrangerApi.constants.ARRANGER_PROJECT_INDEX}'. Since no existing arranger projects detected.`,
     );
 }
-
-const projectName = projectConf.name;
 
 const resolveSanityConditions = async () =>
     await Promise.all([

@@ -1,16 +1,18 @@
-<<<<<<< Updated upstream
-import config from './conf.json';
-=======
 import includeConf from './confInclude.json' assert { type: "json" };
-import kfConf from './confKfNext.json' assert { type: "json" };
->>>>>>> Stashed changes
+import kfConf from './confKfNext.json.json' assert { type: "json" };
 
-export const projectsConfig = () =>
-    Object.entries(config).map(([key, value]) => {
-        const lambda = x => ({ ...x, projectId: key });
-        return {
-            name: key,
-            indices: [...value.indices].map(lambda),
-            extendedMappingMutations: [...value.extendedMappingMutations].map(lambda),
-        };
-    });
+export const projectsConfig = (projectName, env) => {
+    const envToConf = {
+        kf: kfConf,
+        include: includeConf,
+    };
+    const lambda = x => ({ ...x, projectId: projectName });
+    return [
+        {
+            name: projectName,
+            indices: [...envToConf[env].indices].map(lambda),
+            extendedMappingMutations: [...envToConf[env].extendedMappingMutations].map(lambda),
+        }
+    ]
+};
+
