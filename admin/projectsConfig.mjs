@@ -1,5 +1,5 @@
 import includeConf from './confInclude.json' assert { type: "json" };
-import kfConf from './conf.json' assert { type: "json" };
+import kfConf from './confKfNext.json' assert { type: "json" };
 
 export const projectsConfig = (projectName, env) => {
     const envToConf = {
