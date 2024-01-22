@@ -53,8 +53,9 @@ const catIndicesResponse = await client.cat.indices({
 
 assert(catIndicesResponse.statusCode === 200, 'Could not retrieve all indices correctly');
 const allIndices = catIndicesResponse.body;
+
 if (allIndices.length % N_OF_ENTITIES_CENTERS !== 0) {
-    const extractStudyIdWithoutReleaseSuffix = w => 'sd' + w.split('_sd')[1].split('_re')[0];
+    const extractStudyIdWithoutReleaseSuffix = w => w.split(`centric_`)[1].split("_re")[0];
     const fn = suffix =>
         allIndices.filter(x => x.index.includes(suffix)).map(x => extractStudyIdWithoutReleaseSuffix(x.index)).sort();
     const allSpecimensIndices = fn('biospecimen_centric');
@@ -89,9 +90,6 @@ if (allIndices.length % N_OF_ENTITIES_CENTERS !== 0) {
             missing: missingFn(allFilesIndices),
         },
     };
-    console.warn(
-        `Did not received the expected number of indices (must be a multiple of ${N_OF_ENTITIES_CENTERS}). Got total of: ${allIndices.length}`,
-    );
     console.warn('Details:', details);
     process.exit(0);
 }
