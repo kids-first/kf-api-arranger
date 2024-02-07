@@ -39,7 +39,7 @@ const ENV = {
 const args = process.argv.slice(2);
 
 //de-hardcode when possible
-const SUPPORTED_PROJECT_NAMES = ['next_prd', 'next_qa', 'include'];
+const SUPPORTED_PROJECT_NAMES = ['next_prd', 'next_qa', 'include', 'test'];
 const projectArg = args.find(a => a.startsWith('p:'))?.split(':')[1];
 if (!projectArg || !SUPPORTED_PROJECT_NAMES.some(sp => sp === projectArg)) {
     console.warn(
