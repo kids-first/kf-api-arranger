@@ -7,6 +7,11 @@ const releaseArgument = args.find(a => a.startsWith('release:')) ?? '';
 const release = releaseArgument.split('release:')[1];
 assert(!!release, 'Missing release value');
 
+const projectArgument = args.find(a => a.startsWith('project:')) ?? '';
+const project = projectArgument.split('project:')[1]?.toLocaleLowerCase() || ``;
+
+const isInclude = project.includes(`inc`);
+
 const ENTITIES = {
     study_centric: 'study_centric',
     participant_centric: 'participant_centric',
@@ -45,6 +50,9 @@ console.log(title);
 console.log(divider);
 console.log(globalStats.join('\n'));
 
+const PREFIX = 0;
+const SUFFIX = 1;
+
 const catIndicesResponse = await client.cat.indices({
     index: `*_${release}`,
     h: 'index',
@@ -55,9 +63,12 @@ assert(catIndicesResponse.statusCode === 200, 'Could not retrieve all indices co
 const allIndices = catIndicesResponse.body;
 
 if (allIndices.length % N_OF_ENTITIES_CENTERS !== 0) {
-    const extractStudyIdWithoutReleaseSuffix = w => w.split(`centric_`)[1].split("_re")[0];
+    const extractStudyIdWithoutReleaseSuffix = w => w.split(`centric_`)[SUFFIX].split('_re')[PREFIX];
     const fn = suffix =>
-        allIndices.filter(x => x.index.includes(suffix)).map(x => extractStudyIdWithoutReleaseSuffix(x.index)).sort();
+        allIndices
+            .filter(x => x.index.includes(suffix))
+            .map(x => extractStudyIdWithoutReleaseSuffix(x.index))
+            .sort();
     const allSpecimensIndices = fn('biospecimen_centric');
     const allStudiesIndices = fn('study_centric');
     const allParticipantsIndices = fn('participant_centric');
@@ -90,8 +101,7 @@ if (allIndices.length % N_OF_ENTITIES_CENTERS !== 0) {
             missing: missingFn(allFilesIndices),
         },
     };
-    console.warn('Details:', details);
-    process.exit(0);
+    console.info('Details:', details);
 }
 
 const allStudiesSearchResponse = await client.search({
@@ -113,12 +123,9 @@ const studyIdToStudyCode = allStudiesHits.reduce((xs, x) => {
     };
 }, {});
 
-const PREFIX = 0;
-const SUFFIX = 1;
-
 const removeReleaseSuffix = word => word.split('_re_')[PREFIX];
 
-const studyIdsWithReleaseSuffix = [...new Set(allIndices.map(x => `sd_${x.index.split('_sd_')[SUFFIX]}`))].sort();
+const studyIdsWithReleaseSuffix = [...new Set(allIndices.map(x => x.index.split('centric_')[SUFFIX]))].sort();
 
 const mSearchesAllResponse = await client.msearch({
     body: studyIdsWithReleaseSuffix
@@ -134,12 +141,6 @@ const mSearchesAllResponse = await client.msearch({
 });
 const mResponsesForAllStudies = mSearchesAllResponse?.body?.responses || [];
 
-const N_OF_ENTITIES_CENTERS_MINUS_STUDY = N_OF_ENTITIES_CENTERS - 1;
-assert(
-    mResponsesForAllStudies.length % N_OF_ENTITIES_CENTERS_MINUS_STUDY === 0,
-    'Did not received the expected search results for all studies',
-);
-
 const messagesPlaceholdersByStudy = studyIdsWithReleaseSuffix
     .map((x, index) => {
         const studyId = removeReleaseSuffix(x);
@@ -152,10 +153,11 @@ const messagesPlaceholdersByStudy = studyIdsWithReleaseSuffix
         ];
     })
     .flat();
-const totalHitsByStudies = mResponsesForAllStudies.map(x => x.hits.total.value);
+
+const totalHitsByStudies = mResponsesForAllStudies.map(x => x?.hits?.total?.value || 0);
 console.log(divider);
 console.log(messagesPlaceholdersByStudy.map((x, index) => x + totalHitsByStudies[index]).join('\n'));
-
+const FIELD_DUPLICATE_SPECIMEN = isInclude ? `container_id` : 'fhir_id';
 const mSearchDuplicatesResponse = await client.msearch({
     body: [
         { index: `${ENTITIES.study_centric}*${release}*` },
@@ -184,6 +186,7 @@ const mSearchDuplicatesResponse = await client.msearch({
                     aggs: {
                         study: {
                             terms: {
+                                size: 100000,
                                 field: 'study.study_id',
                             },
                         },
@@ -210,7 +213,7 @@ const mSearchDuplicatesResponse = await client.msearch({
             aggs: {
                 duplicates: {
                     terms: {
-                        field: 'fhir_id',
+                        field: FIELD_DUPLICATE_SPECIMEN,
                         size: 100000,
                         min_doc_count: 2,
                     },
@@ -221,11 +224,6 @@ const mSearchDuplicatesResponse = await client.msearch({
 });
 
 const mResponsesForDuplicates = mSearchDuplicatesResponse?.body?.responses || [];
-
-assert(
-    mResponsesForDuplicates.length % N_OF_ENTITIES_CENTERS === 0,
-    'Did not received the expected search results for duplicates',
-);
 
 const bucketsOfDuplicates = {
     [ENTITIES.study_centric]: mResponsesForDuplicates[0].aggregations.duplicates.buckets || [],
@@ -242,14 +240,22 @@ const messagesForDuplicates = Object.entries(bucketsOfDuplicates).reduce((xs, [c
     const showDetailOnlyForParticipants =
         center === ENTITIES.participant_centric
             ? buckets.map(
-                b =>
-                    `(${b.doc_count}) ${b.key.toLowerCase()} ${b.study.buckets
-                        .map(sb => `(${sb.key.toLowerCase()}; ${studyIdToStudyCode[sb.key.toLowerCase()]})`)
-                        .join(' - ')}`,
-            )
+                  b =>
+                      `(${b.doc_count}) ${b.key.toLowerCase()} ${b.study.buckets
+                          .map(sb => `(${sb.key.toLowerCase()}; ${studyIdToStudyCode[sb.key.toLowerCase()]})`)
+                          .join(' - ')}`,
+              )
             : [];
-
-    return [...xs, `\nFound ${nOfDuplicates} duplicates in ${center}`, ...showDetailOnlyForParticipants];
+    const showDetailOnlyForSpecimen =
+        center === ENTITIES.biospecimen_centric
+            ? [`(Using field=${FIELD_DUPLICATE_SPECIMEN} to compute duplicates)`]
+            : [];
+    return [
+        ...xs,
+        `\nFound ${nOfDuplicates} duplicates in ${center}`,
+        ...showDetailOnlyForParticipants,
+        ...showDetailOnlyForSpecimen,
+    ];
 }, []);
 
 console.log(messagesForDuplicates.join('\n'));
@@ -262,7 +268,7 @@ const searchResponseSpecimensDuplicates = await client.search({
         aggs: {
             duplicates: {
                 terms: {
-                    field: 'fhir_id',
+                    field: FIELD_DUPLICATE_SPECIMEN,
                     size: 100000,
                     min_doc_count: 2,
                 },

@@ -1,5 +1,6 @@
 // docker run -u node -it --rm --network host -v ${PWD}:/code --workdir /code node:20-alpine3.18 sh
 // examples: npm run admin-project p:include e:include OR npm run admin-project p:next_prd (will default to kf)
+//kf-api-arranger/node_modules/@arranger/mapping-utils/dist/extendMapping.js change  rangeStep: ['double', 'float', 'half_float', 'scaled_float'].includes(type) ? 0.01 : 1 to rangeStep: 1.0
 /* eslint-disable no-console */
 import 'regenerator-runtime/runtime.js';
 
@@ -39,10 +40,12 @@ const args = process.argv.slice(2);
 
 //de-hardcode when possible
 const SUPPORTED_PROJECT_NAMES = ['next_prd', 'next_qa', 'include'];
-const projectArg = args.find(a => a.startsWith('p:'))?.split(":")[1];
+const projectArg = args.find(a => a.startsWith('p:'))?.split(':')[1];
 if (!projectArg || !SUPPORTED_PROJECT_NAMES.some(sp => sp === projectArg)) {
     console.warn(
-        `admin-project-script - You must input a supported arranger project name. Got "${projectArg}" where supported values are: "${SUPPORTED_PROJECT_NAMES.join(', ')}"`,
+        `admin-project-script - You must input a supported arranger project name. Got "${projectArg}" where supported values are: "${SUPPORTED_PROJECT_NAMES.join(
+            ', ',
+        )}"`,
     );
     process.exit(1);
 }
@@ -152,9 +155,8 @@ if (creationConditions.every(b => !b)) {
     const addResp = await addArrangerProjectWithClient(projectName);
     console.debug(`admin-project-script - (Project addition) received this response from arranger api: `, addResp);
     console.debug(
-        `admin-project-script - Creating these new graphql fields: ${projectConf.indices
-            .map(i => `'${i.graphqlField}' from es index '${i.esIndex}'`)
-            .join(', ')}`,
+        `admin-project-script - Creating these new graphql fields: `,
+        projectConf.indices.map(i => `${i.graphqlField}' from es index '${i.esIndex}`),
     );
     await ArrangerApi.createNewIndices(client, projectConf.indices);
 } else if (creationConditions.some(b => b !== creationConditions[0])) {
