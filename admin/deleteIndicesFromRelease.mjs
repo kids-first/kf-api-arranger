@@ -19,6 +19,19 @@ const userReadline = readline.createInterface({
     output: process.stdout,
 });
 
+const displayDoYouWantToProceed = () =>
+    new Promise(resolve => {
+        userReadline.question(`You are about to delete indices. Do you want to proceed y/n? > `, answer =>
+            resolve(answer === 'y'),
+        );
+    });
+
+const wannaProceed = await displayDoYouWantToProceed();
+
+if (!wannaProceed) {
+    process.exit(0);
+}
+
 const client = new Client({ node: esHost });
 
 const catIndicesResponse = await client.cat.indices({
@@ -46,7 +59,7 @@ assert(
     `Oops it seems like there is at least one type missing. Requires: ${INDEX_CATEGORIES.join(', ')}. Terminating`,
 );
 
-const displayShowIndicesQuestion = () =>
+const displayIndicesQuestion = () =>
     new Promise(resolve => {
         userReadline.question(`${releaseIndices.length} were found. Do you want to display them y/n? > `, answer => {
             const yes = answer === 'y';
@@ -57,7 +70,7 @@ const displayShowIndicesQuestion = () =>
         });
     });
 
-isInteractive && (await displayShowIndicesQuestion());
+isInteractive && (await displayIndicesQuestion());
 
 const displayIndicesQuestion = () =>
     new Promise(resolve => {
