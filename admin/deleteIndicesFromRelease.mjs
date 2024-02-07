@@ -72,14 +72,14 @@ const displayIndicesQuestion = () =>
 
 isInteractive && (await displayIndicesQuestion());
 
-const displayIndicesQuestion = () =>
+const displayIndicesQuestionAfterShowThem = () =>
     new Promise(resolve => {
         userReadline.question(`Do you want to delete them y/n? > `, answer => {
             const isYes = answer === 'y';
             resolve(isYes);
         });
     });
-const proceedToDeletion = isInteractive ? await displayIndicesQuestion() : true;
+const proceedToDeletion = isInteractive ? await displayIndicesQuestionAfterShowThem() : true;
 if (proceedToDeletion) {
     if (!isInteractive) {
         const maxDisplay = 5;
