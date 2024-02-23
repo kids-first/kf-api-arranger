@@ -87,7 +87,7 @@ const mock = {
             data_type: 'Normalized relative expression (FPKM)',
             experimental_strategy: 'Bulk polyA+ RNAseq',
             experimental_platform: 'Illumina Novaseq',
-            publication: 'PMID: 37379383',
+            publication: ['PMID: 37379383'],
             access_limitation: 'General research use (DUO:0000042)',
             access_requirement: 'Not for profit, non commercial use only (DUO:0000018)',
             dbgap: 'phs002981',
