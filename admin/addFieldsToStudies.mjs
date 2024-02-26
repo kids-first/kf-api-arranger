@@ -47,10 +47,14 @@ const mappingSeemsValid = m.dataset.type === 'nested' && mappedKeys.every(x => !
 if (!mappingSeemsValid) {
     console.error('It seems like not all values are mapped correctly.');
     if (m.dataset.type === 'nested') {
-        console.error(
-            'Problematic keys per study: ',
-            mappedKeys.filter(x => !x[0]),
-        );
+        console.error('Problematic keys per study: ', [
+            ...new Set(
+                mappedKeys
+                    .filter(x => !x[0])
+                    .map(x => x[1])
+                    .flat(),
+            ),
+        ]);
     }
     process.exit(0);
 }
