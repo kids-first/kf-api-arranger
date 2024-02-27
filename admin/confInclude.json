@@ -197,6 +197,13 @@
       }
     },
     {
+      "field": "expected_data_categories",
+      "graphqlField": "study",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
       "field": "experimental_strategy",
       "graphqlField": "study",
       "extendedFieldMappingInput": {

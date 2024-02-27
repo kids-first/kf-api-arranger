@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import EsInstance from '../dist/src/ElasticSearchClientInstance.js';
 import readline from 'readline';
 
-import { mockStudies } from './mockStudies.mjs';
+import { mockStudies, validateStudies } from './mockStudies.mjs';
 const userReadline = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -26,6 +26,18 @@ if (!yesOrNo) {
 const { keys, values } = Object;
 
 const ms = [...mockStudies];
+
+const vr = validateStudies(ms);
+const invalidStudies = vr.filter(v => !v[1]);
+if (invalidStudies.length > 0) {
+    invalidStudies.forEach(v => {
+        const [code, , errors] = v;
+        console.log(`study=${code} is invalid`);
+        console.log(errors);
+    });
+    process.exit(0);
+}
+
 const sCodes = [...new Set(ms.map(x => x.study_code))];
 const nOfStudiesToEnhance = ms.length;
 assert(sCodes.length === nOfStudiesToEnhance);
@@ -39,15 +51,15 @@ const m = values(rM.body)[0]?.mappings?.properties;
 assert(!!m);
 //  !Notice Warning: mappings are multivalued (one for each study). Only the first found is used. So validation may, in certain instances, be incomplete,
 const mappedKeys = ms.map(s => {
-    const sKeys = keys(s);
-    const allKeysExistInMapping = sKeys.every(sk => !!m[sk]);
-    return [allKeysExistInMapping, sKeys.filter(sk => !m[sk])];
+    const sTopLevelKeys = keys(s);
+    const allKeysExistInMapping = sTopLevelKeys.every(sk => !!m[sk]);
+    return [allKeysExistInMapping, sTopLevelKeys.filter(sk => !m[sk])];
 });
 const mappingSeemsValid = m.dataset.type === 'nested' && mappedKeys.every(x => !!x[0]);
 if (!mappingSeemsValid) {
     console.error('It seems like not all values are mapped correctly.');
     if (m.dataset.type === 'nested') {
-        console.error('Problematic keys per study: ', [
+        console.error('Problematic keys: ', [
             ...new Set(
                 mappedKeys
                     .filter(x => !x[0])
@@ -62,6 +74,7 @@ if (!mappingSeemsValid) {
 // Processing
 const r = await client.search({
     index: 'study_centric',
+    size: sCodes.length,
     body: {
         query: {
             bool: {
