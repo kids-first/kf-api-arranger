@@ -10,12 +10,12 @@ const createNewIndices = async (esClient, confIndices) => {
     }
 };
 
-const fixExtendedMapping = async (esClient, confExtendedMappingMutations) => {
+const fixExtendedMapping = async (esClient, mutations) => {
     const updateFieldExtendedMappingWithClient = updateFieldExtendedMapping(esClient);
-    for (const confExtendedMappingMutation of confExtendedMappingMutations) {
-        console.debug("fixing extendedMapping field =", confExtendedMappingMutation?.field)
+    for (const [index, mutation] of mutations.entries()) {
+        console.debug('updating field = ', mutation?.field, ` ${index + 1} of ${mutations.length}`);
         await updateFieldExtendedMappingWithClient({
-            ...confExtendedMappingMutation,
+            ...mutation,
         });
     }
 };

@@ -35,10 +35,16 @@ export const computeAuthorizedStudiesForFence = async (
         indexOfTotalNOfFiles: 0,
         indexOfControlledNOfFiles: 1,
         indexOfRegisteredNOfFiles: 2,
+        indexOfStudyContainsOpenAccess: 3,
     };
 
     //Get all files count per candidate study
     const accessCounts = await multiSearchFilesAccessCounts(client, fence, allStudyIds);
+    const countFailures =
+        accessCounts?.filter(x => x._shards?.failures && x._shards.failures.length > 0)?.map(x => x._shards.failures) ||
+        [];
+    // eslint-disable-next-line no-console
+    console.assert(countFailures.length === 0, 'failures detected', countFailures);
     const size = Object.keys(M_SEARCH).length; //there are "size" response elements per study
     // eslint-disable-next-line no-console
     console.assert(
@@ -49,11 +55,13 @@ export const computeAuthorizedStudiesForFence = async (
         data: dataAggregations.map((x: StudyDataSpecific, i: number): StudyDataSpecific | StudyDataGlobal => {
             const extractMSearchHitsTotal = (index: number) =>
                 accessCounts.slice(i * size, i * size + size)[index].hits.total.value;
+            const containsOpenAccess = extractMSearchHitsTotal(M_SEARCH.indexOfStudyContainsOpenAccess) > 0;
             return {
                 ...x,
                 total_files_count: extractMSearchHitsTotal(M_SEARCH.indexOfTotalNOfFiles),
                 total_controlled_files_count: extractMSearchHitsTotal(M_SEARCH.indexOfControlledNOfFiles),
                 total_uncontrolled_files_count: extractMSearchHitsTotal(M_SEARCH.indexOfRegisteredNOfFiles),
+                user_acl_in_study: containsOpenAccess ? [...x.user_acl_in_study, 'open_access'] : x.user_acl_in_study,
             };
         }),
     };
