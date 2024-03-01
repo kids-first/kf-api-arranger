@@ -64,6 +64,7 @@ describe('Compute Authorized Studies', () => {
                                 { key: 'SD_Z6MWD3H0', doc_count: 4 },
                                 { key: 'phs002330.c2', doc_count: 4 },
                                 { key: 'phs002330.c999', doc_count: 4 },
+                                { key: 'open_access', doc_count: 10 },
                             ],
                         },
                     },
@@ -85,6 +86,10 @@ describe('Compute Authorized Studies', () => {
                         status: 200,
                     },
                     {
+                        hits: { total: { value: 0, relation: 'eq' }, max_score: null, hits: [] },
+                        status: 200,
+                    },
+                    {
                         hits: { total: { value: 100, relation: 'eq' }, max_score: null, hits: [] },
                         status: 200,
                     },
@@ -94,6 +99,10 @@ describe('Compute Authorized Studies', () => {
                     },
                     {
                         hits: { total: { value: 25, relation: 'eq' }, max_score: null, hits: [] },
+                        status: 200,
+                    },
+                    {
+                        hits: { total: { value: 10, relation: 'eq' }, max_score: null, hits: [] },
                         status: 200,
                     },
                 ]),
@@ -121,7 +130,7 @@ describe('Compute Authorized Studies', () => {
                 },
                 {
                     study_id: 'SD_Z6MWD3H0',
-                    user_acl_in_study: ['phs002330.c2'],
+                    user_acl_in_study: ['phs002330.c2', 'open_access'],
                     study_code: 'KF-CHDALL',
                     title: 'Kids First: Genomic Analysis of Congenital...',
                     authorized_controlled_files_count: 4,

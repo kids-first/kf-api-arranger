@@ -79,7 +79,7 @@ export const multiSearchFilesAccessCounts = async (
     const { body: bodyMSearch } = await client.msearch({
         body: studyIds
             .map((s: string) => [
-                {},
+                { index: esFileIndex },
                 {
                     track_total_hits: true,
                     size: 0,
@@ -89,7 +89,7 @@ export const multiSearchFilesAccessCounts = async (
                         },
                     },
                 },
-                {},
+                { index: esFileIndex },
                 {
                     track_total_hits: true,
                     size: 0,
@@ -103,7 +103,7 @@ export const multiSearchFilesAccessCounts = async (
                         },
                     },
                 },
-                {},
+                { index: esFileIndex },
                 {
                     track_total_hits: true,
                     size: 0,
@@ -112,6 +112,20 @@ export const multiSearchFilesAccessCounts = async (
                             must: [
                                 { term: { study_id: { value: s } } },
                                 { term: { controlled_access: { value: 'Registered' } } },
+                                { term: { repository: { value: fence } } },
+                            ],
+                        },
+                    },
+                },
+                { index: esFileIndex },
+                {
+                    track_total_hits: true,
+                    size: 0,
+                    query: {
+                        bool: {
+                            must: [
+                                { term: { study_id: { value: s } } },
+                                { term: { acl: { value: 'open_access' } } },
                                 { term: { repository: { value: fence } } },
                             ],
                         },

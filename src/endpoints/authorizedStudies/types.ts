@@ -30,4 +30,24 @@ export type ResponseResult = {
 export type FileAccessCountsResponse = {
     hits: { total: { value: number } };
     status: number;
+    _shards: {
+        total: number;
+        successful: number;
+        skipped: number;
+        failed: number;
+        failures: {
+            shard: number;
+            index: string;
+            node: string;
+            reason: {
+                reason: string;
+                index: string;
+                index_uuid: string;
+                caused_by: {
+                    type: string;
+                    reason: string;
+                };
+            };
+        }[];
+    };
 };
