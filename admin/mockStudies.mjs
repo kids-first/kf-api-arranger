@@ -35,8 +35,8 @@ export const mockStudies = [
                 experimental_strategy: 'Bulk polyA+ RNAseq',
                 experimental_platform: 'Illumina Novaseq',
                 publication: ['PMID: 37379383'],
-                access_limitation: 'General research use (DUO:0000042)',
-                access_requirement: 'Not for profit, non commercial use only (DUO:0000018)',
+                access_limitation: ['General research use (DUO:0000042)'],
+                access_requirement: ['Not for profit, non commercial use only (DUO:0000018)'],
                 repository: 'Gene Expression Omnibus',
                 repository_url: 'https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE190125',
                 participant_count: 402,
@@ -54,8 +54,8 @@ export const mockStudies = [
                 experimental_strategy: 'Mass spec metabolomics',
                 experimental_platform: 'UHPLC-MS',
                 publication: ['PMID: 37379383'],
-                access_limitation: 'General research use (DUO:0000042)',
-                access_requirement: 'Not for profit, non commercial use only (DUO:0000018)',
+                access_limitation: ['General research use (DUO:0000042)'],
+                access_requirement: ['Not for profit, non commercial use only (DUO:0000018)'],
                 dbgap: 'phs002981',
                 participant_count: 479,
                 biospecimen_count: 479,
@@ -72,8 +72,8 @@ export const mockStudies = [
                 experimental_strategy: 'Multiplex immunoassay',
                 experimental_platform: 'Meso Scale Discovery Assays (MSD)',
                 publication: ['PMID: 37379383'],
-                access_limitation: 'General research use (DUO:0000042)',
-                access_requirement: 'Not for profit, non commercial use only (DUO:0000018)',
+                access_limitation: ['General research use (DUO:0000042)'],
+                access_requirement: ['Not for profit, non commercial use only (DUO:0000018)'],
                 participant_count: 479,
                 biospecimen_count: 479,
                 file_count: 477,
@@ -137,7 +137,7 @@ export const mockStudies = [
                 expected_number_participants: 530,
                 experimental_strategy: 'Whole genome sequencing',
                 experimental_platform: 'Illumina',
-                access_limitation: 'General research use (DUO:0000042)',
+                access_limitation: ['General research use (DUO:0000042)'],
                 dbgap: 'phs002330',
                 participant_count: 530,
                 biospecimen_count: 834,
@@ -149,7 +149,7 @@ export const mockStudies = [
                 data_category: 'Clinical',
                 expected_data_category: 'Unharmonized demographic/clinical data',
                 expected_number_participants: 530,
-                access_limitation: 'General research use (DUO:0000042)',
+                access_limitation: ['General research use (DUO:0000042)'],
                 dbgap: 'phs002330',
                 participant_count: 530,
             },
@@ -251,10 +251,16 @@ const sSchema = {
                         },
                     },
                     access_limitation: {
-                        type: 'string',
+                        type: 'array',
+                        items: {
+                            type: 'string'
+                        }
                     },
                     access_requirement: {
-                        type: 'string',
+                        type: 'array',
+                        items: {
+                            type: 'string'
+                        }
                     },
                     repository: {
                         type: 'string',
