@@ -103,15 +103,16 @@ const operations = ms.flatMap(doc => {
         return undefined;
     }
     return [
-        { update: { _index: 'study_centric', _id: oDoc._id } },
+        { update: { _index: oDoc._index, _id: oDoc._id } },
         {
             doc: {
-                ...doc,
                 ...oDoc._source,
+                ...doc,
             },
         },
     ];
 });
+
 assert(operations.every(o => o !== undefined));
 const br = await client.bulk({ refresh: true, body: operations });
 assert(br.statusCode === 200 || !br.body?.errors, br);
@@ -121,6 +122,7 @@ const uItems = br.body.items;
 // Not a perfect check theoretically, but it should be largely sufficient.
 // Besides, identity ( f(x)=x ) transform is considered as an update
 const allUpdated = uItems.length === ms.length;
+console.log(sCodes)
 console.log(
     allUpdated
         ? 'All items were updated'
