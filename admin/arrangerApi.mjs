@@ -11,6 +11,7 @@ const createNewIndices = async (esClient, confIndices) => {
 };
 
 const fixExtendedMapping = async (esClient, mutations) => {
+    console.time(`fixExtendedMapping`)
     const updateFieldExtendedMappingWithClient = updateFieldExtendedMapping(esClient);
     for (const [index, mutation] of mutations.entries()) {
         console.debug('updating field = ', mutation?.field, ` ${index + 1} of ${mutations.length}`);
@@ -18,6 +19,7 @@ const fixExtendedMapping = async (esClient, mutations) => {
             ...mutation,
         });
     }
+    console.timeEnd(`fixExtendedMapping`)
 };
 
 export const ArrangerApi = {

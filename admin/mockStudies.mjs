@@ -79,6 +79,36 @@ export const mockStudies = [
                 file_count: 477,
             },
         ],
+        data_types: [
+            {
+                file_count: 1200,
+                data_type: 'Gene Fusions',
+            },
+            {
+                file_count: 477,
+                data_type: 'Protein abundance (absolute protein concentration)',
+            },
+            {
+                file_count: 433,
+                data_type: 'Aligned Reads',
+            },
+            {
+                file_count: 433,
+                data_type: 'gVCF',
+            },
+            {
+                file_count: 418,
+                data_type: 'Preprocessed metabolite relative abundance',
+            },
+            {
+                file_count: 7,
+                data_type: 'Other',
+            },
+            {
+                file_count: 7,
+                data_type: 'Variant Calls',
+            },
+        ],
         date_collection_end_year: '2020',
         date_collection_start_year: '2016',
         description:
@@ -96,6 +126,24 @@ export const mockStudies = [
             'Clinical',
         ],
         expected_number_participants: 2500,
+        experimental_strategies: [
+            {
+                file_count: 3200,
+                experimental_strategy: 'RNA-Seq',
+            },
+            {
+                file_count: 880,
+                experimental_strategy: 'Whole Genome Sequencing',
+            },
+            {
+                file_count: 447,
+                experimental_strategy: 'Multiplex Immunoassay',
+            },
+            {
+                file_count: 418,
+                experimental_strategy: 'LCMS Metabolomics',
+            },
+        ],
         external_id: 'phs001138',
         file_count: 4975,
         institution: 'Linda Crnic Institute for Down Syndrome',
@@ -237,6 +285,9 @@ const sSchema = {
                     },
                     expected_data_categories: {
                         type: 'array',
+                        items: {
+                            type: 'string',
+                        },
                     },
                     experimental_strategy: {
                         type: 'string',
@@ -253,14 +304,14 @@ const sSchema = {
                     access_limitation: {
                         type: 'array',
                         items: {
-                            type: 'string'
-                        }
+                            type: 'string',
+                        },
                     },
                     access_requirement: {
                         type: 'array',
                         items: {
-                            type: 'string'
-                        }
+                            type: 'string',
+                        },
                     },
                     repository: {
                         type: 'string',
@@ -273,6 +324,20 @@ const sSchema = {
                     },
                     biospecimen_count: {
                         type: 'integer',
+                    },
+                    file_count: {
+                        type: 'integer',
+                    },
+                },
+            },
+        },
+        data_types: {
+            type: 'array',
+            items: {
+                type: 'object',
+                properties: {
+                    data_type: {
+                        type: 'string',
                     },
                     file_count: {
                         type: 'integer',
@@ -296,6 +361,20 @@ const sSchema = {
             type: 'array',
             items: {
                 type: 'string',
+            },
+        },
+        experimental_strategies: {
+            type: 'array',
+            items: {
+                type: 'object',
+                properties: {
+                    file_count: {
+                        type: 'integer',
+                    },
+                    experimental_strategy: {
+                        type: 'string',
+                    },
+                },
             },
         },
         expected_number_participants: {
