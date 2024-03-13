@@ -89,7 +89,7 @@ const isNextFormat = allAliases.body
 const actions = releaseIndices.reduce((xs, x) => {
     const prefix = INDICES_PREFIXES.find(p => x.startsWith(p));
     if (!prefix) {
-        // Must never happen
+        // Must never happen unless there are variants for instance
         return xs;
     }
     return [
@@ -102,7 +102,7 @@ const actions = releaseIndices.reduce((xs, x) => {
         },
     ];
 }, []);
-assert(actions.length === releaseIndices.length);
+assert(actions.length <= releaseIndices.length);
 
 const displayActionQuestion = () =>
     new Promise(resolve => {

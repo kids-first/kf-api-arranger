@@ -201,6 +201,13 @@
       }
     },
     {
+      "field": "data_types",
+      "graphqlField": "study",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
       "field": "dataset",
       "graphqlField": "study",
       "extendedFieldMappingInput": {
@@ -243,7 +250,7 @@
       }
     },
     {
-      "field": "experimental_strategy",
+      "field": "experimental_strategies",
       "graphqlField": "study",
       "extendedFieldMappingInput": {
         "isArray": true
