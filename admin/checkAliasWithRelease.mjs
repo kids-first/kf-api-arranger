@@ -2,11 +2,6 @@ import { Client } from '@elastic/elasticsearch';
 import { esHost } from '../dist/src/env.js';
 import assert from 'node:assert/strict';
 
-const args = process.argv.slice(2);
-const releaseArgument = args.find(a => a.startsWith('--release:')) ?? '';
-const release = releaseArgument.split('--release:')[1];
-assert(!!release, 'Missing release value');
-
 const cbKeepClinicalIndicesOnly = x =>
     ['file', 'biospecimen', 'participant', 'study'].some(stem => x.index.includes(stem));
 
