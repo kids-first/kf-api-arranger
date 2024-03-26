@@ -41,6 +41,11 @@ const makeReleaseToCreationDate = l =>
 
 const clinicalIndicesNotAliased = clinicalIndices.filter(x => clinicalAliases.every(a => a.index !== x.index));
 const unaliasedClinicalIndicesWithCreationDate = makeReleaseToCreationDate(clinicalIndicesNotAliased);
+
+// Make sure that no aliased index contains previously found unaliased releases.
+const unaliasedReleases = unaliasedClinicalIndicesWithCreationDate.map(x => x.release)
+assert(clinicalAliases.every(x => !unaliasedReleases.includes(`re_${x.index.split('re_')[1]}`)))
+
 console.log(`===== Not Aliased`);
 
 unaliasedClinicalIndicesWithCreationDate.length
