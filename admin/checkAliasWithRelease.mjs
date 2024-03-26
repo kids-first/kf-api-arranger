@@ -22,11 +22,21 @@ const clinicalAliases = allAliases
 
 const aliasToReleases = clinicalAliases.reduce((xs, x) => {
     const r = 're' + x.index.split('_re_')[1];
+    const v = [...new Set(xs[x.alias] ? [...xs[x.alias], r] : [r])];
     return {
         ...xs,
-        [x.alias]: [...new Set(xs[x.alias] ? [...xs[x.alias], r] : [r])],
+        [x.alias]: v,
+        all: v,
     };
 }, {});
 
-console.log(aliasToReleases);
+const { all, ...entities } = aliasToReleases;
+console.log(`\n`);
 
+//not the best test but it should suffice
+const ok = hasNext ? all.length === 1 : all.length <= 2
+if (!ok) {
+    console.warn('Check if the clinical aliases are ok - There might be a problem')
+}
+console.log(`Release(s) found: ${all}`);
+console.log(entities);
