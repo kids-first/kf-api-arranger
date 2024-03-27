@@ -1,6 +1,6 @@
 //FIX: DUPLICATED CODE
 /**
- *  npm run post-re-delete-indices-helper -- release:re_20231030_1
+ *  npm run delete-clinical-indices-helper -- release:re_20231030_1
  *
  * */
 import assert from 'node:assert/strict';
@@ -45,29 +45,40 @@ if (catIndicesResponse.statusCode !== 200) {
     process.exit(1);
 }
 
-const releaseIndices = catIndicesResponse.body.map(x => x.index).sort();
-assert(Array.isArray(releaseIndices) && releaseIndices.length > 0, 'No index found. Terminating');
+const INDEX_CLINICAL_CATEGORIES = ['file', 'participant', 'study', 'biospecimen'];
+const releaseClinicalIndices = catIndicesResponse.body
+    .map(x => x.index)
+    .filter(x => INDEX_CLINICAL_CATEGORIES.some(c => x.includes(c)))
+    .sort();
+assert(Array.isArray(releaseClinicalIndices) && releaseClinicalIndices.length > 0, 'No index found. Terminating');
 
-const INDEX_CATEGORIES = ['file', 'participant', 'study', 'biospecimen'];
-const hasOnlyClinicalIndices = releaseIndices.every(r => {
+// Extra check. Might not be needed, but cheap to test.
+const hasOnlyClinicalIndices = releaseClinicalIndices.every(r => {
     const indexPrefix = r.split('_')[0];
-    return INDEX_CATEGORIES.includes(indexPrefix);
+    return (
+        ['gene', 'variant', 'member'].some(prefix => !r.startsWith(prefix)) &&
+        INDEX_CLINICAL_CATEGORIES.includes(indexPrefix)
+    );
 });
-
 assert(
     hasOnlyClinicalIndices,
-    `Oops it seems like there is at least one type missing. Requires: ${INDEX_CATEGORIES.join(', ')}. Terminating`,
+    `Oops it seems like non-clinical indices are included. Requires: ${INDEX_CLINICAL_CATEGORIES.join(
+        ', ',
+    )} only. Terminating`,
 );
 
 const displayIndicesQuestion = () =>
     new Promise(resolve => {
-        userReadline.question(`${releaseIndices.length} were found. Do you want to display them y/n? > `, answer => {
-            const yes = answer === 'y';
-            if (yes) {
-                console.log(releaseIndices);
-            }
-            resolve();
-        });
+        userReadline.question(
+            `${releaseClinicalIndices.length} were found. Do you want to display them y/n? > `,
+            answer => {
+                const yes = answer === 'y';
+                if (yes) {
+                    console.log(releaseClinicalIndices);
+                }
+                resolve();
+            },
+        );
     });
 
 isInteractive && (await displayIndicesQuestion());
@@ -84,13 +95,13 @@ if (proceedToDeletion) {
     if (!isInteractive) {
         const maxDisplay = 5;
         console.log(
-            `Deleting ${releaseIndices.length} indices: ${releaseIndices.slice(0, maxDisplay).join(', ')} ${
-                releaseIndices.length > maxDisplay ? '...' : ''
-            }`,
+            `Deleting ${releaseClinicalIndices.length} indices: ${releaseClinicalIndices
+                .slice(0, maxDisplay)
+                .join(', ')} ${releaseClinicalIndices.length > maxDisplay ? '...' : ''}`,
         );
     }
     const deleteResponse = await client.indices.delete({
-        index: releaseIndices,
+        index: releaseClinicalIndices,
     });
     console.log(deleteResponse.body);
 }
