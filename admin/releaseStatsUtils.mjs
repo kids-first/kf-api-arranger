@@ -41,7 +41,7 @@ export const getGlobalClinicalStats = async (client, re) => {
     ];
 };
 
-export const studiesStats = async (client, re, indices) => {
+export const studiesStats = async (client, re, indices, studyToId) => {
     const studies = [...new Set(indices.map(x => x.index.split('centric_')[1]))];
 
     const rAllCounts = await client.msearch({
@@ -75,7 +75,7 @@ export const studiesStats = async (client, re, indices) => {
             .slice(0, -1);
         return {
             ...xs,
-            [studyId]: { ...(xs[studyId] || {}), [entity]: x.hits.total.value, release: re },
+            [studyId]: { ...(xs[studyId] || {}), [entity]: x.hits.total.value, release: re, code: studyToId[studyId] },
         };
     }, {});
     return [undefined, allCounts];
@@ -83,3 +83,29 @@ export const studiesStats = async (client, re, indices) => {
 
 export const isClinicalIndex = index =>
     !!index && ['file', 'participant', 'study', 'biospecimen'].some(x => index.startsWith(x));
+
+export const studyIdToStudyCode = async (client, re) => {
+    const allStudiesSearchResponse = await client.search({
+        index: `${ENTITIES.study_centric}*${re}*`,
+        body: {
+            _source: ['study_id', 'study_code'],
+            size: 1000,
+        },
+    });
+
+    const allStudiesHits = allStudiesSearchResponse?.body?.hits?.hits || [];
+    if (allStudiesSearchResponse.statusCode !== 200 || allStudiesHits.length === 0) {
+        return ['Studies are expected but did not received any', undefined];
+    }
+    return [
+        undefined,
+        allStudiesHits.reduce((xs, x) => {
+            const id = x._source.study_id.toLowerCase();
+            const code = x._source.study_code;
+            return {
+                ...xs,
+                [id]: code,
+            };
+        }, {}),
+    ];
+};

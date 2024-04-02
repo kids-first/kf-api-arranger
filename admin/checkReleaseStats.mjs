@@ -1,7 +1,13 @@
 import { Client } from '@elastic/elasticsearch';
 import { esHost } from '../dist/src/env.js';
 import assert from 'node:assert/strict';
-import { getGlobalClinicalStats, studiesStats, ENTITIES, isClinicalIndex } from './releaseStatsUtils.mjs';
+import {
+    getGlobalClinicalStats,
+    studiesStats,
+    ENTITIES,
+    isClinicalIndex,
+    studyIdToStudyCode,
+} from './releaseStatsUtils.mjs';
 
 const args = process.argv.slice(2);
 const releaseArgument = args.find(a => a.startsWith('release:')) ?? '';
@@ -24,6 +30,10 @@ const globalStats = await getGlobalClinicalStats(client, release);
 assert(!globalStats[0], globalStats[0]);
 console.table(globalStats[1]);
 
+const rStudyDict = await studyIdToStudyCode(client, release);
+assert(!rStudyDict[0], rStudyDict[0]);
+const studyDict = rStudyDict[1];
+
 const catIndicesResponse = await client.cat.indices({
     index: `*_${release}`,
     h: 'index',
@@ -32,9 +42,10 @@ const catIndicesResponse = await client.cat.indices({
 assert(catIndicesResponse.statusCode === 200, 'Could not retrieve all indices correctly');
 const allIndices = catIndicesResponse.body.filter(x => isClinicalIndex(x.index));
 
-const rAllCounts = await studiesStats(client, release, allIndices);
+const rAllCounts = await studiesStats(client, release, allIndices, studyDict);
 assert(!rAllCounts[0], rAllCounts[0]);
 const allCounts = rAllCounts[1];
+
 console.table(allCounts);
 
 const FIELD_DUPLICATE_SPECIMEN = isInclude ? `container_id` : 'fhir_id';
