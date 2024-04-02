@@ -131,10 +131,16 @@ const mSearchDuplicatesResponse = await client.msearch({
 });
 const mResponsesForDuplicates = mSearchDuplicatesResponse?.body?.responses || [];
 const bucketsOfDuplicates = (() => {
-    const cbSubAggregation = ({ study, ...x }) => ({
-        ...x,
-        studyIds: [...new Set(study?.buckets?.map(b => b.key) || [])],
-    });
+    const cbSubAggregation = ({ study, ...x }) => {
+        const studyIds = [...new Set(study?.buckets?.map(b => b.key) || [])];
+        return {
+            ...x,
+            study: studyIds.map(id => ({
+                id,
+                code: studyDict[id.toLowerCase()] || '--'
+            })),
+        };
+    };
     return {
         [ENTITIES.study_centric]: mResponsesForDuplicates[0].aggregations?.duplicates?.buckets || [],
         [ENTITIES.participant_centric]: (mResponsesForDuplicates[1].aggregations?.duplicates?.buckets || []).map(
