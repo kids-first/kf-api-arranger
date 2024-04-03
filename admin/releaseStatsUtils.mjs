@@ -109,3 +109,20 @@ export const studyIdToStudyCode = async (client, re) => {
         }, {}),
     ];
 };
+
+export const getAllCountsPerStudy = async (client, re, studyDict) => {
+    const catIndicesResponse = await client.cat.indices({
+        index: `*_${re}`,
+        h: 'index',
+        format: 'json',
+    });
+    if (catIndicesResponse.statusCode !== 200) {
+        return ['Could not retrieve all indices correctly', undefined];
+    }
+    const allIndices = catIndicesResponse.body.filter(x => isClinicalIndex(x.index));
+    if (allIndices.length === 0) {
+        return [`No found data for release=${re}`, undefined];
+    }
+
+    return await studiesStats(client, re, allIndices, studyDict);
+};
