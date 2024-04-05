@@ -143,7 +143,7 @@ const duplicatesEntries = Object.entries(bucketsOfDuplicates).filter(([, v]) => 
 const duplicatesWithSummary = Object.fromEntries(
     duplicatesEntries.map(([k, v]) => [k, { total_duplicates: v.length }]),
 );
-console.table(duplicatesWithSummary);
+duplicatesWithSummary.length > 0 && console.table(duplicatesWithSummary);
 if (verbose) {
     const duplicatesWithDetails = Object.fromEntries(duplicatesEntries);
     console.log(JSON.stringify(duplicatesWithDetails, null, 4));

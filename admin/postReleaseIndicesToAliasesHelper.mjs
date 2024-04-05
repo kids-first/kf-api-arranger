@@ -4,6 +4,8 @@
  *
  *  npm run post-re-alias-helper -- release:re_test_023 action:remove
  *
+ *   npm run post-re-alias-helper -- release:re_test_023 action:remove test
+ *
  * */
 import assert from 'node:assert/strict';
 import readline from 'readline';
@@ -23,8 +25,13 @@ const ALIAS_ACTIONS = {
 const aliasAction = aliasActionArgument.split(':')?.[1]?.toLocaleLowerCase() ?? ALIAS_ACTIONS.add;
 assert(
     Object.values(ALIAS_ACTIONS).includes(aliasAction),
-    `Alias actions must be one of: "${Object.values(ALIAS_ACTIONS).join(', ')}". For instance, "-- action:${ALIAS_ACTIONS.remove}"`,
+    `Alias actions must be one of: "${Object.values(ALIAS_ACTIONS).join(', ')}". For instance, "-- action:${
+        ALIAS_ACTIONS.remove
+    }"`,
 );
+
+const testArgument = args.find(a => a.startsWith('test')) ?? '';
+const isTest = !!testArgument;
 
 const userReadline = readline.createInterface({
     input: process.stdin,
@@ -92,12 +99,13 @@ const actions = releaseIndices.reduce((xs, x) => {
         // Must never happen
         return xs;
     }
+    const alias = isNextFormat ? `next_${prefix}` : prefix;
     return [
         ...xs,
         {
             [aliasAction]: {
                 index: x,
-                alias: isNextFormat ? `next_${prefix}` : prefix,
+                alias: isTest ? `${alias}_test` : alias,
             },
         },
     ];
