@@ -17,7 +17,7 @@ import {
     updateSetTag,
 } from './endpoints/sets/setsFeature';
 import { Set, UpdateSetContentBody, UpdateSetTagBody } from './endpoints/sets/setsTypes';
-import { getStatistics, Statistics } from './endpoints/statistics';
+import { getPublicStatistics, getStatistics, Statistics } from './endpoints/statistics';
 import { RiffError } from './riff/riffError';
 
 jest.mock('./endpoints/sets/setsFeature');
@@ -109,6 +109,117 @@ describe('Express app (without Arranger)', () => {
                 .get('/statistics')
                 .expect(500, { error: 'Internal Server Error' });
             expect((getStatistics as jest.Mock).mock.calls.length).toEqual(1);
+        });
+    });
+
+    describe('GET /statistics/public', () => {
+        beforeEach(() => {
+            (getPublicStatistics as jest.Mock).mockReset();
+        });
+
+        it('should return 200 if no error occurs', async () => {
+            const expectedPublicStats = {
+                studies: [
+                    {
+                        participant_count: 334,
+                        study_id: 'SD_0TYVY1TW',
+                    },
+                    {
+                        participant_count: 183,
+                        study_id: 'SD_6FPYJQBR',
+                    },
+                    {
+                        participant_count: 759,
+                        study_id: 'SD_DK0KRWK8',
+                    },
+                    {
+                        participant_count: 50,
+                        study_id: 'SD_GPZG67FZ',
+                    },
+                    {
+                        participant_count: 774,
+                        study_id: 'SD_Q2F7XA29',
+                    },
+                    {
+                        participant_count: 356,
+                        study_id: 'SD_QBG7P5P7',
+                    },
+                    {
+                        participant_count: 599,
+                        study_id: 'SD_RM8AFW0R',
+                    },
+                    {
+                        participant_count: 185,
+                        study_id: 'SD_W0V965XZ',
+                    },
+                    {
+                        participant_count: 255,
+                        study_id: 'SD_2CEKQ05V',
+                    },
+                    {
+                        participant_count: 517,
+                        study_id: 'SD_54G4WG4R',
+                    },
+                ],
+                demographics: {
+                    sex: [
+                        {
+                            key: 'male',
+                            doc_count: 14930,
+                        },
+                        {
+                            key: 'female',
+                            doc_count: 13319,
+                        },
+                        {
+                            key: 'unknown',
+                            doc_count: 389,
+                        },
+                    ],
+                    race: [
+                        {
+                            key: 'male',
+                            doc_count: 14930,
+                        },
+                        {
+                            key: 'female',
+                            doc_count: 13319,
+                        },
+                        {
+                            key: 'unknown',
+                            doc_count: 389,
+                        },
+                    ],
+                    downSyndromeStatus: [
+                        {
+                            key: 'D21',
+                            doc_count: 26612,
+                        },
+                        {
+                            key: 'T21',
+                            doc_count: 2026,
+                        },
+                    ],
+                },
+            };
+            (getPublicStatistics as jest.Mock).mockImplementation(() => expectedPublicStats);
+
+            await request(app)
+                .get('/statistics/public')
+                .expect(200, expectedPublicStats);
+            expect((getPublicStatistics as jest.Mock).mock.calls.length).toEqual(1);
+        });
+
+        it('should return 500 if an error occurs', async () => {
+            const expectedError = new Error('OOPS');
+            (getPublicStatistics as jest.Mock).mockImplementation(() => {
+                throw expectedError;
+            });
+
+            await request(app)
+                .get('/statistics/public')
+                .expect(500, { error: 'Internal Server Error' });
+            expect((getPublicStatistics as jest.Mock).mock.calls.length).toEqual(1);
         });
     });
 

@@ -5,7 +5,8 @@ import EsInstance from '../../ElasticSearchClientInstance';
 import {
     esFileIndex,
     esParticipantIndex,
-    esStudyIndex, familyIdKey,
+    esStudyIndex,
+    familyIdKey,
     fileIdKey,
     participantIdKey,
     project,
@@ -111,4 +112,59 @@ export const getStatistics = async (): Promise<Statistics> => {
         samples: result[4],
         fileSize: result[5],
     } as Statistics;
+};
+
+export const getPublicStatistics = async (): Promise<Record<string, unknown>> => {
+    const client = EsInstance.getInstance();
+
+    const studies = await getStudiesParticipantCount(client);
+    const demographics = await getDemographics(client);
+
+    return { studies, demographics };
+};
+
+const getStudiesParticipantCount = async (client: Client): Promise<Record<string, unknown>> => {
+    const { body } = await client.search({
+        index: esStudyIndex,
+        body: {
+            _source: ['participant_count', 'study_id'],
+        },
+    });
+
+    return body.hits.hits.map(hit => hit._source);
+};
+
+const getDemographics = async (client: Client): Promise<Record<string, unknown>> => {
+    const { body } = await client.search({
+        index: esParticipantIndex,
+        size: 0,
+        body: {
+            aggs: {
+                sex: {
+                    terms: {
+                        field: 'sex',
+                        size: 10,
+                    },
+                },
+                downSyndromeStatus: {
+                    terms: {
+                        field: 'down_syndrome_status',
+                        size: 10,
+                    },
+                },
+                race: {
+                    terms: {
+                        field: 'race',
+                        size: 100,
+                    },
+                },
+            },
+        },
+    });
+
+    return {
+        sex: body.aggregations.sex.buckets,
+        race: body.aggregations.sex.buckets,
+        downSyndromeStatus: body.aggregations.downSyndromeStatus.buckets,
+    };
 };
