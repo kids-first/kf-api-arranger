@@ -29,14 +29,22 @@ for (const x of [a, b]) {
 assert(xs.length === 2);
 
 const showOperator = (n, m) => {
+    // both strings or both numbers is ok
     if (n === m) {
         return '=';
-    } else if (n > m) {
+    }
+
+    if ([n, m].some(x => !Number.isInteger(x))) {
+        return '?';
+    }
+
+    if (n > m) {
         return '>';
     } else if (n < m) {
         return '<';
     }
-    return '';
+    // should be dead code, but better safe than sorry
+    return '?';
 };
 
 const [aCounts, bCounts] = xs;

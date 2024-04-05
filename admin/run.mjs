@@ -1,5 +1,5 @@
 // docker run -u node -it --rm --network host -v ${PWD}:/code --workdir /code node:20-alpine3.18 sh
-// examples: npm run admin-project p:include e:include OR npm run admin-project p:next_prd (will default to kf)
+// examples: npm run admin-project p:include e:include test OR npm run admin-project p:next_prd (will default to kf)
 //kf-api-arranger/node_modules/@arranger/mapping-utils/dist/extendMapping.js change  rangeStep: ['double', 'float', 'half_float', 'scaled_float'].includes(type) ? 0.01 : 1 to rangeStep: 1.0
 /* eslint-disable no-console */
 import 'regenerator-runtime/runtime.js';
@@ -10,6 +10,7 @@ import { countNOfDocs, createIndexIfNeeded } from '../dist/src/esUtils.js';
 import { ArrangerApi } from './arrangerApi.mjs';
 import { projectsConfig } from './projectsConfig.mjs';
 import { esHost } from '../dist/src/env.js';
+import { clinicalIndexStems, isClinicalIndex } from './releaseStatsUtils.mjs';
 
 const hasProjectArrangerMetadataIndex = async (esClient, projectName) => {
     const r = await esClient.indices.exists({
@@ -68,6 +69,29 @@ if (envArg) {
 //===== Start =====//
 console.info(`admin-project-script - Starting script`);
 console.info(`admin-project-script - Project value is=${envVal}`);
+
+console.debug(`admin-project-script - Reaching to ElasticSearch at ${esHost}`);
+const client = await EsInstance.default.getInstance();
+
+const isTest = args.some(a => a === 'test');
+const appendTestIfNeeded = x => (isTest && isClinicalIndex(x) ? `${x}_test` : x);
+if (isTest) {
+    const allAliases = await client.cat.aliases({
+        h: 'alias',
+        format: 'json',
+    });
+    const clinicalTestAliases = allAliases.body
+        .filter(x => isClinicalIndex(x.alias) && x.alias.endsWith('_test'))
+        .map(x => x.alias);
+    if (!clinicalTestAliases || !clinicalIndexStems.every(s => clinicalTestAliases.some(x => x.includes(s)))) {
+        console.debug(
+            `admin-project-script - Terminating. When creating a test, all clinical entities must be aliased with _test suffix`,
+        );
+        console.debug(`admin-project-script - received test aliases: `);
+        console.debug(clinicalTestAliases);
+        process.exit(1);
+    }
+}
 //values are hardcoded for now, but as soon as possible, we should use env var from env.ts
 const kfNext = [
     'next_participant_centric',
@@ -77,7 +101,7 @@ const kfNext = [
     'next_variant_centric',
     'next_gene_centric',
     'members-public',
-];
+].map(x => (isTest && isClinicalIndex(x) ? appendTestIfNeeded(x) : x));
 
 const include = [
     'participant_centric',
@@ -86,7 +110,7 @@ const include = [
     'file_centric',
     'variant_centric',
     'gene_centric',
-];
+].map(x => (isTest && isClinicalIndex(x) ? appendTestIfNeeded(x) : x));
 
 const envToIndicesPrefixes = {
     kf: kfNext,
@@ -109,11 +133,13 @@ const projectName = projectArg;
 //TODO: refactor to tolerate only 1 project per conf
 const allProjectsConf = projectsConfig(projectName, envVal);
 
-const projectsConf = allProjectsConf.filter(p => {
-    const indicesInConf = p.indices.map(i => i.esIndex);
-    // indices in conf are the same as target indices from env vars?
-    return sameIndices(indicesInConf, projectIndices);
-});
+const projectsConf = allProjectsConf
+    .map(x => ({ ...x, indices: x.indices.map(i => ({ ...i, esIndex: appendTestIfNeeded(i.esIndex) })) }))
+    .filter(p => {
+        const indicesInConf = p.indices.map(i => i.esIndex);
+        // indices in conf are the same as target indices from env vars?
+        return sameIndices(indicesInConf, projectIndices);
+    });
 
 if (projectsConf.length === 0) {
     console.info(
@@ -128,9 +154,6 @@ if (projectsConf.length === 0) {
 }
 
 const projectConf = projectsConf[0];
-
-console.debug(`admin-project-script - Reaching to ElasticSearch at ${esHost}`);
-const client = await EsInstance.default.getInstance();
 
 const addArrangerProjectWithClient = ArrangerApi.addArrangerProject(client);
 

@@ -155,6 +155,13 @@
       }
     },
     {
+      "field": "contacts",
+      "graphqlField": "study",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
       "field": "controlled_access",
       "graphqlField": "study",
       "extendedFieldMappingInput": {
@@ -176,6 +183,13 @@
       }
     },
     {
+      "field": "data_types",
+      "graphqlField": "study",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
       "field": "dataset",
       "graphqlField": "study",
       "extendedFieldMappingInput": {
@@ -183,14 +197,21 @@
       }
     },
     {
-      "field": "dataset.access_limitation",
+      "field": "dataset.access_limitations",
       "graphqlField": "study",
       "extendedFieldMappingInput": {
         "isArray": true
       }
     },
     {
-      "field": "dataset.access_requirement",
+      "field": "dataset.access_requirements",
+      "graphqlField": "study",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "dataset.data_types",
       "graphqlField": "study",
       "extendedFieldMappingInput": {
         "isArray": true
@@ -204,7 +225,14 @@
       }
     },
     {
-      "field": "dataset.publication",
+      "field": "dataset.publications",
+      "graphqlField": "study",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "domains",
       "graphqlField": "study",
       "extendedFieldMappingInput": {
         "isArray": true
@@ -218,28 +246,49 @@
       }
     },
     {
-      "field": "experimental_strategy",
+      "field": "experimental_strategies",
       "graphqlField": "study",
       "extendedFieldMappingInput": {
         "isArray": true
       }
     },
     {
-      "field": "part_lifespan_stage",
+      "field": "external_ids",
       "graphqlField": "study",
       "extendedFieldMappingInput": {
         "isArray": true
       }
     },
     {
-      "field": "publication",
+      "field": "institutions",
       "graphqlField": "study",
       "extendedFieldMappingInput": {
         "isArray": true
       }
     },
     {
-      "field": "study_design",
+      "field": "investigator_names",
+      "graphqlField": "study",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "part_lifespan_stages",
+      "graphqlField": "study",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "publications",
+      "graphqlField": "study",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "study_designs",
       "graphqlField": "study",
       "extendedFieldMappingInput": {
         "isArray": true

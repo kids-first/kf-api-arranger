@@ -60,29 +60,32 @@ export const studiesStats = async (client, re, indices, studyToId) => {
             .flat(),
     });
 
+    // 404: an index that does not exist. For instance, a given study with no files.
     const responses = rAllCounts?.body?.responses || [];
-    if (!responses.every(r => r.status === 200)) {
-        return ['got problematic statuses while doing a multiple search', undefined];
+    if (responses.some(r => ![200, 404].includes(r.status))) {
+        return ['got unsupported status(es) while doing a multiple search for stats', undefined];
     }
 
     const allCounts = responses.reduce((xs, x) => {
-        const indexName = x.hits.hits[0]._index;
-        const entity = indexName.split('_sd')[0];
-        const studyId = indexName
-            .replace(entity, '')
-            .replace(re, '')
-            .slice(1)
-            .slice(0, -1);
+        const is404 = x.status === 404;
+        const indexName = is404 ? x.error.index : x.hits.hits[0]._index;
+        const entity = `${indexName.split('centric_')[0]}centric`;
+        const studyId = indexName.replace(`_${re}`, '').split('centric_')[1];
         return {
             ...xs,
-            [studyId]: { ...(xs[studyId] || {}), [entity]: x.hits.total.value, release: re, code: studyToId[studyId] },
+            [studyId]: {
+                ...(xs[studyId] || {}),
+                [entity]: x?.hits?.total?.value || 'N/A',
+                release: re,
+                code: studyToId[studyId],
+            },
         };
     }, {});
     return [undefined, allCounts];
 };
 
-export const isClinicalIndex = index =>
-    !!index && ['file', 'participant', 'study', 'biospecimen'].some(x => index.startsWith(x));
+export const clinicalIndexStems = ['file', 'participant', 'study', 'biospecimen'];
+export const isClinicalIndex = index => !!index && clinicalIndexStems.some(x => index.startsWith(x));
 
 export const studyIdToStudyCode = async (client, re) => {
     const allStudiesSearchResponse = await client.search({

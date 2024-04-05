@@ -40,7 +40,7 @@ if (invalidStudies.length > 0) {
 
 const sCodes = [...new Set(ms.map(x => x.study_code))];
 const nOfStudiesToEnhance = ms.length;
-assert(sCodes.length === nOfStudiesToEnhance);
+assert(sCodes.length === nOfStudiesToEnhance, 'Duplicated study_codes in mocks');
 
 const client = await EsInstance.default.getInstance();
 
@@ -55,7 +55,9 @@ const mappedKeys = ms.map(s => {
     const allKeysExistInMapping = sTopLevelKeys.every(sk => !!m[sk]);
     return [allKeysExistInMapping, sTopLevelKeys.filter(sk => !m[sk])];
 });
-const mappingSeemsValid = m.dataset.type === 'nested' && mappedKeys.every(x => !!x[0]);
+
+const firstLevelNestedOK = ['dataset', 'data_types', 'contacts', 'experimental_strategies'].every(k => m[k]?.type === 'nested');
+const mappingSeemsValid = firstLevelNestedOK && mappedKeys.every(x => !!x[0]);
 if (!mappingSeemsValid) {
     console.error('It seems like not all values are mapped correctly.');
     if (m.dataset.type === 'nested') {
@@ -92,28 +94,30 @@ const r = await client.search({
 assert(r.statusCode === 200);
 const hits = r.body.hits;
 assert(
-    hits.total.value === nOfStudiesToEnhance &&
+    hits.total.value <= nOfStudiesToEnhance &&
         hits?.hits &&
         hits.hits.every(h => sCodes.includes(h._source.study_code)),
 );
 
-const operations = ms.flatMap(doc => {
-    const oDoc = hits.hits.find(h => h._source.study_code === doc.study_code);
-    if (!oDoc) {
-        return undefined;
-    }
-    return [
-        { update: { _index: oDoc._index, _id: oDoc._id } },
-        {
-            doc: {
-                ...oDoc._source,
-                ...doc,
+const operations = ms
+    .flatMap(doc => {
+        const oDoc = hits.hits.find(h => h._source.study_code === doc.study_code);
+        if (!oDoc) {
+            return undefined;
+        }
+        return [
+            { update: { _index: oDoc._index, _id: oDoc._id } },
+            {
+                doc: {
+                    ...oDoc._source,
+                    ...doc,
+                },
             },
-        },
-    ];
-});
+        ];
+    })
+    .filter(x => !!x);
 
-assert(operations.every(o => o !== undefined));
+assert(operations.length >= 1);
 const br = await client.bulk({ refresh: true, body: operations });
 assert(br.statusCode === 200 || !br.body?.errors, br);
 
@@ -122,12 +126,24 @@ const uItems = br.body.items;
 // Not a perfect check theoretically, but it should be largely sufficient.
 // Besides, identity ( f(x)=x ) transform is considered as an update
 const allUpdated = uItems.length === ms.length;
-console.log(sCodes)
+const updatedDocsIds = uItems.map(x => x.update._id)
+const updatedCodes = updatedDocsIds.reduce((xs, x) => {
+    const code = hits.hits.find(h => h._id === x)?._source.study_code;
+    return code ? [...xs, code] : xs
+}, [])
+console.log('Codes updated');
+console.log(updatedCodes);
+const notUpdatedCodes = sCodes.filter(c => !updatedCodes.includes(c))
+if (notUpdatedCodes.length > 0) {
+    console.log('Codes NOT updated (no studies found with these codes in study_centric)');
+    console.log(notUpdatedCodes);
+}
 console.log(
     allUpdated
         ? 'All items were updated'
-        : `Updated ${br.body.items.length} / ${ms.length} of docs (ids=${uItems
+        : `Updated ${br.body.items.length} docs (ids=${uItems
               .map(item => item.update._id)
+              .sort()
               .join(',')})`,
 );
 
