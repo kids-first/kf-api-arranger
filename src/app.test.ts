@@ -17,7 +17,7 @@ import {
     updateSetTag,
 } from './endpoints/sets/setsFeature';
 import { Set, UpdateSetContentBody, UpdateSetTagBody } from './endpoints/sets/setsTypes';
-import { getPublicStatistics, getStatistics, Statistics } from './endpoints/statistics';
+import { getStatistics, getStudiesStatistics, Statistics } from './endpoints/statistics';
 import { RiffError } from './riff/riffError';
 
 jest.mock('./endpoints/sets/setsFeature');
@@ -90,6 +90,9 @@ describe('Express app (without Arranger)', () => {
                 samples: 6111,
                 families: 1291,
                 participants: 4330,
+                variants: 1312312,
+                genomes: 13575,
+                transcriptomes: 5454,
             };
             (getStatistics as jest.Mock).mockImplementation(() => expectedStats);
 
@@ -114,112 +117,57 @@ describe('Express app (without Arranger)', () => {
 
     describe('GET /statistics/public', () => {
         beforeEach(() => {
-            (getPublicStatistics as jest.Mock).mockReset();
+            (getStudiesStatistics as jest.Mock).mockReset();
         });
 
         it('should return 200 if no error occurs', async () => {
             const expectedPublicStats = {
                 studies: [
-                    {
-                        participant_count: 334,
-                        study_id: 'SD_0TYVY1TW',
-                    },
+                    { participant_count: 334, study_code: 'KF-EATF' },
                     {
                         participant_count: 183,
-                        study_id: 'SD_6FPYJQBR',
+                        study_code: 'KF-DSD',
                     },
-                    {
-                        participant_count: 759,
-                        study_id: 'SD_DK0KRWK8',
-                    },
+                    { participant_count: 759, study_code: 'KF-OFCAA' },
                     {
                         participant_count: 50,
-                        study_id: 'SD_GPZG67FZ',
+                        study_code: 'KF-FASD',
                     },
-                    {
-                        participant_count: 774,
-                        study_id: 'SD_Q2F7XA29',
-                    },
+                    { participant_count: 774, study_code: 'KF-RSBD' },
                     {
                         participant_count: 356,
-                        study_id: 'SD_QBG7P5P7',
+                        study_code: 'KF-IGCT',
                     },
-                    {
-                        participant_count: 599,
-                        study_id: 'SD_RM8AFW0R',
-                    },
+                    { participant_count: 599, study_code: 'KF-AIS' },
                     {
                         participant_count: 185,
-                        study_id: 'SD_W0V965XZ',
+                        study_code: 'KF-FALL',
                     },
-                    {
-                        participant_count: 255,
-                        study_id: 'SD_2CEKQ05V',
-                    },
+                    { participant_count: 255, study_code: 'KF-CDL' },
                     {
                         participant_count: 517,
-                        study_id: 'SD_54G4WG4R',
+                        study_code: 'KF-CHARGE',
                     },
                 ],
-                demographics: {
-                    sex: [
-                        {
-                            key: 'male',
-                            doc_count: 14930,
-                        },
-                        {
-                            key: 'female',
-                            doc_count: 13319,
-                        },
-                        {
-                            key: 'unknown',
-                            doc_count: 389,
-                        },
-                    ],
-                    race: [
-                        {
-                            key: 'male',
-                            doc_count: 14930,
-                        },
-                        {
-                            key: 'female',
-                            doc_count: 13319,
-                        },
-                        {
-                            key: 'unknown',
-                            doc_count: 389,
-                        },
-                    ],
-                    downSyndromeStatus: [
-                        {
-                            key: 'D21',
-                            doc_count: 26612,
-                        },
-                        {
-                            key: 'T21',
-                            doc_count: 2026,
-                        },
-                    ],
-                },
             };
-            (getPublicStatistics as jest.Mock).mockImplementation(() => expectedPublicStats);
+            (getStudiesStatistics as jest.Mock).mockImplementation(() => expectedPublicStats);
 
             await request(app)
-                .get('/statistics/public')
+                .get('/statistics/studies')
                 .expect(200, expectedPublicStats);
-            expect((getPublicStatistics as jest.Mock).mock.calls.length).toEqual(1);
+            expect((getStudiesStatistics as jest.Mock).mock.calls.length).toEqual(1);
         });
 
         it('should return 500 if an error occurs', async () => {
             const expectedError = new Error('OOPS');
-            (getPublicStatistics as jest.Mock).mockImplementation(() => {
+            (getStudiesStatistics as jest.Mock).mockImplementation(() => {
                 throw expectedError;
             });
 
             await request(app)
-                .get('/statistics/public')
+                .get('/statistics/studies')
                 .expect(500, { error: 'Internal Server Error' });
-            expect((getPublicStatistics as jest.Mock).mock.calls.length).toEqual(1);
+            expect((getStudiesStatistics as jest.Mock).mock.calls.length).toEqual(1);
         });
     });
 

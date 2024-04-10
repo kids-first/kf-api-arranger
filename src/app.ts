@@ -21,7 +21,7 @@ import {
     updateSetTag,
 } from './endpoints/sets/setsFeature';
 import { CreateSetBody, Set, SetSqon, UpdateSetContentBody, UpdateSetTagBody } from './endpoints/sets/setsTypes';
-import { getPublicStatistics, getStatistics } from './endpoints/statistics';
+import { getStatistics, getStudiesStatistics } from './endpoints/statistics';
 import { cacheTTL, esHost, keycloakURL, userApiURL } from './env';
 import { globalErrorHandler, globalErrorLogger } from './errors';
 import { STATISTICS_CACHE_ID, STATISTICS_PUBLIC_CACHE_ID, verifyCache } from './middleware/cache';
@@ -82,8 +82,8 @@ export default (keycloak: Keycloak, sqs: SQSClient, getProject: (projectId: stri
         res.json(data);
     });
 
-    app.getAsync('/statistics/public', verifyCache(STATISTICS_PUBLIC_CACHE_ID, cache), async (req, res) => {
-        const data = await getPublicStatistics();
+    app.getAsync('/statistics/studies', verifyCache(STATISTICS_PUBLIC_CACHE_ID, cache), async (req, res) => {
+        const data = await getStudiesStatistics();
         cache.set(STATISTICS_PUBLIC_CACHE_ID, data);
         res.json(data);
     });
