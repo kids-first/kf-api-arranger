@@ -106,14 +106,19 @@ export const fetchVariantStats = async (client: Client): Promise<number> => {
 
 export const fetchGenomesStats = async (client: Client): Promise<number> => {
     const { body } = await client.count({
-        index: esFileIndex,
+        index: esParticipantIndex,
         body: {
             query: {
                 bool: {
                     must: [
                         {
-                            term: {
-                                file_format: 'cram',
+                            nested: {
+                                path: 'files',
+                                query: {
+                                    term: {
+                                        'files.file_format': 'cram',
+                                    },
+                                },
                             },
                         },
                         {
@@ -121,10 +126,10 @@ export const fetchGenomesStats = async (client: Client): Promise<number> => {
                                 should: [
                                     {
                                         nested: {
-                                            path: 'sequencing_experiment',
+                                            path: 'files.sequencing_experiment',
                                             query: {
                                                 term: {
-                                                    'sequencing_experiment.experiment_strategy':
+                                                    'files.sequencing_experiment.experiment_strategy':
                                                         'Whole Genome Sequencing',
                                                 },
                                             },
@@ -132,10 +137,10 @@ export const fetchGenomesStats = async (client: Client): Promise<number> => {
                                     },
                                     {
                                         nested: {
-                                            path: 'sequencing_experiment',
+                                            path: 'files.sequencing_experiment',
                                             query: {
                                                 term: {
-                                                    'sequencing_experiment.experiment_strategy': 'WGS',
+                                                    'files.sequencing_experiment.experiment_strategy': 'WGS',
                                                 },
                                             },
                                         },
@@ -154,17 +159,17 @@ export const fetchGenomesStats = async (client: Client): Promise<number> => {
 
 export const fetchTranscriptomesStats = async (client: Client): Promise<number> => {
     const { body } = await client.count({
-        index: esFileIndex,
+        index: esParticipantIndex,
         body: {
             query: {
                 bool: {
                     must: [
                         {
                             nested: {
-                                path: 'sequencing_experiment',
+                                path: 'files.sequencing_experiment',
                                 query: {
                                     term: {
-                                        'sequencing_experiment.experiment_strategy': 'RNA-Seq',
+                                        'files.sequencing_experiment.experiment_strategy': 'RNA-Seq',
                                     },
                                 },
                             },
@@ -172,9 +177,36 @@ export const fetchTranscriptomesStats = async (client: Client): Promise<number> 
                         {
                             bool: {
                                 should: [
-                                    { term: { file_format: 'cram' } },
-                                    { term: { file_format: 'fastq' } },
-                                    { term: { file_format: 'bam' } },
+                                    {
+                                        nested: {
+                                            path: 'files',
+                                            query: {
+                                                term: {
+                                                    'files.file_format': 'cram',
+                                                },
+                                            },
+                                        },
+                                    },
+                                    {
+                                        nested: {
+                                            path: 'files',
+                                            query: {
+                                                term: {
+                                                    'files.file_format': 'fastq',
+                                                },
+                                            },
+                                        },
+                                    },
+                                    {
+                                        nested: {
+                                            path: 'files',
+                                            query: {
+                                                term: {
+                                                    'files.file_format': 'bam',
+                                                },
+                                            },
+                                        },
+                                    },
                                 ],
                             },
                         },
@@ -193,8 +225,8 @@ export const getStatistics = async (): Promise<Statistics> => {
         fetchFileStats(client),
         fetchStudyStats(client),
         fetchParticipantStats(client),
-        fetchFamilyStats(client),
         fetchBiospecimenStats(client),
+        fetchFamilyStats(client),
         fetchFileSizeStats(client),
         fetchVariantStats(client),
         fetchGenomesStats(client),
