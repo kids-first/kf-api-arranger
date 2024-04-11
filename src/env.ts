@@ -39,7 +39,7 @@ export const studyIdKey = process.env.STUDY_ID_KEY || 'kf_id';
 export const participantIdKey = process.env.PARTICIPANT_ID_KEY || 'kf_id';
 export const biospecimenIdKey = process.env.BIOSPECIMEN_ID_KEY || 'kf_id';
 export const familyIdKey = process.env.FAMILY_ID_KEY || 'family_id';
-export const variantIdKey = process.env.VARIANT_ID_KEY || '_id';
+export const variantIdKey = process.env.VARIANT_ID_KEY || 'locus';
 
 export const participantKey = process.env.TO_PARTICIPANT_ID_KEY || 'kf_id';
 export const participantFileKey = process.env.TO_PARTICIPANT_FILE_ID_KEY || 'kf_id';

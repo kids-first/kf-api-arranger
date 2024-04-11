@@ -3,7 +3,7 @@ import NodeCache from 'node-cache';
 
 export const STATISTICS_CACHE_ID = 'statistics';
 
-export const STATISTICS_PUBLIC_CACHE_ID = 'statistics_public';
+export const STATISTICS_PUBLIC_CACHE_ID = 'statistics_studies';
 
 export const verifyCache = (cacheId: string, cache: NodeCache) => (
     _req: Request,
