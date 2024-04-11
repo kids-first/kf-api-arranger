@@ -220,7 +220,7 @@ export const getStudiesStatistics = async (): Promise<Record<string, unknown>> =
     const { body } = await client.search({
         index: esStudyIndex,
         body: {
-            size: 20,
+            size: 500,
             _source: ['participant_count', 'study_code'],
         },
     });
