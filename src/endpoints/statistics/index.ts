@@ -105,43 +105,57 @@ export const fetchVariantStats = async (client: Client): Promise<number> => {
 };
 
 export const fetchGenomesStats = async (client: Client): Promise<number> => {
-    const { body } = await client.search({
+    const { body } = await client.count({
         index: esFileIndex,
         body: {
-            size: 0,
             query: {
                 bool: {
                     must: [
-                        {
-                            nested: {
-                                path: 'sequencing_experiment',
-                                query: {
-                                    term: {
-                                        'sequencing_experiment.experiment_strategy': 'WGS',
-                                    },
-                                },
-                            },
-                        },
                         {
                             term: {
                                 file_format: 'cram',
                             },
                         },
+                        {
+                            bool: {
+                                should: [
+                                    {
+                                        nested: {
+                                            path: 'sequencing_experiment',
+                                            query: {
+                                                term: {
+                                                    'sequencing_experiment.experiment_strategy':
+                                                        'Whole Genome Sequencing',
+                                                },
+                                            },
+                                        },
+                                    },
+                                    {
+                                        nested: {
+                                            path: 'sequencing_experiment',
+                                            query: {
+                                                term: {
+                                                    'sequencing_experiment.experiment_strategy': 'WGS',
+                                                },
+                                            },
+                                        },
+                                    },
+                                ],
+                            },
+                        },
                     ],
                 },
             },
-            aggs: { types_count: { value_count: { field: 'file_format' } } },
         },
     });
 
-    return body?.aggregations?.types_count.value;
+    return body?.count;
 };
 
 export const fetchTranscriptomesStats = async (client: Client): Promise<number> => {
-    const { body } = await client.search({
+    const { body } = await client.count({
         index: esFileIndex,
         body: {
-            size: 0,
             query: {
                 bool: {
                     must: [
@@ -155,31 +169,22 @@ export const fetchTranscriptomesStats = async (client: Client): Promise<number> 
                                 },
                             },
                         },
-                    ],
-                    should: [
                         {
-                            term: {
-                                file_format: 'cram',
-                            },
-                        },
-                        {
-                            term: {
-                                file_format: 'fastq',
-                            },
-                        },
-                        {
-                            term: {
-                                file_format: 'bam',
+                            bool: {
+                                should: [
+                                    { term: { file_format: 'cram' } },
+                                    { term: { file_format: 'fastq' } },
+                                    { term: { file_format: 'bam' } },
+                                ],
                             },
                         },
                     ],
                 },
             },
-            aggs: { types_count: { value_count: { field: 'file_format' } } },
         },
     });
 
-    return body?.aggregations?.types_count.value;
+    return body?.count;
 };
 
 export const getStatistics = async (): Promise<Statistics> => {
