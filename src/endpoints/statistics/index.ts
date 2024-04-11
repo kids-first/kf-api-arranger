@@ -15,8 +15,8 @@ import {
     PROJECT_KIDSFIRST,
     studyIdKey,
 } from '../../env';
-import { fetchBiospecimenStats as fetchIncludeBiospecimen } from './includeBiospecimen';
-import { fetchBiospecimenStats as fetchKidsfirstBiospecimen } from './kidsfirstBiospecimen';
+import { fetchBiospecimenStats as fetchIncludeBiospecimen } from './include/biospecimen';
+import { fetchBiospecimenStats as fetchKidsfirstBiospecimen } from './kidsfirst/biospecimen';
 
 export type Diagnosis = {
     mondo_id: string;
