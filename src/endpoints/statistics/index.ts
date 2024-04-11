@@ -5,7 +5,9 @@ import EsInstance from '../../ElasticSearchClientInstance';
 import {
     esFileIndex,
     esParticipantIndex,
-    esStudyIndex, familyIdKey,
+    esStudyIndex,
+    esVariantIndex,
+    familyIdKey,
     fileIdKey,
     participantIdKey,
     project,
@@ -23,6 +25,9 @@ export type Statistics = {
     samples: number;
     families: number;
     participants: number;
+    variants: number;
+    genomes: number;
+    transcriptomes: number;
 };
 
 const fetchFileStats = async (client: Client): Promise<number> => {
@@ -92,23 +97,127 @@ const fetchBiospecimenStats = async (client: Client): Promise<number> => {
     return Promise.resolve(0);
 };
 
+export const fetchVariantStats = async (client: Client): Promise<number> => {
+    const { body } = await client.count({
+        index: esVariantIndex,
+    });
+    return body?.count;
+};
+
+export const fetchGenomesStats = async (client: Client): Promise<number> => {
+    const { body } = await client.search({
+        index: esFileIndex,
+        body: {
+            size: 0,
+            query: {
+                bool: {
+                    must: [
+                        {
+                            nested: {
+                                path: 'sequencing_experiment',
+                                query: {
+                                    term: {
+                                        'sequencing_experiment.experiment_strategy': 'WGS',
+                                    },
+                                },
+                            },
+                        },
+                        {
+                            term: {
+                                file_format: 'cram',
+                            },
+                        },
+                    ],
+                },
+            },
+            aggs: { types_count: { value_count: { field: 'file_format' } } },
+        },
+    });
+
+    return body?.aggregations?.types_count.value;
+};
+
+export const fetchTranscriptomesStats = async (client: Client): Promise<number> => {
+    const { body } = await client.search({
+        index: esFileIndex,
+        body: {
+            size: 0,
+            query: {
+                bool: {
+                    must: [
+                        {
+                            nested: {
+                                path: 'sequencing_experiment',
+                                query: {
+                                    term: {
+                                        'sequencing_experiment.experiment_strategy': 'RNA-Seq',
+                                    },
+                                },
+                            },
+                        },
+                    ],
+                    should: [
+                        {
+                            term: {
+                                file_format: 'cram',
+                            },
+                        },
+                        {
+                            term: {
+                                file_format: 'fastq',
+                            },
+                        },
+                        {
+                            term: {
+                                file_format: 'bam',
+                            },
+                        },
+                    ],
+                },
+            },
+            aggs: { types_count: { value_count: { field: 'file_format' } } },
+        },
+    });
+
+    return body?.aggregations?.types_count.value;
+};
+
 export const getStatistics = async (): Promise<Statistics> => {
     const client = EsInstance.getInstance();
-    const result = await Promise.all([
+    const results = await Promise.all([
         fetchFileStats(client),
         fetchStudyStats(client),
         fetchParticipantStats(client),
         fetchFamilyStats(client),
         fetchBiospecimenStats(client),
         fetchFileSizeStats(client),
+        fetchVariantStats(client),
+        fetchGenomesStats(client),
+        fetchTranscriptomesStats(client),
     ]);
 
     return {
-        files: result[0],
-        studies: result[1],
-        participants: result[2],
-        families: result[3],
-        samples: result[4],
-        fileSize: result[5],
-    } as Statistics;
+        files: results[0],
+        studies: results[1],
+        participants: results[2],
+        samples: results[3],
+        families: results[4],
+        fileSize: results[5],
+        variants: results[6],
+        genomes: results[7],
+        transcriptomes: results[8],
+    };
+};
+
+export const getStudiesStatistics = async (): Promise<Record<string, unknown>> => {
+    const client = EsInstance.getInstance();
+
+    const { body } = await client.search({
+        index: esStudyIndex,
+        body: {
+            _source: ['participant_count', 'study_code'],
+        },
+    });
+
+    return body.hits.hits.map(hit => hit._source);
 };

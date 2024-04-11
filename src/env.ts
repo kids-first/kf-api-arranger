@@ -21,6 +21,7 @@ export const esFileIndex = process.env.ES_FILE_INDEX || 'file_centric';
 export const esStudyIndex = process.env.ES_STUDY_INDEX || 'study_centric';
 export const esParticipantIndex = process.env.ES_PARTICIPANT_INDEX || 'participant_centric';
 export const esBiospecimenIndex = process.env.ES_BIOSPECIMEN_INDEX || 'biospecimen_centric';
+export const esVariantIndex = process.env.ES_VARIANT_INDEX || 'variant_centric';
 
 export const maxNOfGenomicFeatureSuggestions = process.env.MAX_NUMBER_OF_GF_SUGGESTIONS || 5;
 
@@ -38,6 +39,7 @@ export const studyIdKey = process.env.STUDY_ID_KEY || 'kf_id';
 export const participantIdKey = process.env.PARTICIPANT_ID_KEY || 'kf_id';
 export const biospecimenIdKey = process.env.BIOSPECIMEN_ID_KEY || 'kf_id';
 export const familyIdKey = process.env.FAMILY_ID_KEY || 'family_id';
+export const variantIdKey = process.env.VARIANT_ID_KEY || 'locus';
 
 export const participantKey = process.env.TO_PARTICIPANT_ID_KEY || 'kf_id';
 export const participantFileKey = process.env.TO_PARTICIPANT_FILE_ID_KEY || 'kf_id';

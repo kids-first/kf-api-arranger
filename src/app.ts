@@ -21,10 +21,10 @@ import {
     updateSetTag,
 } from './endpoints/sets/setsFeature';
 import { CreateSetBody, Set, SetSqon, UpdateSetContentBody, UpdateSetTagBody } from './endpoints/sets/setsTypes';
-import { getStatistics } from './endpoints/statistics';
+import { getStatistics, getStudiesStatistics } from './endpoints/statistics';
 import { cacheTTL, esHost, keycloakURL, userApiURL } from './env';
 import { globalErrorHandler, globalErrorLogger } from './errors';
-import { STATISTICS_CACHE_ID, verifyCache } from './middleware/cache';
+import { STATISTICS_CACHE_ID, STATISTICS_PUBLIC_CACHE_ID, verifyCache } from './middleware/cache';
 import { injectBodyHttpHeaders } from './middleware/injectBodyHttpHeaders';
 import { resolveSetIdMiddleware } from './middleware/resolveSetIdInSqon';
 
@@ -79,6 +79,12 @@ export default (keycloak: Keycloak, sqs: SQSClient, getProject: (projectId: stri
     app.getAsync('/statistics', verifyCache(STATISTICS_CACHE_ID, cache), async (req, res) => {
         const data = await getStatistics();
         cache.set(STATISTICS_CACHE_ID, data);
+        res.json(data);
+    });
+
+    app.getAsync('/statistics/studies', verifyCache(STATISTICS_PUBLIC_CACHE_ID, cache), async (req, res) => {
+        const data = await getStudiesStatistics();
+        cache.set(STATISTICS_PUBLIC_CACHE_ID, data);
         res.json(data);
     });
 
