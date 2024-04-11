@@ -1,6 +1,6 @@
 import { Client } from '@elastic/elasticsearch';
 
-import { biospecimenIdKey, esParticipantIndex } from '../../env';
+import { biospecimenIdKey, esParticipantIndex } from '../../../env';
 
 export const fetchBiospecimenStats = async (client: Client): Promise<number> => {
     const { body } = await client.search({
