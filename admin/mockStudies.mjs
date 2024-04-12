@@ -185,7 +185,7 @@ export const mockStudies = [
         date_collection_start_year: '2016',
         description:
             'The Human Trisome Project (HTP) is a large and comprehensive natural history study of Down syndrome involving collection of deep clinical data, multimodal phenotyping, a multi-dimensional biobank, generation of pan-omics datasets, and rapid release of data. The HTP has enabled many discoveries about the pathophysiology of Down syndrome, leading to new clinical trials testing  therapies to improve diverse health outcomes in this population.',
-        domains: ['All co-occurring conditions'],
+        domains: ['All Co-occurring Conditions'],
         expected_data_categories: [
             'Genomics',
             'Demographic',
@@ -571,7 +571,7 @@ export const mockStudies = [
         selection_criteria:
             'Inclusion criteria: documented (parent-report or medical record) live birth with trisomy 21 (including standard, translocation, mosaic karyotypes), no age restrictions, males and females, no ethnic or race restrictions, documentation related to heart status at birth (parent-report or medical record) on a subset, documentation related to a diagnosis of acute lymphoblastic leukemia on a subset. Exclusion criteria: lack of consent and disease-specific or more restrictive data sharing',
         study_code: 'DS360-CHD',
-        study_designs: ['Case-control,parent-offspring trios, germline-tumor pairs'],
+        study_designs: ['Case-control, parent-offspring trios, germline-tumor pairs'],
         study_name:
             'INCLUDE: (Sherman) Genomic Analysis of Congenital Heart Defects and Acute Lymphoblastic Leukemia in Children with Down Syndrome',
         website: '',
