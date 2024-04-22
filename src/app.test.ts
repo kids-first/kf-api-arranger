@@ -93,6 +93,24 @@ describe('Express app (without Arranger)', () => {
                 variants: 1312312,
                 genomes: 13575,
                 transcriptomes: 5454,
+                sex: {
+                    male: 4387,
+                    female: 4302,
+                    unknown: 4,
+                    other: 3,
+                },
+                downSyndromeStatus: {
+                    T21: 7266,
+                    D21: 1430,
+                },
+                ethnicity: {
+                    'Not Hispanic or Latino': 6710,
+                    'Hispanic or Latino': 850,
+                    Unknown: 579,
+                    'asked but unknown': 494,
+                    NoInformation: 30,
+                    unknown: 10,
+                },
             };
             (getStatistics as jest.Mock).mockImplementation(() => expectedStats);
 

@@ -28,6 +28,9 @@ export type Statistics = {
     variants: number;
     genomes: number;
     transcriptomes: number;
+    sex: Record<string, number>;
+    downSyndromeStatus: Record<string, number>;
+    ethnicity: Record<string, number>;
 };
 
 const fetchFileStats = async (client: Client): Promise<number> => {
@@ -219,6 +222,37 @@ export const fetchTranscriptomesStats = async (client: Client): Promise<number> 
     return body?.count;
 };
 
+export const fetchDemographicsStats = async (client: Client): Promise<Record<string, number>[]> => {
+    const response = await client.msearch({
+        body: [
+            { index: esParticipantIndex },
+            { size: 0, aggs: { sex: { terms: { field: 'sex', size: 10 } } } },
+            { index: esParticipantIndex },
+            { size: 0, aggs: { down_syndrome_status: { terms: { field: 'down_syndrome_status', size: 10 } } } },
+            { index: esParticipantIndex },
+            { size: 0, aggs: { ethnicity: { terms: { field: 'ethnicity', size: 10 } } } },
+        ],
+    });
+
+    const sex = response.body.responses[0].aggregations.sex.buckets.reduce((acc, curr) => {
+        acc[curr.key] = curr.doc_count;
+        return acc;
+    }, {});
+    const downSyndromeStatus = response.body.responses[1].aggregations.down_syndrome_status.buckets.reduce(
+        (acc, curr) => {
+            acc[curr.key] = curr.doc_count;
+            return acc;
+        },
+        {},
+    );
+    const ethnicity = response.body.responses[2].aggregations.ethnicity.buckets.reduce((acc, curr) => {
+        acc[curr.key] = curr.doc_count;
+        return acc;
+    }, {});
+
+    return [sex, downSyndromeStatus, ethnicity];
+};
+
 export const getStatistics = async (): Promise<Statistics> => {
     const client = EsInstance.getInstance();
     const results = await Promise.all([
@@ -231,6 +265,7 @@ export const getStatistics = async (): Promise<Statistics> => {
         fetchVariantStats(client),
         fetchGenomesStats(client),
         fetchTranscriptomesStats(client),
+        fetchDemographicsStats(client),
     ]);
 
     return {
@@ -243,6 +278,9 @@ export const getStatistics = async (): Promise<Statistics> => {
         variants: results[6],
         genomes: results[7],
         transcriptomes: results[8],
+        sex: results[9][0],
+        downSyndromeStatus: results[9][1],
+        ethnicity: results[9][2],
     };
 };
 
