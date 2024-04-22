@@ -225,11 +225,11 @@ export const fetchTranscriptomesStats = async (client: Client): Promise<number> 
 export const fetchDemographicsStats = async (client: Client): Promise<Record<string, number>[]> => {
     const response = await client.msearch({
         body: [
-            { index: 'participant_centric' },
+            { index: esParticipantIndex },
             { size: 0, aggs: { sex: { terms: { field: 'sex', size: 10 } } } },
-            { index: 'participant_centric' },
+            { index: esParticipantIndex },
             { size: 0, aggs: { down_syndrome_status: { terms: { field: 'down_syndrome_status', size: 10 } } } },
-            { index: 'participant_centric' },
+            { index: esParticipantIndex },
             { size: 0, aggs: { ethnicity: { terms: { field: 'ethnicity', size: 10 } } } },
         ],
     });
