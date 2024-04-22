@@ -111,6 +111,48 @@ describe('Express app (without Arranger)', () => {
                     NoInformation: 30,
                     unknown: 10,
                 },
+                diagnosis: [
+                    {
+                        mondo_id: 'speech disorder (MONDO:0004730)',
+                        count: 2277,
+                    },
+                    {
+                        mondo_id: 'hearing loss disorder (MONDO:0005365)',
+                        count: 1978,
+                    },
+                    {
+                        mondo_id: 'intellectual disability (MONDO:0001071)',
+                        count: 1970,
+                    },
+                    {
+                        mondo_id: 'hypothyroidism (MONDO:0005420)',
+                        count: 1734,
+                    },
+                    {
+                        mondo_id: 'sleep apnea syndrome (MONDO:0005296)',
+                        count: 1360,
+                    },
+                    {
+                        mondo_id: 'atrial septal defect (MONDO:0006664)',
+                        count: 1243,
+                    },
+                    {
+                        mondo_id: 'ventricular septal defect (MONDO:0002070)',
+                        count: 1105,
+                    },
+                    {
+                        mondo_id: 'specific language impairment (MONDO:0000724)',
+                        count: 1068,
+                    },
+                    {
+                        mondo_id: 'congenital heart disease (MONDO:0005453)',
+                        count: 991,
+                    },
+                    {
+                        mondo_id: 'gastroesophageal reflux disease (MONDO:0007186)',
+                        count: 867,
+                    },
+                ],
             };
             (getStatistics as jest.Mock).mockImplementation(() => expectedStats);
 
