@@ -232,15 +232,15 @@ export const fetchDemographicsStats = async (client: Client): Promise<Record<str
     const response = await client.msearch({
         body: [
             { index: esParticipantIndex },
-            { size: 0, aggs: { race: { terms: { field: 'race', size: 20 } } } },
+            { size: 0, aggs: { sex: { terms: { field: 'sex', size: 10 } } } },
             { index: esParticipantIndex },
             { size: 0, aggs: { down_syndrome_status: { terms: { field: 'down_syndrome_status', size: 10 } } } },
             { index: esParticipantIndex },
-            { size: 0, aggs: { sex: { terms: { field: 'sex', size: 20 } } } },
+            { size: 0, aggs: { race: { terms: { field: 'race', size: 20 } } } },
         ],
     });
 
-    const race = response.body.responses[0].aggregations.race.buckets.reduce((acc, curr) => {
+    const sex = response.body.responses[0].aggregations.sex.buckets.reduce((acc, curr) => {
         acc[curr.key] = curr.doc_count;
         return acc;
     }, {});
@@ -251,12 +251,12 @@ export const fetchDemographicsStats = async (client: Client): Promise<Record<str
         },
         {},
     );
-    const sex = response.body.responses[2].aggregations.sex.buckets.reduce((acc, curr) => {
+    const race = response.body.responses[2].aggregations.race.buckets.reduce((acc, curr) => {
         acc[curr.key] = curr.doc_count;
         return acc;
     }, {});
 
-    return [race, downSyndromeStatus, sex];
+    return [sex, downSyndromeStatus, race];
 };
 
 export const fetchTopDiagnosis = async (client: Client): Promise<Diagnosis[]> => {
@@ -316,9 +316,9 @@ export const getStatistics = async (): Promise<Statistics> => {
         variants: results[6],
         genomes: results[7],
         transcriptomes: results[8],
-        race: results[9][0],
+        sex: results[9][0],
         downSyndromeStatus: results[9][1],
-        sex: results[9][2],
+        race: results[9][2],
         diagnosis,
     };
 };

@@ -93,6 +93,16 @@ describe('Express app (without Arranger)', () => {
                 variants: 1312312,
                 genomes: 13575,
                 transcriptomes: 5454,
+                sex: {
+                    male: 4387,
+                    female: 4302,
+                    unknown: 4,
+                    other: 3,
+                },
+                downSyndromeStatus: {
+                    T21: 7266,
+                    D21: 1430,
+                },
                 race: {
                     White: 7029,
                     'Black or African American': 618,
@@ -106,16 +116,6 @@ describe('Express app (without Arranger)', () => {
                     'American Indian or Alaska Native': 34,
                     'Native Hawaiian or Other Pacific Islander': 8,
                     'not available': 3,
-                },
-                downSyndromeStatus: {
-                    T21: 7266,
-                    D21: 1430,
-                },
-                sex: {
-                    male: 4387,
-                    female: 4302,
-                    unknown: 4,
-                    other: 3,
                 },
                 diagnosis: [
                     {
