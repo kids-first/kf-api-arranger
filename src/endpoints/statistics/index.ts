@@ -18,6 +18,11 @@ import {
 import { fetchBiospecimenStats as fetchIncludeBiospecimen } from './includeBiospecimen';
 import { fetchBiospecimenStats as fetchKidsfirstBiospecimen } from './kidsfirstBiospecimen';
 
+export type Diagnosis = {
+    mondo_id: string;
+    count: number;
+};
+
 export type Statistics = {
     files: number;
     fileSize: string;
@@ -31,6 +36,7 @@ export type Statistics = {
     sex: Record<string, number>;
     downSyndromeStatus: Record<string, number>;
     ethnicity: Record<string, number>;
+    diagnosis: Diagnosis[];
 };
 
 const fetchFileStats = async (client: Client): Promise<number> => {
@@ -253,6 +259,36 @@ export const fetchDemographicsStats = async (client: Client): Promise<Record<str
     return [sex, downSyndromeStatus, ethnicity];
 };
 
+export const fetchTopDiagnosis = async (client: Client): Promise<Diagnosis[]> => {
+    const response = await client.search({
+        index: esParticipantIndex,
+        body: {
+            size: 0,
+            aggs: {
+                top_diagnosis_ids: {
+                    nested: {
+                        path: 'diagnosis',
+                    },
+                    aggs: {
+                        filtered_diagnosis_ids: {
+                            terms: {
+                                field: 'diagnosis.mondo_id_diagnosis',
+                                size: 10,
+                                exclude: '.*MONDO:(0700030|0008608|0700129|0700127|0700130|0700128|0700126).*',
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    });
+
+    return response.body.aggregations.top_diagnosis_ids.filtered_diagnosis_ids.buckets.map(bucket => ({
+        mondo_id: bucket.key,
+        count: bucket.doc_count,
+    }));
+};
+
 export const getStatistics = async (): Promise<Statistics> => {
     const client = EsInstance.getInstance();
     const results = await Promise.all([
@@ -268,6 +304,8 @@ export const getStatistics = async (): Promise<Statistics> => {
         fetchDemographicsStats(client),
     ]);
 
+    const diagnosis = await fetchTopDiagnosis(client);
+
     return {
         files: results[0],
         studies: results[1],
@@ -281,6 +319,7 @@ export const getStatistics = async (): Promise<Statistics> => {
         sex: results[9][0],
         downSyndromeStatus: results[9][1],
         ethnicity: results[9][2],
+        diagnosis,
     };
 };
 
