@@ -274,15 +274,7 @@ export const fetchTopDiagnosis = async (client: Client): Promise<Diagnosis[]> =>
                             terms: {
                                 field: 'diagnosis.mondo_id_diagnosis',
                                 size: 10,
-                                exclude: [
-                                    'complete trisomy 21 (MONDO:0700030)',
-                                    'Down syndrome (MONDO:0008608)',
-                                    'mosaic translocation Down syndrome (MONDO:0700129)',
-                                    'mosaic trisomy 21 (MONDO:0700127)',
-                                    'partial segmental duplication (MONDO:0700130)',
-                                    'translocation Down syndrome (MONDO:0700128)',
-                                    'trisomy 21 (MONDO:0700126)',
-                                ],
+                                exclude: '.*MONDO:(0700030|0008608|0700129|0700127|0700130|0700128|0700126).*',
                             },
                         },
                     },
