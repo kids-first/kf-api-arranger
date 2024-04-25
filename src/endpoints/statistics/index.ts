@@ -35,7 +35,7 @@ export type Statistics = {
     transcriptomes: number;
     sex: Record<string, number>;
     downSyndromeStatus: Record<string, number>;
-    ethnicity: Record<string, number>;
+    race: Record<string, number>;
     diagnosis: Diagnosis[];
 };
 
@@ -236,7 +236,7 @@ export const fetchDemographicsStats = async (client: Client): Promise<Record<str
             { index: esParticipantIndex },
             { size: 0, aggs: { down_syndrome_status: { terms: { field: 'down_syndrome_status', size: 10 } } } },
             { index: esParticipantIndex },
-            { size: 0, aggs: { ethnicity: { terms: { field: 'ethnicity', size: 10 } } } },
+            { size: 0, aggs: { race: { terms: { field: 'race', size: 20 } } } },
         ],
     });
 
@@ -251,12 +251,12 @@ export const fetchDemographicsStats = async (client: Client): Promise<Record<str
         },
         {},
     );
-    const ethnicity = response.body.responses[2].aggregations.ethnicity.buckets.reduce((acc, curr) => {
+    const race = response.body.responses[2].aggregations.race.buckets.reduce((acc, curr) => {
         acc[curr.key] = curr.doc_count;
         return acc;
     }, {});
 
-    return [sex, downSyndromeStatus, ethnicity];
+    return [sex, downSyndromeStatus, race];
 };
 
 export const fetchTopDiagnosis = async (client: Client): Promise<Diagnosis[]> => {
@@ -318,7 +318,7 @@ export const getStatistics = async (): Promise<Statistics> => {
         transcriptomes: results[8],
         sex: results[9][0],
         downSyndromeStatus: results[9][1],
-        ethnicity: results[9][2],
+        race: results[9][2],
         diagnosis,
     };
 };

@@ -103,13 +103,19 @@ describe('Express app (without Arranger)', () => {
                     T21: 7266,
                     D21: 1430,
                 },
-                ethnicity: {
-                    'Not Hispanic or Latino': 6710,
-                    'Hispanic or Latino': 850,
-                    Unknown: 579,
-                    'asked but unknown': 494,
-                    NoInformation: 30,
-                    unknown: 10,
+                race: {
+                    White: 7029,
+                    'Black or African American': 618,
+                    Unknown: 408,
+                    Asian: 269,
+                    NoInformation: 131,
+                    other: 66,
+                    'asked but unknown': 58,
+                    'More than one race': 37,
+                    unknown: 35,
+                    'American Indian or Alaska Native': 34,
+                    'Native Hawaiian or Other Pacific Islander': 8,
+                    'not available': 3,
                 },
                 diagnosis: [
                     {
