@@ -7,6 +7,7 @@ import assert from 'node:assert/strict';
 import readline from 'readline';
 import { Client } from '@elastic/elasticsearch';
 import { esHost } from '../dist/src/env.js';
+import { cbKeepClinicalIndicesOnly } from './utils.mjs';
 
 const args = process.argv.slice(2);
 const releaseArgument = args.find(a => a.startsWith('release:')) ?? '';
@@ -66,6 +67,19 @@ assert(
         ', ',
     )} only. Terminating`,
 );
+
+const rAllAliases = await client.cat.aliases({
+    h: 'alias,index',
+    format: 'json',
+});
+
+assert(rAllAliases.statusCode === 200);
+
+const allAliases = rAllAliases.body;
+const clinicalAliases = allAliases.filter(cbKeepClinicalIndicesOnly);
+
+const isAliased = clinicalAliases.some(x => x.index.includes(releaseTag));
+assert(!isAliased, `${releaseTag} is aliased`);
 
 const displayIndicesQuestion = () =>
     new Promise(resolve => {

@@ -4,6 +4,7 @@
 import assert from 'node:assert/strict';
 import { Client } from '@elastic/elasticsearch';
 import { esHost } from '../dist/src/env.js';
+import { cbKeepClinicalIndicesOnly } from './utils.mjs';
 
 const client = new Client({ node: esHost });
 
@@ -17,9 +18,6 @@ if (catIndicesResponse.statusCode !== 200) {
     console.error('Received bad response', catIndicesResponse, ' Terminating.');
     process.exit(1);
 }
-
-const cbKeepClinicalIndicesOnly = x =>
-    ['file', 'biospecimen', 'participant', 'study'].some(stem => x.index.includes(stem));
 
 const clinicalIndices = catIndicesResponse.body.filter(cbKeepClinicalIndicesOnly);
 assert(Array.isArray(clinicalIndices) && clinicalIndices.length > 0, 'No index found. Terminating');
@@ -43,8 +41,8 @@ const clinicalIndicesNotAliased = clinicalIndices.filter(x => clinicalAliases.ev
 const unaliasedClinicalIndicesWithCreationDate = makeReleaseToCreationDate(clinicalIndicesNotAliased);
 
 // Make sure that no aliased index contains previously found unaliased releases.
-const unaliasedReleases = unaliasedClinicalIndicesWithCreationDate.map(x => x.release)
-assert(clinicalAliases.every(x => !unaliasedReleases.includes(`re_${x.index.split('re_')[1]}`)))
+const unaliasedReleases = unaliasedClinicalIndicesWithCreationDate.map(x => x.release);
+assert(clinicalAliases.every(x => !unaliasedReleases.includes(`re_${x.index.split('re_')[1]}`)));
 
 console.log(`===== Not Aliased`);
 
