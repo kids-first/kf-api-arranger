@@ -11,9 +11,6 @@ assert(!!release, 'Missing release value');
 const projectArgument = args.find(a => a.startsWith('project:')) ?? '';
 const project = projectArgument.split('project:')[1]?.toLocaleLowerCase() || ``;
 
-const verboseArgument = args.find(a => a.startsWith('verbose:')) ?? '';
-const verbose = ['true', 'yes', 'y'].includes(verboseArgument.split('verbose:')[1]?.toLocaleLowerCase() || ``);
-
 const isInclude = project.includes(`inc`);
 
 const client = new Client({ node: esHost });
@@ -33,6 +30,7 @@ const allCounts = rAllCounts[1];
 console.table(allCounts);
 
 const FIELD_DUPLICATE_SPECIMEN = isInclude ? `container_id` : 'fhir_id';
+const BUCKET_SIZE_FOR_DUPES = 1;
 const mSearchDuplicatesResponse = await client.msearch({
     body: [
         { index: `${ENTITIES.study_centric}*${release}*` },
@@ -42,7 +40,7 @@ const mSearchDuplicatesResponse = await client.msearch({
                 duplicates: {
                     terms: {
                         field: 'study_id',
-                        size: 100000,
+                        size: BUCKET_SIZE_FOR_DUPES,
                         min_doc_count: 2,
                     },
                 },
@@ -55,16 +53,8 @@ const mSearchDuplicatesResponse = await client.msearch({
                 duplicates: {
                     terms: {
                         field: 'participant_id',
-                        size: 100000,
+                        size: BUCKET_SIZE_FOR_DUPES,
                         min_doc_count: 2,
-                    },
-                    aggs: {
-                        study: {
-                            terms: {
-                                size: 100000,
-                                field: 'study.study_id',
-                            },
-                        },
                     },
                 },
             },
@@ -76,16 +66,8 @@ const mSearchDuplicatesResponse = await client.msearch({
                 duplicates: {
                     terms: {
                         field: 'file_id',
-                        size: 100000,
+                        size: 1,
                         min_doc_count: 2,
-                    },
-                    aggs: {
-                        study: {
-                            terms: {
-                                size: 100000,
-                                field: 'study.study_id',
-                            },
-                        },
                     },
                 },
             },
@@ -97,16 +79,8 @@ const mSearchDuplicatesResponse = await client.msearch({
                 duplicates: {
                     terms: {
                         field: FIELD_DUPLICATE_SPECIMEN,
-                        size: 100000,
+                        size: BUCKET_SIZE_FOR_DUPES,
                         min_doc_count: 2,
-                    },
-                    aggs: {
-                        study: {
-                            terms: {
-                                size: 100000,
-                                field: 'study.study_id',
-                            },
-                        },
                     },
                 },
             },
@@ -114,37 +88,26 @@ const mSearchDuplicatesResponse = await client.msearch({
     ],
 });
 const mResponsesForDuplicates = mSearchDuplicatesResponse?.body?.responses || [];
-const bucketsOfDuplicates = (() => {
-    const cbSubAggregation = ({ study, ...x }) => {
-        const studyIds = [...new Set(study?.buckets?.map(b => b.key) || [])];
-        return {
-            ...x,
-            study: studyIds.map(id => ({
-                id,
-                code: studyDict[id.toLowerCase()] || '--',
-            })),
-        };
-    };
-    return {
-        [ENTITIES.study_centric]: mResponsesForDuplicates[0].aggregations?.duplicates?.buckets || [],
-        [ENTITIES.participant_centric]: (mResponsesForDuplicates[1].aggregations?.duplicates?.buckets || []).map(
-            cbSubAggregation,
-        ),
-        [ENTITIES.file_centric]: (mResponsesForDuplicates[2].aggregations?.duplicates?.buckets || []).map(
-            cbSubAggregation,
-        ),
-        [ENTITIES.biospecimen_centric]: (mResponsesForDuplicates[3].aggregations?.duplicates?.buckets || []).map(
-            cbSubAggregation,
-        ),
-    };
-})();
-
-const duplicatesEntries = Object.entries(bucketsOfDuplicates).filter(([, v]) => !!v && v.length > 0);
-const duplicatesWithSummary = Object.fromEntries(
-    duplicatesEntries.map(([k, v]) => [k, { total_duplicates: v.length }]),
+const duplicates = Object.fromEntries(
+    [
+        [ENTITIES.study_centric, undefined],
+        [ENTITIES.participant_centric, undefined],
+        [ENTITIES.file_centric, undefined],
+        [ENTITIES.biospecimen_centric, undefined],
+    ]
+        .map((x, index) => {
+            const key = x[0];
+            const buckets = mResponsesForDuplicates[index].aggregations?.duplicates?.buckets || [];
+            const hasDuplicates = buckets.length > 0;
+            return [key, { duplicates: hasDuplicates }];
+        })
+        .sort((x, y) => {
+            //ref: https://stackoverflow.com/questions/17387435/javascript-sort-array-of-objects-by-a-boolean-property
+            // true values first
+            if (x[1].duplicates === y[1].duplicates) {
+                return 0;
+            }
+            return x[1].duplicates ? -1 : 1;
+        }),
 );
-duplicatesWithSummary.length > 0 && console.table(duplicatesWithSummary);
-if (verbose) {
-    const duplicatesWithDetails = Object.fromEntries(duplicatesEntries);
-    console.log(JSON.stringify(duplicatesWithDetails, null, 4));
-}
+console.table(duplicates);
