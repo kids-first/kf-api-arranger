@@ -23,6 +23,10 @@ export const esParticipantIndex = process.env.ES_PARTICIPANT_INDEX || 'participa
 export const esBiospecimenIndex = process.env.ES_BIOSPECIMEN_INDEX || 'biospecimen_centric';
 export const esVariantIndex = process.env.ES_VARIANT_INDEX || 'variant_centric';
 
+export const esMembersIndex = process.env.ES_MEMBERS_INDEX || 'members';
+
+export const esPublicMemberIndex = process.env.ES_PUBLIC_MEMBERS_INDEX || 'members-public';
+
 export const maxNOfGenomicFeatureSuggestions = process.env.MAX_NUMBER_OF_GF_SUGGESTIONS || 5;
 
 export const indexNameGeneFeatureSuggestion = process.env.GENES_SUGGESTIONS_INDEX_NAME;
