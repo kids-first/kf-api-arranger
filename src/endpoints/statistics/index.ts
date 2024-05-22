@@ -298,6 +298,8 @@ export const fetchTopDiagnosis = async (client: Client): Promise<Diagnosis[]> =>
 };
 
 export const fetchMemberStats = async (client: Client): Promise<MembersCount> => {
+    if (project === PROJECT_INCLUDE) return;
+
     const { body: members } = await client.count({
         index: esMembersIndex,
     });
@@ -327,6 +329,7 @@ export const getStatistics = async (): Promise<Statistics> => {
     ]);
 
     const diagnosis = await fetchTopDiagnosis(client);
+
     const members = await fetchMemberStats(client);
     return {
         files: results[0],
