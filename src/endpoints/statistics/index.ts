@@ -296,7 +296,15 @@ export const fetchTopDiagnosis = async (client: Client): Promise<Diagnosis[]> =>
 };
 
 export const fetchMemberStats = async (client: Client): Promise<MembersCount> => {
-    if (project === PROJECT_INCLUDE) return;
+    const membersExists = await client.indices.exists({
+        index: 'members',
+    });
+
+    const publicMembersExists = await client.indices.exists({
+        index: 'members-public',
+    });
+
+    if (!membersExists?.body || !publicMembersExists?.body) return;
 
     const { body: members } = await client.count({
         index: 'members',
