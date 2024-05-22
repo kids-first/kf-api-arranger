@@ -4,9 +4,7 @@ import filesize from 'filesize';
 import EsInstance from '../../ElasticSearchClientInstance';
 import {
     esFileIndex,
-    esMembersIndex,
     esParticipantIndex,
-    esPublicMemberIndex,
     esStudyIndex,
     esVariantIndex,
     familyIdKey,
@@ -301,11 +299,11 @@ export const fetchMemberStats = async (client: Client): Promise<MembersCount> =>
     if (project === PROJECT_INCLUDE) return;
 
     const { body: members } = await client.count({
-        index: esMembersIndex,
+        index: 'members',
     });
 
     const { body: publicMembers } = await client.count({
-        index: esPublicMemberIndex,
+        index: 'members-public',
     });
     return {
         totalCount: members?.count,
@@ -331,6 +329,7 @@ export const getStatistics = async (): Promise<Statistics> => {
     const diagnosis = await fetchTopDiagnosis(client);
 
     const members = await fetchMemberStats(client);
+
     return {
         files: results[0],
         studies: results[1],
