@@ -4,7 +4,9 @@ import filesize from 'filesize';
 import EsInstance from '../../ElasticSearchClientInstance';
 import {
     esFileIndex,
+    esMembersIndex,
     esParticipantIndex,
+    esPublicMemberIndex,
     esStudyIndex,
     esVariantIndex,
     familyIdKey,
@@ -23,6 +25,11 @@ export type Diagnosis = {
     count: number;
 };
 
+export type MembersCount = {
+    totalCount: number;
+    publicCount: number;
+};
+
 export type Statistics = {
     files: number;
     fileSize: string;
@@ -37,6 +44,7 @@ export type Statistics = {
     downSyndromeStatus: Record<string, number>;
     race: Record<string, number>;
     diagnosis: Diagnosis[];
+    members: MembersCount;
 };
 
 const fetchFileStats = async (client: Client): Promise<number> => {
@@ -289,6 +297,20 @@ export const fetchTopDiagnosis = async (client: Client): Promise<Diagnosis[]> =>
     }));
 };
 
+export const fetchMemberStats = async (client: Client): Promise<MembersCount> => {
+    const { body: members } = await client.count({
+        index: esMembersIndex,
+    });
+
+    const { body: publicMembers } = await client.count({
+        index: esPublicMemberIndex,
+    });
+    return {
+        totalCount: members?.count,
+        publicCount: publicMembers?.count,
+    };
+};
+
 export const getStatistics = async (): Promise<Statistics> => {
     const client = EsInstance.getInstance();
     const results = await Promise.all([
@@ -305,7 +327,7 @@ export const getStatistics = async (): Promise<Statistics> => {
     ]);
 
     const diagnosis = await fetchTopDiagnosis(client);
-
+    const members = await fetchMemberStats(client);
     return {
         files: results[0],
         studies: results[1],
@@ -320,6 +342,7 @@ export const getStatistics = async (): Promise<Statistics> => {
         downSyndromeStatus: results[9][1],
         race: results[9][2],
         diagnosis,
+        members,
     };
 };
 
