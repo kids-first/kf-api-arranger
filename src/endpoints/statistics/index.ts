@@ -327,7 +327,6 @@ export const getStatistics = async (): Promise<Statistics> => {
     ]);
 
     const diagnosis = await fetchTopDiagnosis(client);
-
     const members = await fetchMemberStats(client);
 
     return {
