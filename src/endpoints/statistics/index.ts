@@ -278,7 +278,7 @@ export const fetchTopDiagnosis = async (client: Client): Promise<Diagnosis[]> =>
                     aggs: {
                         filtered_diagnosis_ids: {
                             terms: {
-                                field: 'diagnosis.mondo_id_diagnosis',
+                                field: 'diagnosis.mondo_display_term',
                                 size: 10,
                                 exclude: '.*MONDO:(0700030|0008608|0700129|0700127|0700130|0700128|0700126).*',
                             },
