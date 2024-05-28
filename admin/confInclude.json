@@ -288,6 +288,13 @@
       }
     },
     {
+      "field": "selection_criteria",
+      "graphqlField": "study",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
       "field": "study_designs",
       "graphqlField": "study",
       "extendedFieldMappingInput": {
