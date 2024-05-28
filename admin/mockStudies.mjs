@@ -5,12 +5,6 @@ export const mockStudies = [
         biobank_contact: 'dsresearch@cuanschutz.edu',
         biobank_request_link: 'https://redcap.link/HTPVBRrequest',
         biospecimen_count: 39430,
-        contacts: [
-            {
-                email: 'dsresearch@cuanschutz.edu',
-                name: 'Angela Rachubinski',
-            },
-        ],
         controlled_access: ['Registered', 'Controlled'],
         data_category: [
             'Genomics',
@@ -183,9 +177,6 @@ export const mockStudies = [
         ],
         date_collection_end_year: '',
         date_collection_start_year: '2016',
-        description:
-            'The Human Trisome Project (HTP) is a large and comprehensive natural history study of Down syndrome involving collection of deep clinical data, multimodal phenotyping, a multi-dimensional biobank, generation of pan-omics datasets, and rapid release of data. The HTP has enabled many discoveries about the pathophysiology of Down syndrome, leading to new clinical trials testing  therapies to improve diverse health outcomes in this population.',
-        domains: ['All Co-occurring Conditions'],
         expected_data_categories: [
             'Genomics',
             'Demographic',
@@ -225,22 +216,7 @@ export const mockStudies = [
         part_lifespan_stages: ['Pediatric', 'Adult'],
         participant_count: 1062,
         program: 'INCLUDE',
-        publications: [
-            'PMID: 37379383',
-            'PMID: 37360690',
-            'PMID: 37277650',
-            'PMID: 36577365',
-            'PMID: 33787858',
-            'PMID: 31722205',
-            'PMID: 31699819',
-            'PMID: 31628327',
-            'PMID: 29296929',
-            'PMID: 29093484',
-            'PMID: 27472900',
-        ],
-        selection_criteria: 'Ages 6 months to 89 years old, with or without Down syndrome',
         study_code: 'HTP',
-        study_designs: ['Case-control', 'Longitudinal'],
         study_name: 'The Human Trisome Project',
         website: 'https://www.trisome.org',
     },
@@ -248,12 +224,6 @@ export const mockStudies = [
         biobank_contact: '',
         biobank_request_link: '',
         biospecimen_count: 834,
-        contacts: [
-            {
-                email: 'philip.lupo@bcm.edu',
-                name: 'Phillip J Lupo',
-            },
-        ],
         controlled_access: ['Registered', 'Controlled'],
         data_category: ['Genomics', 'Clinical'],
         data_source: ['Unknown'],
@@ -369,9 +339,6 @@ export const mockStudies = [
         ],
         date_collection_end_year: '',
         date_collection_start_year: '',
-        description:
-            "This study is a collaboration with the trans-NIH INvestigation of Co-occurring conditions across the Lifespan to Understand Down syndrome (INCLUDE) Project, which seeks to improve health and quality-of-life for individuals with Down syndrome, and NHLBI's TransOmics for Precision Medicine (TOPMed) program, which seeks to apply omics technologies to improve scientific understanding of the fundamental biological processes that underlie heart, lung, blood, and sleep (HLBS) disorders. Additional Pediatric Cardiac Genetics Consortium (PCGC) data from children affected with Down syndrome and congenital heart disease are accessible through two separate dbGaP studies: phs001138 (Kids First) and phs001194 (TOPMed).",
-        domains: ['Hematologic Diseases'],
         expected_data_categories: ['Genomics', 'Clinical', 'Unharmonized Demographic/Clinical'],
         expected_number_participants: 530,
         experimental_strategies: [
@@ -401,11 +368,7 @@ export const mockStudies = [
         part_lifespan_stages: ['Pediatric'],
         participant_count: 530,
         program: 'INCLUDE/KF',
-        publications: [],
-        selection_criteria:
-            'Inclusion criteria: documented (parent-report or medical record) live birth with trisomy 21 (including standard, translocation, mosaic karyotypes), no age restrictions, males and females, no ethnic or race restrictions, documentation related to heart status at birth (parent-report or medical record) on a subset, documentation related to a diagnosis of acute lymphoblastic leukemia on a subset. Exclusion criteria: lack of consent and disease-specific or more restrictive data sharing ',
         study_code: 'DS-COG-ALL',
-        study_designs: ['Case-control, parent-offspring trios, germline-tumor pairs'],
         study_name:
             'INCLUDE: (Lupo) Genomic Analysis of Congenital Heart Defects and Acute Lymphoblastic Leukemia in Children with Down Syndrome',
         website: '',
@@ -414,12 +377,6 @@ export const mockStudies = [
         biobank_contact: '',
         biobank_request_link: '',
         biospecimen_count: 1344,
-        contacts: [
-            {
-                email: 'trosser@emory.edu',
-                name: 'Tracie Rosser',
-            },
-        ],
         controlled_access: ['Controlled'],
         data_category: ['Genomics', 'Clinical'],
         data_source: ['Unknown'],
@@ -535,9 +492,6 @@ export const mockStudies = [
         ],
         date_collection_end_year: '',
         date_collection_start_year: '',
-        description:
-            "This study is a collaboration with the trans-NIH INvestigation of Co-occurring conditions across the Lifespan to Understand Down syndrome (INCLUDE) Project, which seeks to improve health and quality-of-life for individuals with Down syndrome, and NHLBI's TransOmics for Precision Medicine (TOPMed) program, which seeks to apply omics technologies to improve scientific understanding of the fundamental biological processes that underlie heart, lung, blood, and sleep (HLBS) disorders. Additional Pediatric Cardiac Genetics Consortium (PCGC) data from children affected with Down syndrome and congenital heart disease are accessible through two separate dbGaP studies: phs001138 (Kids First) and phs001194 (TOPMed).",
-        domains: ['Congenital Heart Defects'],
         expected_data_categories: ['Genomics', 'Clinical', 'Unharmonized Demographic/Clinical'],
         expected_number_participants: 1327,
         experimental_strategies: [
@@ -567,11 +521,7 @@ export const mockStudies = [
         part_lifespan_stages: ['Pediatric'],
         participant_count: 1327,
         program: 'INCLUDE/KF',
-        publications: [],
-        selection_criteria:
-            'Inclusion criteria: documented (parent-report or medical record) live birth with trisomy 21 (including standard, translocation, mosaic karyotypes), no age restrictions, males and females, no ethnic or race restrictions, documentation related to heart status at birth (parent-report or medical record) on a subset, documentation related to a diagnosis of acute lymphoblastic leukemia on a subset. Exclusion criteria: lack of consent and disease-specific or more restrictive data sharing',
         study_code: 'DS360-CHD',
-        study_designs: ['Case-control, parent-offspring trios, germline-tumor pairs'],
         study_name:
             'INCLUDE: (Sherman) Genomic Analysis of Congenital Heart Defects and Acute Lymphoblastic Leukemia in Children with Down Syndrome',
         website: '',
@@ -580,12 +530,6 @@ export const mockStudies = [
         biobank_contact: '',
         biobank_request_link: '',
         biospecimen_count: 1344,
-        contacts: [
-            {
-                email: 'eileen.king@cchmc.org',
-                name: 'Eileen C. King',
-            },
-        ],
         controlled_access: ['Controlled'],
         data_category: ['Genomics', 'Clinical'],
         data_source: ['Medical Record', 'Participant or Caregiver Report'],
@@ -701,9 +645,6 @@ export const mockStudies = [
         ],
         date_collection_end_year: '',
         date_collection_start_year: '',
-        description:
-            "This study is a collaboration with the trans-NIH INvestigation of Co-occurring conditions across the Lifespan to Understand Down syndrome (INCLUDE) Project, which seeks to improve health and quality-of-life for individuals with Down syndrome, and NHLBI's TransOmics for Precision Medicine (TOPMed) program, which seeks to apply omics technologies to improve scientific understanding of the fundamental biological processes that underlie heart, lung, blood, and sleep (HLBS) disorders. Additional Pediatric Cardiac Genetics Consortium (PCGC) data from children affected with Down syndrome and congenital heart disease are accessible through two separate dbGaP studies: phs001138 (Kids First) and phs001194 (TOPMed).",
-        domains: ['Congenital Heart Defects', 'All Co-occurring Conditions'],
         expected_data_categories: ['Genomics', 'Clinical', 'Unharmonized Demographic/Clinical'],
         expected_number_participants: 369,
         experimental_strategies: [
@@ -733,11 +674,7 @@ export const mockStudies = [
         part_lifespan_stages: ['Pediatric'],
         participant_count: 369,
         program: 'INCLUDE/KF',
-        publications: [],
-        selection_criteria:
-            'Inclusion criteria: documented (parent-report or medical record) live birth with trisomy 21 (including standard, translocation, mosaic karyotypes), no age restrictions, males and females, no ethnic or race restrictions, documentation related to heart status at birth (parent-report or medical record) on a subset, documentation related to a diagnosis of acute lymphoblastic leukemia on a subset. Exclusion criteria: lack of consent and disease-specific or more restrictive data sharing',
         study_code: 'DS-PCGC',
-        study_designs: [],
         study_name:
             'INCLUDE: (PCGC) Genomic Analysis of Congenital Heart Defects and Acute Lymphoblastic Leukemia in Children with Down Syndrome',
         website: '',
@@ -746,16 +683,6 @@ export const mockStudies = [
         biobank_contact: 'hakonarson@chop.edu',
         biobank_request_link: '',
         biospecimen_count: 1908,
-        contacts: [
-            {
-                email: 'snyderj3@chop.edu',
-                name: 'James Snyder',
-            },
-            {
-                email: 'hakonarson@chop.edu',
-                name: 'Hakon Hakonarson',
-            },
-        ],
         controlled_access: ['Registered'],
         data_category: ['Genomics', 'Transcriptomics', 'Imaging', 'Clinical'],
         data_source: ['Unknown'],
@@ -894,9 +821,6 @@ export const mockStudies = [
         ],
         date_collection_end_year: '',
         date_collection_start_year: '',
-        description:
-            "Down syndrome (DS) is the most common chromosomal abnormality in live births, with an incidence of 1 in 700 in the US. To better understand the pathophysiology of DS, this proposal will generate and analyze sequence data on 777 pediatric DS patients from the Children's Hospital of Philadelphia (CHOP), as well as 321 mothers and 148 fathers. We anticipate that the information derived from this deeply phenotyped cohort will allow for improved understanding of the pathophysiology and molecular mechanisms underlying DS-associated comorbidities, which may inform on new practices for treatment or innovative future therapies.",
-        domains: ['All Co-occurring Conditions'],
         expected_data_categories: ['Genomics', 'Transcriptomics', 'Imaging', 'Clinical'],
         expected_number_participants: 1152,
         experimental_strategies: [
@@ -926,10 +850,7 @@ export const mockStudies = [
         part_lifespan_stages: ['Pediatric', 'Adult'],
         participant_count: 1152,
         program: 'INCLUDE',
-        publications: [],
-        selection_criteria: '',
         study_code: 'X01-Hakonarson',
-        study_designs: ['Singletons, trios and single-parent dyads'],
         study_name:
             'Genetic underpinnings of the multifactorial phenotype of Trisomy 21 patients unveiled by multi-omics approaches',
         website: '',
@@ -938,16 +859,6 @@ export const mockStudies = [
         biobank_contact: '',
         biobank_request_link: '',
         biospecimen_count: 436,
-        contacts: [
-            {
-                email: 'Irene.roberts@paediatrics.ox.ac.uk',
-                name: 'Irene Roberts',
-            },
-            {
-                email: 'desmith@usc.edu',
-                name: 'Adam de Smith',
-            },
-        ],
         controlled_access: ['Registered'],
         data_category: ['Clinical'],
         data_source: ['Unknown'],
@@ -1063,9 +974,6 @@ export const mockStudies = [
         ],
         date_collection_end_year: '',
         date_collection_start_year: '',
-        description:
-            'Children with Down syndrome (DS) have an extremely high risk of developing acute myeloid leukemia, and this is preceded by a transient myeloid leukemia that presents in up to 30% of newborns with DS and can lead to early death. In this study, we will investigate the role of germline genetic risk factors in modifying the risk of transient myeloid leukemia in DS. We examined patient germline samples (n=470), including 130 cases with GATA1 mutations and 340 controls without GATA1 mutations. Our results will shed light on the etiology of myeloid leukemia in children with DS.',
-        domains: ['Hematologic Diseases'],
         expected_data_categories: ['Genomics', 'Clinical'],
         expected_number_participants: 436,
         experimental_strategies: [
@@ -1095,11 +1003,7 @@ export const mockStudies = [
         part_lifespan_stages: ['Neonatal'],
         participant_count: 1152,
         program: 'INCLUDE',
-        publications: [],
-        selection_criteria:
-            'Patient germline samples (n=470), including 130 cases with GATA1 mutations and 340 controls without GATA1 mutations',
         study_code: 'X01-deSmith',
-        study_designs: ['Case-control'],
         study_name: 'The epidemiology of transient leukemia in newborns with Down syndrome',
         website: '',
     },
@@ -1107,12 +1011,6 @@ export const mockStudies = [
         biobank_contact: '',
         biobank_request_link: '',
         biospecimen_count: 23,
-        contacts: [
-            {
-                email: 'bkhor@benaroyaresearch.org',
-                name: 'Bernard Khor',
-            },
-        ],
         controlled_access: ['Registered'],
         data_category: ['Transcriptomics', 'Clinical'],
         data_source: ['Medical Record', 'Participant or Caregiver Report'],
@@ -1181,9 +1079,6 @@ export const mockStudies = [
         dataset: [],
         date_collection_end_year: '',
         date_collection_start_year: '2018',
-        description:
-            'The Down syndrome registry at Benaroya Research Institute (BRI) builds on institutional expertise to collect and analyze longitudinal biological samples and concomitant clinical metadata across the lifespan of people with Down syndrome. The goal is to help advance therapeutic approaches to predict, prevent and cure co-occurring conditions of Down syndrome.',
-        domains: ['Immune System Diseases'],
         expected_data_categories: ['Transcriptomics', 'Clinical'],
         expected_number_participants: 167,
         experimental_strategies: [
@@ -1213,10 +1108,7 @@ export const mockStudies = [
         part_lifespan_stages: ['Pediatric', 'Adult'],
         participant_count: 167,
         program: 'INCLUDE',
-        publications: ['PMID: 35020411'],
-        selection_criteria: 'Individuals with DS, aged 2-55',
         study_code: 'BRI-DSR',
-        study_designs: ['Case-control'],
         study_name: 'Benaroya Research Institute Down Syndrome Registry',
         website: '',
     },
@@ -1224,12 +1116,6 @@ export const mockStudies = [
         biobank_contact: '',
         biobank_request_link: '',
         biospecimen_count: 41,
-        contacts: [
-            {
-                email: 'dsresearch@cuanschutz.edu',
-                name: 'Joaquin Espinosa',
-            },
-        ],
         controlled_access: ['Controlled'],
         data_category: ['Genomics', 'Clinical'],
         data_source: ['Medical Record', 'Participant or Caregiver Report', 'Investigator Assessment'],
@@ -1298,9 +1184,6 @@ export const mockStudies = [
         dataset: [],
         date_collection_end_year: '',
         date_collection_start_year: '',
-        description:
-            'The Nexus is a patient registry, clinical database, and biological sample bank focused on developmental disorders. Its major goal is to advance research by (i) linking human cognitive, behavioral, neurological and other clinical phenotypes to biological samples, including DNA, plasma, and lymphoblastoid cell lines, and (ii) facilitating access to appropriate patient cohorts for research purposes. The Nexus is unique among biorepositories in that it combines extensive clinical data and biosamples, and emphasizes the inclusion of quantitative cognitive and behavioral data.',
-        domains: ['Behavior and Behavior Mechanisms', 'All Co-occurring Conditions'],
         expected_data_categories: ['Genomics', 'Clinical'],
         expected_number_participants: 600,
         experimental_strategies: [
@@ -1330,10 +1213,7 @@ export const mockStudies = [
         part_lifespan_stages: ['Pediatric'],
         participant_count: 41,
         program: 'INCLUDE/KF',
-        publications: [],
-        selection_criteria: '',
         study_code: 'DS-NEXUS',
-        study_designs: ['Patient registry', 'Observational study'],
         study_name: 'Nexus Translational Biobank',
         website: '',
     },
@@ -1341,12 +1221,6 @@ export const mockStudies = [
         biobank_contact: '',
         biobank_request_link: '',
         biospecimen_count: 0,
-        contacts: [
-            {
-                email: 'clmartin1@geisinger.edu',
-                name: 'Christa Martin',
-            },
-        ],
         controlled_access: [],
         data_category: ['Clinical'],
         data_source: ['Medical Record', 'Participant or Caregiver Report', 'Investigator Assessment'],
@@ -1415,9 +1289,6 @@ export const mockStudies = [
         dataset: [],
         date_collection_end_year: '',
         date_collection_start_year: '',
-        description:
-            'The present work falls under an administrative supplement to study Down syndrome (DS) within the existing grant, "Dimensional Analysis of Developmental Brain Disorders using an Online, Genome First Approach" (R01-MH107431). The study aims to build validated, quantitative measures of psychopathology for DS.',
-        domains: ['Sleep Wake Disorders', 'Behavior and Behavior Mechanisms', 'All Co-occurring Conditions'],
         expected_data_categories: ['Clinical'],
         expected_number_participants: 79,
         experimental_strategies: [
@@ -1447,10 +1318,7 @@ export const mockStudies = [
         part_lifespan_stages: ['Pediatric', 'Adult'],
         participant_count: 79,
         program: 'INCLUDE',
-        publications: [],
-        selection_criteria: '',
         study_code: 'DS-Sleep',
-        study_designs: ['Trios or duos'],
         study_name: 'Dimensional, Sleep, and Genomic Analyses of Down Syndrome to Elucidate Phenotypic Variability',
         website: '',
     },
@@ -1458,12 +1326,6 @@ export const mockStudies = [
         biobank_contact: '',
         biobank_request_link: '',
         biospecimen_count: 0,
-        contacts: [
-            {
-                email: 'sujata.bardhan@nih.gov',
-                name: 'Sujata Bardhan',
-            },
-        ],
         controlled_access: [],
         data_category: ['Clinical'],
         data_source: ['Participant or Caregiver Report'],
@@ -1556,9 +1418,6 @@ export const mockStudies = [
         ],
         date_collection_end_year: '',
         date_collection_start_year: '2013',
-        description:
-            'DS-Connect is an online survey tool designed to collect demographic data and basic health information from individuals with DS. The purposes of DS-Connect: The Down Syndrome Registry are to better understand the health of people with Down syndrome and to inform eligible participants who, based on their health history, may be a match for research studies or new clinical trials.',
-        domains: ['All Co-occurring Conditions'],
         expected_data_categories: ['Clinical'],
         expected_number_participants: 100000,
         experimental_strategies: [
@@ -1588,10 +1447,7 @@ export const mockStudies = [
         part_lifespan_stages: ['Fetal', 'Adult', 'Pediatric', 'Neonatal'],
         participant_count: 3634,
         program: 'INCLUDE',
-        publications: [],
-        selection_criteria: 'Individuals with DS (including those with mosaic DS and partial trisomy 21)',
         study_code: 'DSC',
-        study_designs: ['Online survey'],
         study_name: 'DS-Connect: The Down Syndrome Registry',
         website: 'https://dsconnect.nih.gov',
     },
@@ -1599,12 +1455,6 @@ export const mockStudies = [
         biobank_contact: '',
         biobank_request_link: '',
         biospecimen_count: 0,
-        contacts: [
-            {
-                email: 'jov18@pitt.edu',
-                name: 'Joni Vander Bilt',
-            },
-        ],
         controlled_access: [],
         data_category: ['Clinical'],
         data_source: ['Medical Record', 'Participant or Caregiver Report', 'Investigator Assessment'],
@@ -1673,9 +1523,6 @@ export const mockStudies = [
         dataset: [],
         date_collection_end_year: '',
         date_collection_start_year: '',
-        description:
-            "The goal of the Alzheimer Biomarker Consortium-Down Syndrome (ABC-DS) is to study a group of adults with Down syndrome over their lives to single out early biomarkers of the onset of Alzheimer's disease.\n\nNOTE: Access to the full ABC-DS dataset, including clinical, cognitive, neuroimaging, and genetic data, must be requested from ABC-DS using the data request form (https://pitt.co1.qualtrics.com/jfe/form/SV_cu0pNCZZlrdSxUN).",
-        domains: ['Behavior and Behavior Mechanisms', 'All Co-occurring Conditions'],
         expected_data_categories: ['Clinical'],
         expected_number_participants: 550,
         experimental_strategies: [
@@ -1705,10 +1552,7 @@ export const mockStudies = [
         part_lifespan_stages: ['Adult'],
         participant_count: 417,
         program: 'INCLUDE',
-        publications: [],
-        selection_criteria: 'Adults 25 years and older with DS',
         study_code: 'ABC-DS',
-        study_designs: ['Case-control'],
         study_name: 'Alzheimer Biomarker Consortium - Down Syndrome',
         website: 'https://www.nia.nih.gov/research/abc-ds',
     },
@@ -1726,20 +1570,6 @@ const sSchema = {
         },
         biospecimen_count: {
             type: 'integer',
-        },
-        contacts: {
-            type: 'array',
-            items: {
-                type: 'object',
-                properties: {
-                    name: {
-                        type: 'string',
-                    },
-                    email: {
-                        type: 'string',
-                    },
-                },
-            },
         },
         data_types: {
             type: 'array',
@@ -1862,15 +1692,6 @@ const sSchema = {
         date_collection_start_year: {
             type: 'string',
         },
-        description: {
-            type: 'string',
-        },
-        domains: {
-            type: 'array',
-            items: {
-                type: 'string',
-            },
-        },
         expected_data_categories: {
             type: 'array',
             items: {
@@ -1903,6 +1724,7 @@ const sSchema = {
         file_count: {
             type: 'integer',
         },
+        //FIXME in contacts?
         institutions: {
             type: 'array',
             items: {
@@ -1933,20 +1755,8 @@ const sSchema = {
         program: {
             type: 'string',
         },
-        publications: {
-            type: 'array',
-        },
-        selection_criteria: {
-            type: 'string',
-        },
         study_code: {
             type: 'string',
-        },
-        study_designs: {
-            type: 'array',
-            items: {
-                type: 'string',
-            },
         },
         study_name: {
             type: 'string',

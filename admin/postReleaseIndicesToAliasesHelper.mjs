@@ -11,6 +11,7 @@ import assert from 'node:assert/strict';
 import readline from 'readline';
 import { Client } from '@elastic/elasticsearch';
 import { esHost } from '../dist/src/env.js';
+import { cbKeepClinicalIndicesOnly } from './utils.mjs';
 
 const args = process.argv.slice(2);
 const releaseArgument = args.find(a => a.startsWith('release:')) ?? '';
@@ -51,25 +52,35 @@ if (catIndicesResponse.statusCode !== 200) {
     process.exit(1);
 }
 
-const releaseIndices = catIndicesResponse.body.map(x => x.index).sort();
+const releaseIndices = catIndicesResponse.body
+    .filter(cbKeepClinicalIndicesOnly)
+    .map(x => x.index)
+    .sort();
 assert(Array.isArray(releaseIndices) && releaseIndices.length > 0, 'No index found. Terminating');
-
-const INDEX_CATEGORIES = ['file', 'participant', 'study', 'biospecimen'];
-const hasAllTypeOfIndices = INDEX_CATEGORIES.every(wordStem => releaseIndices.some(x => x.includes(wordStem)));
-
-assert(
-    hasAllTypeOfIndices,
-    `Oops it seems like there is at least one type missing. Requires: ${INDEX_CATEGORIES.join(', ')}. Terminating`,
-);
 
 const displayIndicesQuestion = () =>
     new Promise(resolve => {
-        userReadline.question(`${releaseIndices.length} were found. Do you want to display them y/n? > `, answer => {
-            if (answer === 'y') {
-                console.log(releaseIndices);
-            }
-            resolve();
-        });
+        userReadline.question(
+            `${releaseIndices.length} were found. Do you want to display its counts per entity y/n? > `,
+            answer => {
+                if (answer === 'y') {
+                    const entityToStudies = releaseIndices.reduce((xs, x) => {
+                        const [entity, studyIdWithRelease] = x.split('_centric_');
+                        const studyId = studyIdWithRelease.split('_re')[0];
+                        return {
+                            ...xs,
+                            [entity]: xs[entity] ? [...xs[entity], studyId] : [studyId],
+                        };
+                    }, {});
+                    const entityCounts = Object.entries(entityToStudies).map(([k, v]) => ({
+                        entity: k,
+                        study_counts: v.length,
+                    }));
+                    console.table(entityCounts);
+                }
+                resolve();
+            },
+        );
     });
 await displayIndicesQuestion();
 
@@ -112,13 +123,27 @@ const actions = releaseIndices.reduce((xs, x) => {
 }, []);
 assert(actions.length === releaseIndices.length);
 
+const allIndexTargetsCorrectAlias = actions.every(a => {
+    const index = a[aliasAction].index;
+    const alias = a[aliasAction].alias;
+    return index.startsWith(alias.replace('next_', ''));
+});
+assert(allIndexTargetsCorrectAlias);
+
 const displayActionQuestion = () =>
     new Promise(resolve => {
-        userReadline.question('Do want to see the actions that are about to be sent to ES y/n? > ', answer => {
+        userReadline.question('Do want to see an actions sample that are about to be sent to ES y/n? > ', answer => {
             console.log(answer);
             if (answer === 'y') {
-                console.log(actions);
+                INDICES_PREFIXES.forEach(x => {
+                    console.log(
+                        x,
+                        '=> ',
+                        [...actions].find(a => a[aliasAction].index.includes(x)),
+                    );
+                });
             }
+
             resolve();
         });
     });
