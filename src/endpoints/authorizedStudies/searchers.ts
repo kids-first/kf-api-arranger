@@ -97,34 +97,6 @@ export const multiSearchFilesAccessCounts = async (
                         bool: {
                             must: [
                                 { term: { study_id: { value: s } } },
-                                { term: { controlled_access: { value: 'Controlled' } } },
-                                { term: { repository: { value: fence } } },
-                            ],
-                        },
-                    },
-                },
-                { index: esFileIndex },
-                {
-                    track_total_hits: true,
-                    size: 0,
-                    query: {
-                        bool: {
-                            must: [
-                                { term: { study_id: { value: s } } },
-                                { term: { controlled_access: { value: 'Registered' } } },
-                                { term: { repository: { value: fence } } },
-                            ],
-                        },
-                    },
-                },
-                { index: esFileIndex },
-                {
-                    track_total_hits: true,
-                    size: 0,
-                    query: {
-                        bool: {
-                            must: [
-                                { term: { study_id: { value: s } } },
                                 { term: { acl: { value: 'open_access' } } },
                                 { term: { repository: { value: fence } } },
                             ],

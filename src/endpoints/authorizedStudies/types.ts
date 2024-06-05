@@ -14,8 +14,7 @@ export type StudyDataSpecific = {
 
 export type StudyDataGlobal = {
     total_files_count: number;
-    total_controlled_files_count: number;
-    total_uncontrolled_files_count: number;
+    total_authorized_files_count: number;
 };
 
 export type AuthStudiesData = (StudyDataSpecific | StudyDataGlobal)[];
