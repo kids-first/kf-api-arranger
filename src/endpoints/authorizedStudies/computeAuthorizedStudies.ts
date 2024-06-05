@@ -33,13 +33,12 @@ export const computeAuthorizedStudiesForFence = async (
     const allStudyIds = dataAggregations.map(x => x.study_id);
     const M_SEARCH = {
         indexOfTotalNOfFiles: 0,
-        indexOfControlledNOfFiles: 1,
-        indexOfRegisteredNOfFiles: 2,
-        indexOfStudyContainsOpenAccess: 3,
+        indexOfOpenAccessNOfFiles: 1,
     };
 
     //Get all files count per candidate study
     const accessCounts = await multiSearchFilesAccessCounts(client, fence, allStudyIds);
+
     const countFailures =
         accessCounts?.filter(x => x._shards?.failures && x._shards.failures.length > 0)?.map(x => x._shards.failures) ||
         [];
@@ -55,12 +54,14 @@ export const computeAuthorizedStudiesForFence = async (
         data: dataAggregations.map((x: StudyDataSpecific, i: number): StudyDataSpecific | StudyDataGlobal => {
             const extractMSearchHitsTotal = (index: number) =>
                 accessCounts.slice(i * size, i * size + size)[index].hits.total.value;
-            const containsOpenAccess = extractMSearchHitsTotal(M_SEARCH.indexOfStudyContainsOpenAccess) > 0;
+            const openAccessCount = extractMSearchHitsTotal(M_SEARCH.indexOfOpenAccessNOfFiles);
+            const containsOpenAccess = openAccessCount > 0;
+            const total_authorized_files_count = openAccessCount + x.authorized_controlled_files_count;
+
             return {
                 ...x,
                 total_files_count: extractMSearchHitsTotal(M_SEARCH.indexOfTotalNOfFiles),
-                total_controlled_files_count: extractMSearchHitsTotal(M_SEARCH.indexOfControlledNOfFiles),
-                total_uncontrolled_files_count: extractMSearchHitsTotal(M_SEARCH.indexOfRegisteredNOfFiles),
+                total_authorized_files_count,
                 user_acl_in_study: containsOpenAccess ? [...x.user_acl_in_study, 'open_access'] : x.user_acl_in_study,
             };
         }),
