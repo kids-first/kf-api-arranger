@@ -78,27 +78,11 @@ describe('Compute Authorized Studies', () => {
                         status: 200,
                     },
                     {
-                        hits: { total: { value: 100, relation: 'eq' }, max_score: null, hits: [] },
-                        status: 200,
-                    },
-                    {
-                        hits: { total: { value: 0, relation: 'eq' }, max_score: null, hits: [] },
-                        status: 200,
-                    },
-                    {
                         hits: { total: { value: 0, relation: 'eq' }, max_score: null, hits: [] },
                         status: 200,
                     },
                     {
                         hits: { total: { value: 100, relation: 'eq' }, max_score: null, hits: [] },
-                        status: 200,
-                    },
-                    {
-                        hits: { total: { value: 75, relation: 'eq' }, max_score: null, hits: [] },
-                        status: 200,
-                    },
-                    {
-                        hits: { total: { value: 25, relation: 'eq' }, max_score: null, hits: [] },
                         status: 200,
                     },
                     {
@@ -125,8 +109,7 @@ describe('Compute Authorized Studies', () => {
                     title: 'National Heart, Lung, and Blood Institute...',
                     authorized_controlled_files_count: 100,
                     total_files_count: 100,
-                    total_controlled_files_count: 100,
-                    total_uncontrolled_files_count: 0,
+                    total_authorized_files_count: 100,
                 },
                 {
                     study_id: 'SD_Z6MWD3H0',
@@ -135,8 +118,7 @@ describe('Compute Authorized Studies', () => {
                     title: 'Kids First: Genomic Analysis of Congenital...',
                     authorized_controlled_files_count: 4,
                     total_files_count: 100,
-                    total_controlled_files_count: 75,
-                    total_uncontrolled_files_count: 25,
+                    total_authorized_files_count: 14,
                 },
             ]);
         });
