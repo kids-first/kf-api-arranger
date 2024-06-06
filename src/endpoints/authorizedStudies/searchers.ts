@@ -30,13 +30,6 @@ export const searchAggregatedAuthorizedStudiesForFence = async (
                                 },
                             },
                         },
-                        {
-                            term: {
-                                controlled_access: {
-                                    value: 'Controlled',
-                                },
-                            },
-                        },
                     ],
                 },
             },
