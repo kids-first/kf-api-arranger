@@ -176,7 +176,7 @@
       }
     },
     {
-      "field": "data_source",
+      "field": "data_sources",
       "graphqlField": "study",
       "extendedFieldMappingInput": {
         "isArray": true
