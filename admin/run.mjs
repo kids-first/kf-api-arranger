@@ -200,7 +200,9 @@ if (updateConditions.every(b => b)) {
     );
     if (nOfDocsInProjectMetadata === projectConf.indices.length) {
         console.debug(`admin-project-script - Applying extended mapping mutations.`);
+        console.time("fixExtendedMapping")
         await ArrangerApi.fixExtendedMapping(client, projectConf.extendedMappingMutations);
+        console.timeEnd("fixExtendedMapping")
     }
 }
 

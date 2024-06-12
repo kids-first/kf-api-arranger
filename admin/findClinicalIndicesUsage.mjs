@@ -44,15 +44,32 @@ const unaliasedClinicalIndicesWithCreationDate = makeReleaseToCreationDate(clini
 const unaliasedReleases = unaliasedClinicalIndicesWithCreationDate.map(x => x.release);
 assert(clinicalAliases.every(x => !unaliasedReleases.includes(`re_${x.index.split('re_')[1]}`)));
 
-console.log(`===== Not Aliased`);
+console.log(`===== Not Aliased (pattern:re_*)`);
 
 unaliasedClinicalIndicesWithCreationDate.length
     ? console.table(unaliasedClinicalIndicesWithCreationDate)
     : console.log('None');
 
-console.log(`===== Aliased`);
+console.log(`===== Aliased (pattern:re_*)`);
 const clinicalIndicesAliased = clinicalIndices.filter(x => clinicalAliases.some(a => a.index === x.index));
 const aliasedClinicalIndicesWithCreationDate = makeReleaseToCreationDate(clinicalIndicesAliased);
 aliasedClinicalIndicesWithCreationDate.length
     ? console.table(aliasedClinicalIndicesWithCreationDate)
     : console.log('None');
+
+console.log(`===== Others (Clinical)`);
+const othersClinical = clinicalIndices
+    .filter(x => !x.index.includes('_re_'))
+    .sort((a, b) => b['creation.date'] - a['creation.date'])
+    .map(x => {
+        const release = x.index
+            .split('sd_')[1]
+            .split('_')
+            .slice(1)
+            .join('_');
+        return [release, x['creation.date.string']];
+    })
+    .reduce((xs, x) => (xs.some(y => y[0] === x[0]) ? xs : [...xs, x]), [])
+    .map(x => ({ release: x[0], creation_date: x[1] }));
+
+othersClinical.length ? console.table(othersClinical) : console.log('None');
