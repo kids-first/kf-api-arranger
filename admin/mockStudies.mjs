@@ -14,68 +14,6 @@ export const mockStudies = [
             'Imaging',
             'Clinical',
         ],
-        data_types: [
-            {
-                file_count: 2865,
-                data_type: 'Gene Expression Quantifications',
-            },
-            {
-                file_count: 2865,
-                data_type: 'Gene Fusions',
-            },
-            {
-                file_count: 433,
-                data_type: 'Aligned Reads',
-            },
-            {
-                file_count: 433,
-                data_type: 'GVCF',
-            },
-            {
-                file_count: 0,
-                data_type: 'Simple Nucleotide Variations',
-            },
-            {
-                file_count: 7,
-                data_type: 'Variant Calls',
-            },
-            {
-                file_count: 0,
-                data_type: 'Alternative Splicing',
-            },
-            {
-                file_count: 800,
-                data_type: 'Unaligned Reads',
-            },
-            {
-                file_count: 0,
-                data_type: 'Somatic Copy Number Variations',
-            },
-            {
-                file_count: 0,
-                data_type: 'Raw Gene Fusions',
-            },
-            {
-                file_count: 477,
-                data_type: 'Protein abundance (absolute protein concentration)',
-            },
-            {
-                file_count: 418,
-                data_type: 'Preprocessed metabolite relative abundance',
-            },
-            {
-                file_count: 0,
-                data_type: 'Isoform Expression Quantifications',
-            },
-            {
-                file_count: 0,
-                data_type: 'Somatic Structural Variations',
-            },
-            {
-                file_count: 7,
-                data_type: 'Other',
-            },
-        ],
         dataset: [
             {
                 dataset_id: 'HTP-TR',
@@ -196,68 +134,6 @@ export const mockStudies = [
     {
         controlled_access: ['Registered', 'Controlled'],
         data_category: ['Genomics', 'Clinical'],
-        data_types: [
-            {
-                file_count: 0,
-                data_type: 'Gene Expression Quantifications',
-            },
-            {
-                file_count: 0,
-                data_type: 'Gene Fusions',
-            },
-            {
-                file_count: 834,
-                data_type: 'Aligned Reads',
-            },
-            {
-                file_count: 475,
-                data_type: 'GVCF',
-            },
-            {
-                file_count: 2070,
-                data_type: 'Simple Nucleotide Variations',
-            },
-            {
-                file_count: 376,
-                data_type: 'Variant Calls',
-            },
-            {
-                file_count: 0,
-                data_type: 'Alternative Splicing',
-            },
-            {
-                file_count: 0,
-                data_type: 'Unaligned Reads',
-            },
-            {
-                file_count: 783,
-                data_type: 'Somatic Copy Number Variations',
-            },
-            {
-                file_count: 0,
-                data_type: 'Raw Gene Fusions',
-            },
-            {
-                file_count: 0,
-                data_type: 'Protein abundance (absolute protein concentration)',
-            },
-            {
-                file_count: 0,
-                data_type: 'Preprocessed metabolite relative abundance',
-            },
-            {
-                file_count: 0,
-                data_type: 'Isoform Expression Quantifications',
-            },
-            {
-                file_count: 207,
-                data_type: 'Somatic Structural Variations',
-            },
-            {
-                file_count: 7,
-                data_type: 'Other',
-            },
-        ],
         dataset: [
             {
                 dataset_id: 'DS-COG-ALL-GEN',
@@ -335,68 +211,6 @@ export const mockStudies = [
     {
         controlled_access: ['Controlled'],
         data_category: ['Genomics', 'Clinical'],
-        data_types: [
-            {
-                file_count: 0,
-                data_type: 'Gene Expression Quantifications',
-            },
-            {
-                file_count: 0,
-                data_type: 'Gene Fusions',
-            },
-            {
-                file_count: 1344,
-                data_type: 'Aligned Reads',
-            },
-            {
-                file_count: 1344,
-                data_type: 'GVCF',
-            },
-            {
-                file_count: 0,
-                data_type: 'Simple Nucleotide Variations',
-            },
-            {
-                file_count: 786,
-                data_type: 'Variant Calls',
-            },
-            {
-                file_count: 0,
-                data_type: 'Alternative Splicing',
-            },
-            {
-                file_count: 0,
-                data_type: 'Unaligned Reads',
-            },
-            {
-                file_count: 0,
-                data_type: 'Somatic Copy Number Variations',
-            },
-            {
-                file_count: 0,
-                data_type: 'Raw Gene Fusions',
-            },
-            {
-                file_count: 0,
-                data_type: 'Protein abundance (absolute protein concentration)',
-            },
-            {
-                file_count: 0,
-                data_type: 'Preprocessed metabolite relative abundance',
-            },
-            {
-                file_count: 0,
-                data_type: 'Isoform Expression Quantifications',
-            },
-            {
-                file_count: 0,
-                data_type: 'Somatic Structural Variations',
-            },
-            {
-                file_count: 0,
-                data_type: 'Other',
-            },
-        ],
         dataset: [
             {
                 dataset_id: 'DS360-CHD-GEN',
@@ -474,68 +288,6 @@ export const mockStudies = [
     {
         controlled_access: ['Controlled'],
         data_category: ['Genomics', 'Clinical'],
-        data_types: [
-            {
-                file_count: 0,
-                data_type: 'Other',
-            },
-            {
-                file_count: 0,
-                data_type: 'Gene Expression Quantifications',
-            },
-            {
-                file_count: 0,
-                data_type: 'Raw Gene Fusions',
-            },
-            {
-                file_count: 0,
-                data_type: 'Gene Fusions',
-            },
-            {
-                file_count: 0,
-                data_type: 'Isoform Expression Quantifications',
-            },
-            {
-                file_count: 369,
-                data_type: 'Aligned Reads',
-            },
-            {
-                file_count: 369,
-                data_type: 'GVCF',
-            },
-            {
-                file_count: 0,
-                data_type: 'Simple Nucleotide Variations',
-            },
-            {
-                file_count: 40,
-                data_type: 'Variant Calls',
-            },
-            {
-                file_count: 0,
-                data_type: 'Alternative Splicing',
-            },
-            {
-                file_count: 0,
-                data_type: 'Unaligned Reads',
-            },
-            {
-                file_count: 0,
-                data_type: 'Somatic Copy Number Variations',
-            },
-            {
-                file_count: 0,
-                data_type: 'Protein abundance (absolute protein concentration)',
-            },
-            {
-                file_count: 0,
-                data_type: 'Preprocessed metabolite relative abundance',
-            },
-            {
-                file_count: 0,
-                data_type: 'Somatic Structural Variations',
-            },
-        ],
         dataset: [
             {
                 dataset_id: 'DS-PCGC-GEN',
@@ -613,68 +365,6 @@ export const mockStudies = [
     {
         controlled_access: ['Registered'],
         data_category: ['Genomics', 'Transcriptomics', 'Imaging', 'Clinical'],
-        data_types: [
-            {
-                file_count: 468,
-                data_type: 'Gene Expression Quantifications',
-            },
-            {
-                file_count: 229,
-                data_type: 'Gene Fusions',
-            },
-            {
-                file_count: 0,
-                data_type: 'Aligned Reads',
-            },
-            {
-                file_count: 0,
-                data_type: 'GVCF',
-            },
-            {
-                file_count: 0,
-                data_type: 'Simple Nucleotide Variations',
-            },
-            {
-                file_count: 376,
-                data_type: 'Variant Calls',
-            },
-            {
-                file_count: 1167,
-                data_type: 'Alternative Splicing',
-            },
-            {
-                file_count: 0,
-                data_type: 'Unaligned Reads',
-            },
-            {
-                file_count: 783,
-                data_type: 'Somatic Copy Number Variations',
-            },
-            {
-                file_count: 467,
-                data_type: 'Raw Gene Fusions',
-            },
-            {
-                file_count: 0,
-                data_type: 'Protein abundance (absolute protein concentration)',
-            },
-            {
-                file_count: 0,
-                data_type: 'Preprocessed metabolite relative abundance',
-            },
-            {
-                file_count: 234,
-                data_type: 'Isoform Expression Quantifications',
-            },
-            {
-                file_count: 0,
-                data_type: 'Somatic Structural Variations',
-            },
-            {
-                file_count: 0,
-                data_type: 'Other',
-            },
-        ],
         dataset: [
             {
                 dataset_id: 'X01-Hakon-GEN',
@@ -775,68 +465,6 @@ export const mockStudies = [
     {
         controlled_access: ['Registered'],
         data_category: ['Clinical'],
-        data_types: [
-            {
-                file_count: 0,
-                data_type: 'Gene Expression Quantifications',
-            },
-            {
-                file_count: 0,
-                data_type: 'Gene Fusions',
-            },
-            {
-                file_count: 0,
-                data_type: 'Aligned Reads',
-            },
-            {
-                file_count: 0,
-                data_type: 'GVCF',
-            },
-            {
-                file_count: 0,
-                data_type: 'Simple Nucleotide Variations',
-            },
-            {
-                file_count: 0,
-                data_type: 'Variant Calls',
-            },
-            {
-                file_count: 0,
-                data_type: 'Alternative Splicing',
-            },
-            {
-                file_count: 0,
-                data_type: 'Unaligned Reads',
-            },
-            {
-                file_count: 0,
-                data_type: 'Somatic Copy Number Variations',
-            },
-            {
-                file_count: 0,
-                data_type: 'Raw Gene Fusions',
-            },
-            {
-                file_count: 0,
-                data_type: 'Protein abundance (absolute protein concentration)',
-            },
-            {
-                file_count: 0,
-                data_type: 'Preprocessed metabolite relative abundance',
-            },
-            {
-                file_count: 0,
-                data_type: 'Isoform Expression Quantifications',
-            },
-            {
-                file_count: 0,
-                data_type: 'Somatic Structural Variations',
-            },
-            {
-                file_count: 0,
-                data_type: 'Other',
-            },
-        ],
         dataset: [
             {
                 dataset_id: 'X01-deSmith-GEN',
@@ -914,68 +542,6 @@ export const mockStudies = [
     {
         controlled_access: ['Registered'],
         data_category: ['Transcriptomics', 'Clinical'],
-        data_types: [
-            {
-                file_count: 115,
-                data_type: 'Other',
-            },
-            {
-                file_count: 46,
-                data_type: 'Gene Expression Quantifications',
-            },
-            {
-                file_count: 46,
-                data_type: 'Raw Gene Fusions',
-            },
-            {
-                file_count: 23,
-                data_type: 'Gene Fusions',
-            },
-            {
-                file_count: 23,
-                data_type: 'Isoform Expression Quantifications',
-            },
-            {
-                file_count: 0,
-                data_type: 'Aligned Reads',
-            },
-            {
-                file_count: 0,
-                data_type: 'GVCF',
-            },
-            {
-                file_count: 0,
-                data_type: 'Simple Nucleotide Variations',
-            },
-            {
-                file_count: 0,
-                data_type: 'Variant Calls',
-            },
-            {
-                file_count: 0,
-                data_type: 'Alternative Splicing',
-            },
-            {
-                file_count: 0,
-                data_type: 'Unaligned Reads',
-            },
-            {
-                file_count: 0,
-                data_type: 'Somatic Copy Number Variations',
-            },
-            {
-                file_count: 0,
-                data_type: 'Protein abundance (absolute protein concentration)',
-            },
-            {
-                file_count: 0,
-                data_type: 'Preprocessed metabolite relative abundance',
-            },
-            {
-                file_count: 0,
-                data_type: 'Somatic Structural Variations',
-            },
-        ],
         dataset: [],
         date_collection_end_year: '',
         date_collection_start_year: '2018',
@@ -1006,68 +572,6 @@ export const mockStudies = [
     {
         controlled_access: ['Controlled'],
         data_category: ['Genomics', 'Clinical'],
-        data_types: [
-            {
-                file_count: 0,
-                data_type: 'Other',
-            },
-            {
-                file_count: 0,
-                data_type: 'Gene Expression Quantifications',
-            },
-            {
-                file_count: 0,
-                data_type: 'Raw Gene Fusions',
-            },
-            {
-                file_count: 0,
-                data_type: 'Gene Fusions',
-            },
-            {
-                file_count: 0,
-                data_type: 'Isoform Expression Quantifications',
-            },
-            {
-                file_count: 41,
-                data_type: 'Aligned Reads',
-            },
-            {
-                file_count: 41,
-                data_type: 'GVCF',
-            },
-            {
-                file_count: 0,
-                data_type: 'Simple Nucleotide Variations',
-            },
-            {
-                file_count: 41,
-                data_type: 'Variant Calls',
-            },
-            {
-                file_count: 0,
-                data_type: 'Alternative Splicing',
-            },
-            {
-                file_count: 0,
-                data_type: 'Unaligned Reads',
-            },
-            {
-                file_count: 0,
-                data_type: 'Somatic Copy Number Variations',
-            },
-            {
-                file_count: 0,
-                data_type: 'Protein abundance (absolute protein concentration)',
-            },
-            {
-                file_count: 0,
-                data_type: 'Preprocessed metabolite relative abundance',
-            },
-            {
-                file_count: 0,
-                data_type: 'Somatic Structural Variations',
-            },
-        ],
         dataset: [],
         date_collection_end_year: '',
         date_collection_start_year: '',
@@ -1098,68 +602,6 @@ export const mockStudies = [
     {
         controlled_access: [],
         data_category: ['Clinical'],
-        data_types: [
-            {
-                file_count: 0,
-                data_type: 'Other',
-            },
-            {
-                file_count: 0,
-                data_type: 'Gene Expression Quantifications',
-            },
-            {
-                file_count: 0,
-                data_type: 'Raw Gene Fusions',
-            },
-            {
-                file_count: 0,
-                data_type: 'Gene Fusions',
-            },
-            {
-                file_count: 0,
-                data_type: 'Isoform Expression Quantifications',
-            },
-            {
-                file_count: 0,
-                data_type: 'Aligned Reads',
-            },
-            {
-                file_count: 0,
-                data_type: 'GVCF',
-            },
-            {
-                file_count: 0,
-                data_type: 'Simple Nucleotide Variations',
-            },
-            {
-                file_count: 0,
-                data_type: 'Variant Calls',
-            },
-            {
-                file_count: 0,
-                data_type: 'Alternative Splicing',
-            },
-            {
-                file_count: 0,
-                data_type: 'Unaligned Reads',
-            },
-            {
-                file_count: 0,
-                data_type: 'Somatic Copy Number Variations',
-            },
-            {
-                file_count: 0,
-                data_type: 'Protein abundance (absolute protein concentration)',
-            },
-            {
-                file_count: 0,
-                data_type: 'Preprocessed metabolite relative abundance',
-            },
-            {
-                file_count: 0,
-                data_type: 'Somatic Structural Variations',
-            },
-        ],
         dataset: [],
         date_collection_end_year: '',
         date_collection_start_year: '',
@@ -1190,68 +632,6 @@ export const mockStudies = [
     {
         controlled_access: [],
         data_category: ['Clinical'],
-        data_types: [
-            {
-                file_count: 0,
-                data_type: 'Other',
-            },
-            {
-                file_count: 0,
-                data_type: 'Gene Expression Quantifications',
-            },
-            {
-                file_count: 0,
-                data_type: 'Raw Gene Fusions',
-            },
-            {
-                file_count: 0,
-                data_type: 'Gene Fusions',
-            },
-            {
-                file_count: 0,
-                data_type: 'Isoform Expression Quantifications',
-            },
-            {
-                file_count: 0,
-                data_type: 'Aligned Reads',
-            },
-            {
-                file_count: 0,
-                data_type: 'GVCF',
-            },
-            {
-                file_count: 0,
-                data_type: 'Simple Nucleotide Variations',
-            },
-            {
-                file_count: 0,
-                data_type: 'Variant Calls',
-            },
-            {
-                file_count: 0,
-                data_type: 'Alternative Splicing',
-            },
-            {
-                file_count: 0,
-                data_type: 'Unaligned Reads',
-            },
-            {
-                file_count: 0,
-                data_type: 'Somatic Copy Number Variations',
-            },
-            {
-                file_count: 0,
-                data_type: 'Protein abundance (absolute protein concentration)',
-            },
-            {
-                file_count: 0,
-                data_type: 'Preprocessed metabolite relative abundance',
-            },
-            {
-                file_count: 0,
-                data_type: 'Somatic Structural Variations',
-            },
-        ],
         dataset: [
             {
                 dataset_id: 'DS-Connect-UNHAR',
@@ -1306,68 +686,6 @@ export const mockStudies = [
     {
         controlled_access: [],
         data_category: ['Clinical'],
-        data_types: [
-            {
-                file_count: 0,
-                data_type: 'Other',
-            },
-            {
-                file_count: 0,
-                data_type: 'Gene Expression Quantifications',
-            },
-            {
-                file_count: 0,
-                data_type: 'Raw Gene Fusions',
-            },
-            {
-                file_count: 0,
-                data_type: 'Gene Fusions',
-            },
-            {
-                file_count: 0,
-                data_type: 'Isoform Expression Quantifications',
-            },
-            {
-                file_count: 0,
-                data_type: 'Aligned Reads',
-            },
-            {
-                file_count: 0,
-                data_type: 'GVCF',
-            },
-            {
-                file_count: 0,
-                data_type: 'Simple Nucleotide Variations',
-            },
-            {
-                file_count: 0,
-                data_type: 'Variant Calls',
-            },
-            {
-                file_count: 0,
-                data_type: 'Alternative Splicing',
-            },
-            {
-                file_count: 0,
-                data_type: 'Unaligned Reads',
-            },
-            {
-                file_count: 0,
-                data_type: 'Somatic Copy Number Variations',
-            },
-            {
-                file_count: 0,
-                data_type: 'Protein abundance (absolute protein concentration)',
-            },
-            {
-                file_count: 0,
-                data_type: 'Preprocessed metabolite relative abundance',
-            },
-            {
-                file_count: 0,
-                data_type: 'Somatic Structural Variations',
-            },
-        ],
         dataset: [],
         date_collection_end_year: '',
         date_collection_start_year: '',
@@ -1401,20 +719,6 @@ const sSchema = {
     title: 'Study',
     type: 'object',
     properties: {
-        data_types: {
-            type: 'array',
-            items: {
-                type: 'object',
-                properties: {
-                    file_count: {
-                        type: 'integer',
-                    },
-                    data_type: {
-                        type: 'string',
-                    },
-                },
-            },
-        },
         controlled_access: {
             type: 'array',
             items: {
