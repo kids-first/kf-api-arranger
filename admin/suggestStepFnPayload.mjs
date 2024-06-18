@@ -89,8 +89,8 @@ if (project === 'include') {
         runGenomicEtl: false,
         verbose: 'false',
     };
-    console.log(payloadInc);
-    console.log('\n')
+    console.log(JSON.stringify(payloadInc, null, 4));
+    console.log('\n');
 }
 
 const addKfSuffixToRelIfInclude = () => `${rel}${isInclude ? '_kf' : ''}`;
@@ -104,4 +104,4 @@ const payloadKf = {
     runGenomicEtl: false,
     verbose: 'false',
 };
-console.log(payloadKf);
+console.log(JSON.stringify(payloadKf, null, 4));
