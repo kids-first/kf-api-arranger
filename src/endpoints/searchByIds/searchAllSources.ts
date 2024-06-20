@@ -1,6 +1,6 @@
 import { flatten } from 'lodash';
 
-import { ArrangerProject } from '../../sqon/searchSqon';
+import { ArrangerProject } from '../../arrangerUtils';
 import { byBiospecimenId } from './byBiospecimenId';
 import { byFamilyId } from './byFamilyId';
 import { byId } from './byId';

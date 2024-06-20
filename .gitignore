@@ -8,3 +8,4 @@ node_modules
 /.idea/
 dev/es_data/*
 *.env-dev
+venv

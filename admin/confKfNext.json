@@ -1,0 +1,449 @@
+{
+  "indices": [
+    {
+      "graphqlField": "biospecimen",
+      "esIndex": "next_biospecimen_centric"
+    },
+    {
+      "graphqlField": "file",
+      "esIndex": "next_file_centric"
+    },
+    {
+      "graphqlField": "genes",
+      "esIndex": "next_gene_centric"
+    },
+    {
+      "graphqlField": "members",
+      "esIndex": "members-public"
+    },
+    {
+      "graphqlField": "participant",
+      "esIndex": "next_participant_centric"
+    },
+    {
+      "graphqlField": "study",
+      "esIndex": "next_study_centric"
+    },
+    {
+      "graphqlField": "variants",
+      "esIndex": "next_variant_centric"
+    }
+  ],
+  "extendedMappingMutations": [
+    {
+      "field": "diagnoses",
+      "graphqlField": "biospecimen",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "diagnoses.source_text_tumor_location",
+      "graphqlField": "biospecimen",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "acl",
+      "graphqlField": "file",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "files",
+      "graphqlField": "file",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "participants",
+      "graphqlField": "file",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "participants.biospecimens",
+      "graphqlField": "file",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "participants.biospecimens.diagnoses",
+      "graphqlField": "file",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "participants.biospecimens.diagnoses.source_text_tumor_location",
+      "graphqlField": "file",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "participants.down_syndrome_diagnosis",
+      "graphqlField": "file",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "sequencing_experiment",
+      "graphqlField": "file",
+      "extendedFieldMappingInput": {
+        "isArray": true,
+        "type": "nested"
+      }
+    },
+    {
+      "field": "alias",
+      "graphqlField": "genes",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "interests",
+      "graphqlField": "members",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "roles",
+      "graphqlField": "members",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "searchableInterests",
+      "graphqlField": "members",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "down_syndrome_diagnosis",
+      "graphqlField": "participant",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "files.biospecimens.diagnoses",
+      "graphqlField": "participant",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "files.biospecimens.diagnoses.source_text_tumor_location",
+      "graphqlField": "participant",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "files.sequencing_experiment",
+      "graphqlField": "participant",
+      "extendedFieldMappingInput": {
+        "isArray": true,
+        "type": "nested"
+      }
+    },
+    {
+      "field": "mondo.parents",
+      "graphqlField": "participant",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "observed_phenotype.age_at_event_days",
+      "graphqlField": "participant",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "observed_phenotype.parents",
+      "graphqlField": "participant",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "contacts",
+      "graphqlField": "study",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "controlled_access",
+      "graphqlField": "study",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "data_category",
+      "graphqlField": "study",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "data_sources",
+      "graphqlField": "study",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "data_types",
+      "graphqlField": "study",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "dataset",
+      "graphqlField": "study",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "dataset.access_limitations",
+      "graphqlField": "study",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "dataset.access_requirements",
+      "graphqlField": "study",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "dataset.data_types",
+      "graphqlField": "study",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "dataset.expected_data_categories",
+      "graphqlField": "study",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "dataset.publications",
+      "graphqlField": "study",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "domains",
+      "graphqlField": "study",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "expected_data_categories",
+      "graphqlField": "study",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "experimental_strategies",
+      "graphqlField": "study",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "external_ids",
+      "graphqlField": "study",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "institutions",
+      "graphqlField": "study",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "investigator_names",
+      "graphqlField": "study",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "part_lifespan_stages",
+      "graphqlField": "study",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "publications",
+      "graphqlField": "study",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "selection_criteria",
+      "graphqlField": "study",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "study_designs",
+      "graphqlField": "study",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "clinvar.clin_sig",
+      "graphqlField": "variants",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "clinvar.conditions",
+      "graphqlField": "variants",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "clinvar.inheritance",
+      "graphqlField": "variants",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "clinvar.interpretations",
+      "graphqlField": "variants",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "gene_external_reference",
+      "graphqlField": "variants",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "genes",
+      "graphqlField": "variants",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "genes.alias",
+      "graphqlField": "variants",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "genes.consequences.consequence",
+      "graphqlField": "variants",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "genes.consequences.refseq_mrna_id",
+      "graphqlField": "variants",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "genes.cosmic.tumour_types_germline",
+      "graphqlField": "variants",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "genes.omim.inheritance",
+      "graphqlField": "variants",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "genes.omim.inheritance_code",
+      "graphqlField": "variants",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "genes.orphanet.inheritance",
+      "graphqlField": "variants",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "genes.spliceai.type",
+      "graphqlField": "variants",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "studies.participant_ids",
+      "graphqlField": "variants",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "studies.transmission",
+      "graphqlField": "variants",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "studies.zygosity",
+      "graphqlField": "variants",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    }
+  ]
+}

@@ -14,10 +14,14 @@ JBCiTrVNMy4wmZruwoG/sae517Jl6cIFePSifpOTsA==
 
 export const publicKey = `MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAJgoVgqi7/C9uSoUsfQeep2Dbw5HfXWQIyypg+XZ3NqsxTA2k2Fr2vmBu82iGsNgwWBKac5IOzSGvyob1l64MkUCAwEAAQ==`;
 
+export const fakeKeycloakRealm = 'fake_realm';
+export const fakeKeycloakClient = 'fake_client';
+export const fakeKeycloakUrl = 'https://fake_keycloak_url.com/auth';
+
 export const getToken = (expire = 1000, sub = '12345-678-90abcdef', roles = []) =>
     jwt.sign(
         {
-            iss: 'https://kf-keycloak-qa.kf-strides.org/auth/realms/kidsfirstdrc',
+            iss: `${fakeKeycloakUrl}/realms/${fakeKeycloakRealm}`,
             sub: sub,
             aud: 'kf-api-arranger',
             jti: '2c166d55-5ae6-4fb4-9daa-a1d5e1f535d7',

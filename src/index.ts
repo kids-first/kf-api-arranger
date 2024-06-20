@@ -3,11 +3,11 @@ import 'regenerator-runtime/runtime.js';
 
 import Arranger from '@arranger/server';
 import { getProject } from '@arranger/server';
-import SQS from 'aws-sdk/clients/sqs';
+import { SQSClient } from '@aws-sdk/client-sqs';
 import Keycloak from 'keycloak-connect';
 
 import buildApp from './app';
-import { esHost, esUser, esPass, port } from './env';
+import { esHost, esPass, esUser, port } from './env';
 import keycloakConfig from './keycloak';
 
 process.on('uncaughtException', err => {
@@ -26,7 +26,8 @@ process.on('SIGINT', () => {
 });
 
 const keycloak = new Keycloak({}, keycloakConfig);
-const sqs = new SQS({ apiVersion: '2012-11-05' });
+
+const sqs = new SQSClient({});
 const app = buildApp(keycloak, sqs, getProject);
 const externalContext = (req, _res, _con) => ({ auth: req.kauth?.grant?.access_token || {} });
 
@@ -41,7 +42,16 @@ Arranger({
     app.get('/*/ping', router);
     app.use(keycloak.protect(), router);
 
+    const k: any = keycloak;
+    const originalValidateGrant = k.grantManager.validateGrant;
+    k.grantManager.validateGrant = grant =>
+        originalValidateGrant.call(k.grantManager, grant).catch(err => {
+            console.error('Grant Validation Error', err);
+            throw err;
+        });
+
     app.listen(port, async () => {
+        console.log('Arranger-Next Starting');
         console.log(`⚡️ Listening on port ${port} ⚡️`);
     });
 });

@@ -1,18 +1,11 @@
-# First image to compile typescript to javascript
-FROM node:16.13-alpine AS build-image
+FROM node:20-alpine3.18 AS build
 WORKDIR /app
 COPY . .
-RUN npm ci
-RUN npm run clean
-RUN npm run build
+RUN npm ci && npm run cleanAndBuild
 
-# Second image, that creates an image for production
-FROM nikolaik/python-nodejs:python3.9-nodejs16-alpine AS prod-image
+FROM node:20-alpine3.18 AS prod-image
 WORKDIR /app
-COPY --from=build-image ./app/dist ./dist
+COPY --from=build ./app/dist ./dist
 COPY package* ./
-COPY ./resource ./resource
-RUN npm ci --production
-RUN pip3 install -r resource/py/requirements.txt
-
+RUN apk update && apk upgrade --no-cache libcrypto3 libssl3 && npm ci --production
 CMD [ "node", "./dist/src/index.js" ]
