@@ -2,9 +2,9 @@
 @Library(value="kids-first/aws-infra-jenkins-shared-libraries", changelog=false) _
 deploy {
     architecture_type = "aws-ecs-service-type-1"
-    jenkinsfile_name  = "next.deploy" 
-    main_branch="2.0"
-    projectName = "kf-api-arranger-next"
+    jenkinsfile_name  = "kf.deploy" 
+    main_branch="master"
+    projectName = "kf-api-arranger"
     environments = "qa,prd"
     docker_image_type = "alpine"
     internal_app = "false"
