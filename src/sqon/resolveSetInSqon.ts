@@ -1,11 +1,10 @@
 import { Dictionary, flattenDeep, get, isArray, zipObject } from 'lodash';
 
+import { mapRiffOutputToUserOutput } from '../endpoints/sets/setsFeature';
 import { SetSqon } from '../endpoints/sets/setsTypes';
-import { getRiffs } from '../riff/riffClient';
 import { project, PROJECT_INCLUDE } from '../env';
-import { getUserContents } from '../userApi/userApiClient';
-
-const projectType = project;
+import { getRiffs } from '../riff/riffClient';
+import { getSharedSet, getUserContents, Output as UserSetOutput } from '../userApi/userApiClient';
 
 const getSetIdsFromSqon = (sqon: SetSqon, collection = []) =>
     (isArray(sqon.content)
@@ -35,11 +34,11 @@ const injectIdsIntoSqon = (sqon: SetSqon, setIdsToValueMap: Dictionary<string[]>
 export const resolveSetsInSqon = async (sqon: SetSqon, userId: string, accessToken: string): Promise<SetSqon> => {
     const setIds: string[] = getSetIdsFromSqon(sqon || ({} as SetSqon));
     if (setIds.length) {
-        let userSets;
-        if (projectType === PROJECT_INCLUDE) {
-            userSets = await getUserContents(accessToken);
+        let userSets: UserSetOutput[];
+        if (project === PROJECT_INCLUDE) {
+            userSets = await retrieveSetsFromUsers(accessToken, setIds);
         } else {
-            userSets = await getRiffs(accessToken, userId);
+            userSets = (await getRiffs(accessToken, userId)).map(s => mapRiffOutputToUserOutput(s));
         }
 
         const ids = setIds.map(setId => get(userSets.filter(r => r.id === setId)[0], 'content.ids', []));
@@ -52,4 +51,21 @@ export const resolveSetsInSqon = async (sqon: SetSqon, userId: string, accessTok
     } else {
         return sqon;
     }
+};
+
+export const retrieveSetsFromUsers = async (accessToken: string, setIds: string[]): Promise<UserSetOutput[]> => {
+    // Get all user sets
+    const userSets = await getUserContents(accessToken);
+    const userSetsIds = userSets.map(us => us.id);
+
+    for (const setId of setIds) {
+        // if set is a shared set, fetch it and add it to user sets
+        if (!userSetsIds.includes(setId)) {
+            const sharedSet = await getSharedSet(accessToken, setId);
+            userSets.push(sharedSet);
+            userSetsIds.push(sharedSet.id);
+        }
+    }
+
+    return userSets;
 };

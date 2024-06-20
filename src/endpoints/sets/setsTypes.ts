@@ -34,5 +34,7 @@ export type Set = {
     id: string;
     tag: string;
     size: number;
+    setType: string;
+    updated_date: Date;
+    created_date: Date;
 };
-

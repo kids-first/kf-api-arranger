@@ -1,12 +1,15 @@
 import addAsync from '@awaitjs/express';
-import SQS from 'aws-sdk/clients/sqs';
+import { SQSClient } from '@aws-sdk/client-sqs';
 import cors from 'cors';
 import express, { Express } from 'express';
 import { Keycloak } from 'keycloak-connect';
 import NodeCache from 'node-cache';
 
 import { dependencies, version } from '../package.json';
+import { ArrangerProject } from './arrangerUtils';
+import { computeAuthorizedStudiesForAllFences } from './endpoints/authorizedStudies/computeAuthorizedStudies';
 import genomicFeatureSuggestions, { SUGGESTIONS_TYPES } from './endpoints/genomicFeatureSuggestions';
+import { getPhenotypesNodes } from './endpoints/phenotypes';
 import { searchAllSources } from './endpoints/searchByIds/searchAllSources';
 import { SearchByIdsResult } from './endpoints/searchByIds/searchByIdsTypes';
 import {
@@ -18,17 +21,14 @@ import {
     updateSetTag,
 } from './endpoints/sets/setsFeature';
 import { CreateSetBody, Set, SetSqon, UpdateSetContentBody, UpdateSetTagBody } from './endpoints/sets/setsTypes';
-import { getStatistics } from './endpoints/statistics';
-import { calculateSurvivalForSqonResult } from './endpoints/survival';
-import { cacheTTL, esHost, keycloakURL } from './env';
+import { getStatistics, getStudiesStatistics } from './endpoints/statistics';
+import { cacheTTL, esHost, keycloakURL, userApiURL } from './env';
 import { globalErrorHandler, globalErrorLogger } from './errors';
-import { STATISTICS_CACHE_ID, verifyCache } from './middleware/cache';
+import { STATISTICS_CACHE_ID, STATISTICS_PUBLIC_CACHE_ID, verifyCache } from './middleware/cache';
 import { injectBodyHttpHeaders } from './middleware/injectBodyHttpHeaders';
 import { resolveSetIdMiddleware } from './middleware/resolveSetIdInSqon';
-import { ArrangerProject } from './sqon/searchSqon';
-import { getPhenotypesNodes } from './endpoints/phenotypes';
 
-export default (keycloak: Keycloak, sqs: SQS, getProject: (projectId: string) => ArrangerProject): Express => {
+export default (keycloak: Keycloak, sqs: SQSClient, getProject: (projectId: string) => ArrangerProject): Express => {
     const app = addAsync.addAsync(express());
 
     const cache = new NodeCache({ stdTTL: cacheTTL });
@@ -53,14 +53,16 @@ export default (keycloak: Keycloak, sqs: SQS, getProject: (projectId: string) =>
 
     app.useAsync(resolveSetIdMiddleware());
 
-    app.get('/status', (_req, res) =>
+    app.get('/status', (_req, res) => {
         res.send({
             dependencies,
             version,
             keycloak: keycloakURL,
             elasticsearch: esHost,
-        }),
-    );
+            users: userApiURL,
+            arrangerNext: true,
+        });
+    });
 
     app.post('/cache-clear', keycloak.protect('realm:ADMIN'), async (_req, res) => {
         cache.flushAll();
@@ -80,14 +82,10 @@ export default (keycloak: Keycloak, sqs: SQS, getProject: (projectId: string) =>
         res.json(data);
     });
 
-    app.postAsync('/survival', keycloak.protect(), async (req, res) => {
-        const accessToken = req.headers.authorization;
-        const userId = req['kauth']?.grant?.access_token?.content?.sub;
-        const sqon: SetSqon = req.body.sqon;
-        const projectId: string = req.body.project;
-        const data = await calculateSurvivalForSqonResult(sqon, projectId, userId, accessToken, getProject);
-
-        res.send({ data });
+    app.getAsync('/statistics/studies', verifyCache(STATISTICS_PUBLIC_CACHE_ID, cache), async (req, res) => {
+        const data = await getStudiesStatistics();
+        cache.set(STATISTICS_PUBLIC_CACHE_ID, data);
+        res.json(data);
     });
 
     app.postAsync('/searchByIds', keycloak.protect(), async (req, res) => {
@@ -165,6 +163,8 @@ export default (keycloak: Keycloak, sqs: SQS, getProject: (projectId: string) =>
 
         res.send({ data });
     });
+
+    app.postAsync('/authorized-studies', keycloak.protect(), computeAuthorizedStudiesForAllFences);
 
     app.use(globalErrorLogger, globalErrorHandler);
 

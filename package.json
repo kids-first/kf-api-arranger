@@ -7,12 +7,13 @@
     "start": "node ./dist/src/index.js",
     "test": "jest",
     "test:watch": "jest --watch",
-    "clean": "rm -rf ./dist/* ",
-    "build": "npm run clean; tsc ",
+    "cleanAndBuild": "rm -rf ./dist/* && tsc --build",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
-    "buildAndRun": "npm run build; npm start",
-    "admin-project": "node --experimental-modules=node --es-module-specifier-resolution=node admin/run.mjs"
+    "cbs": "npm run cleanAndBuild && npm start",
+    "admin-project": "node --experimental-modules=node --es-module-specifier-resolution=node admin/run.mjs",
+    "post-re-alias-helper": "node --experimental-modules=node --es-module-specifier-resolution=node admin/postReleaseIndicesToAliasesHelper.mjs",
+    "delete-clinical-indices-helper": "node --experimental-modules=node --es-module-specifier-resolution=node admin/deleteClinicalIndicesFromRelease.mjs"
   },
   "repository": {
     "type": "git",
@@ -38,19 +39,19 @@
     "@arranger/middleware": "^2.16.0",
     "@arranger/server": "^2.16.1",
     "@awaitjs/express": "^0.8.0",
+    "@aws-sdk/client-sqs": "^3.438.0",
     "@elastic/elasticsearch": "^7.9.1",
-    "aws-sdk": "^2.1035.0",
+    "ajv": "^8.12.0",
     "cors": "2.8.5",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "filesize": "^3.6.1",
     "graphql-parse-resolve-info": "4.11.0",
     "http-status-codes": "^2.1.4",
-    "keycloak-connect": "^14.0.0",
+    "keycloak-connect": "^22.0.5",
     "lodash": "^4.17.21",
     "node-cache": "^5.1.2",
     "node-fetch": "^2.6.5",
-    "python-shell": "^3.0.0",
     "regenerator-runtime": "^0.13.9"
   },
   "devDependencies": {
@@ -72,7 +73,6 @@
     "prettier": "^1.19.1",
     "supertest": "^6.1.2",
     "ts-jest": "^27.0.4",
-    "ts-node": "^10.1.0",
     "typescript": "^4.3.5"
   }
 }

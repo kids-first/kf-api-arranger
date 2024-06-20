@@ -1,10 +1,11 @@
-import AWS from 'aws-sdk';
+import { SQSClient } from '@aws-sdk/client-sqs';
 import { Express } from 'express';
 import Keycloak from 'keycloak-connect';
 import request from 'supertest';
 
-import { getToken, publicKey } from '../test/authTestUtils';
+import { fakeKeycloakClient, fakeKeycloakRealm, fakeKeycloakUrl, getToken, publicKey } from '../test/authTestUtils';
 import buildApp from './app';
+import { ArrangerProject } from './arrangerUtils';
 import { searchAllSources } from './endpoints/searchByIds/searchAllSources';
 import { SetNotFoundError } from './endpoints/sets/setError';
 import {
@@ -16,14 +17,10 @@ import {
     updateSetTag,
 } from './endpoints/sets/setsFeature';
 import { Set, UpdateSetContentBody, UpdateSetTagBody } from './endpoints/sets/setsTypes';
-import { getStatistics, Statistics } from './endpoints/statistics';
-import { calculateSurvivalForSqonResult } from './endpoints/survival';
-import { keycloakClient, keycloakRealm, keycloakURL } from './env';
+import { getStatistics, getStudiesStatistics, Statistics } from './endpoints/statistics';
 import { RiffError } from './riff/riffError';
-import { ArrangerProject } from './sqon/searchSqon';
 
 jest.mock('./endpoints/sets/setsFeature');
-jest.mock('./endpoints/survival');
 jest.mock('./endpoints/statistics');
 jest.mock('./endpoints/searchByIds/searchAllSources');
 
@@ -34,15 +31,15 @@ describe('Express app (without Arranger)', () => {
     const getProject = (_s: string) => ({} as ArrangerProject);
 
     beforeEach(() => {
-        const sqs = new AWS.SQS({ apiVersion: '2012-11-05' });
+        const sqs = new SQSClient({});
         const publicKeyToVerify = publicKey;
         keycloakFakeConfig = {
-            realm: keycloakRealm,
+            realm: fakeKeycloakRealm,
             'confidential-port': 0,
             'bearer-only': true,
-            'auth-server-url': keycloakURL,
+            'auth-server-url': fakeKeycloakUrl,
             'ssl-required': 'external',
-            resource: keycloakClient,
+            resource: fakeKeycloakClient,
             'realm-public-key': publicKeyToVerify, // For test purpose, we use public key to validate token.
         };
         const keycloak = new Keycloak({}, keycloakFakeConfig);
@@ -93,6 +90,79 @@ describe('Express app (without Arranger)', () => {
                 samples: 6111,
                 families: 1291,
                 participants: 4330,
+                variants: 1312312,
+                genomes: 13575,
+                transcriptomes: 5454,
+                sex: {
+                    male: 4387,
+                    female: 4302,
+                    unknown: 4,
+                    other: 3,
+                },
+                downSyndromeStatus: {
+                    T21: 7266,
+                    D21: 1430,
+                },
+                race: {
+                    White: 7029,
+                    'Black or African American': 618,
+                    Unknown: 408,
+                    Asian: 269,
+                    NoInformation: 131,
+                    other: 66,
+                    'asked but unknown': 58,
+                    'More than one race': 37,
+                    unknown: 35,
+                    'American Indian or Alaska Native': 34,
+                    'Native Hawaiian or Other Pacific Islander': 8,
+                    'not available': 3,
+                },
+                diagnosis: [
+                    {
+                        mondo_id: 'speech disorder (MONDO:0004730)',
+                        count: 2277,
+                    },
+                    {
+                        mondo_id: 'hearing loss disorder (MONDO:0005365)',
+                        count: 1978,
+                    },
+                    {
+                        mondo_id: 'intellectual disability (MONDO:0001071)',
+                        count: 1970,
+                    },
+                    {
+                        mondo_id: 'hypothyroidism (MONDO:0005420)',
+                        count: 1734,
+                    },
+                    {
+                        mondo_id: 'sleep apnea syndrome (MONDO:0005296)',
+                        count: 1360,
+                    },
+                    {
+                        mondo_id: 'atrial septal defect (MONDO:0006664)',
+                        count: 1243,
+                    },
+                    {
+                        mondo_id: 'ventricular septal defect (MONDO:0002070)',
+                        count: 1105,
+                    },
+                    {
+                        mondo_id: 'specific language impairment (MONDO:0000724)',
+                        count: 1068,
+                    },
+                    {
+                        mondo_id: 'congenital heart disease (MONDO:0005453)',
+                        count: 991,
+                    },
+                    {
+                        mondo_id: 'gastroesophageal reflux disease (MONDO:0007186)',
+                        count: 867,
+                    },
+                ],
+                members: {
+                    totalCount: 12343,
+                    publicCount: 345,
+                },
             };
             (getStatistics as jest.Mock).mockImplementation(() => expectedStats);
 
@@ -112,6 +182,62 @@ describe('Express app (without Arranger)', () => {
                 .get('/statistics')
                 .expect(500, { error: 'Internal Server Error' });
             expect((getStatistics as jest.Mock).mock.calls.length).toEqual(1);
+        });
+    });
+
+    describe('GET /statistics/public', () => {
+        beforeEach(() => {
+            (getStudiesStatistics as jest.Mock).mockReset();
+        });
+
+        it('should return 200 if no error occurs', async () => {
+            const expectedPublicStats = {
+                studies: [
+                    { participant_count: 334, study_code: 'KF-EATF' },
+                    {
+                        participant_count: 183,
+                        study_code: 'KF-DSD',
+                    },
+                    { participant_count: 759, study_code: 'KF-OFCAA' },
+                    {
+                        participant_count: 50,
+                        study_code: 'KF-FASD',
+                    },
+                    { participant_count: 774, study_code: 'KF-RSBD' },
+                    {
+                        participant_count: 356,
+                        study_code: 'KF-IGCT',
+                    },
+                    { participant_count: 599, study_code: 'KF-AIS' },
+                    {
+                        participant_count: 185,
+                        study_code: 'KF-FALL',
+                    },
+                    { participant_count: 255, study_code: 'KF-CDL' },
+                    {
+                        participant_count: 517,
+                        study_code: 'KF-CHARGE',
+                    },
+                ],
+            };
+            (getStudiesStatistics as jest.Mock).mockImplementation(() => expectedPublicStats);
+
+            await request(app)
+                .get('/statistics/studies')
+                .expect(200, expectedPublicStats);
+            expect((getStudiesStatistics as jest.Mock).mock.calls.length).toEqual(1);
+        });
+
+        it('should return 500 if an error occurs', async () => {
+            const expectedError = new Error('OOPS');
+            (getStudiesStatistics as jest.Mock).mockImplementation(() => {
+                throw expectedError;
+            });
+
+            await request(app)
+                .get('/statistics/studies')
+                .expect(500, { error: 'Internal Server Error' });
+            expect((getStudiesStatistics as jest.Mock).mock.calls.length).toEqual(1);
         });
     });
 
@@ -385,97 +511,6 @@ describe('Express app (without Arranger)', () => {
                 .set({ Authorization: `Bearer ${token}` })
                 .expect(500, { error: 'Internal Server Error' });
             expect((deleteSet as jest.Mock).mock.calls.length).toEqual(1);
-        });
-    });
-
-    describe('POST /survival', () => {
-        const requestBody = {
-            project: '2021_05_03_v2',
-            sqon: {
-                op: 'and',
-                content: [{ op: 'in', content: { field: 'gender', value: ['Female'] } }],
-            },
-        };
-
-        beforeEach(() => {
-            (calculateSurvivalForSqonResult as jest.Mock).mockReset();
-        });
-
-        it('should return 403 if no Authorization header', () =>
-            request(app)
-                .post('/survival')
-                .expect(403));
-
-        it('should return 200 if Authorization header contains valid token and no error occurs', async () => {
-            const mockSurvivalResponse = [
-                {
-                    start: 0,
-                    end: 1,
-                    died: 7,
-                    censored: 467,
-                    cumulativeSurvival: 1,
-                    donors: [
-                        {
-                            time: 0,
-                            censored: true,
-                            meta: {
-                                id: 'PT_HXDR3ZX6',
-                            },
-                        },
-                    ],
-                },
-                {
-                    start: 1,
-                    end: 3,
-                    died: 1,
-                    censored: 1,
-                    cumulativeSurvival: 0.9944223107569721,
-                    donors: [
-                        {
-                            time: 2,
-                            censored: true,
-                            meta: {
-                                id: 'PT_A0V7V4N0',
-                            },
-                        },
-                        {
-                            time: 3,
-                            censored: false,
-                            meta: {
-                                id: 'PT_Y7GFMG49',
-                            },
-                        },
-                    ],
-                },
-            ];
-            (calculateSurvivalForSqonResult as jest.Mock).mockImplementation(() => mockSurvivalResponse);
-
-            const token = getToken();
-
-            await request(app)
-                .post('/survival')
-                .send(requestBody)
-                .set('Content-type', 'application/json')
-                .set({ Authorization: `Bearer ${token}` })
-                .expect(200, { data: mockSurvivalResponse });
-            expect((calculateSurvivalForSqonResult as jest.Mock).mock.calls.length).toEqual(1);
-        });
-
-        it('should return 500 if Authorization header contains valid token but an error occurs', async () => {
-            const expectedError = new Error('OOPS');
-            (calculateSurvivalForSqonResult as jest.Mock).mockImplementation(() => {
-                throw expectedError;
-            });
-
-            const token = getToken();
-
-            await request(app)
-                .post('/survival')
-                .send(requestBody)
-                .set('Content-type', 'application/json')
-                .set({ Authorization: `Bearer ${token}` })
-                .expect(500, { error: 'Internal Server Error' });
-            expect((calculateSurvivalForSqonResult as jest.Mock).mock.calls.length).toEqual(1);
         });
     });
 

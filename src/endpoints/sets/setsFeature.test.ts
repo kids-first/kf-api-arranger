@@ -1,16 +1,17 @@
-import AWS from 'aws-sdk';
+import { SQS } from '@aws-sdk/client-sqs';
 
+import { ArrangerProject } from '../../arrangerUtils';
 import {
     CreateUpdateBody,
     deleteRiff,
     getRiffs,
+    Output as RiffOutput,
     postRiff,
     putRiff,
-    Output,
     RIFF_TYPE_SET,
 } from '../../riff/riffClient';
 import { resolveSetsInSqon } from '../../sqon/resolveSetInSqon';
-import { ArrangerProject, searchSqon } from '../../sqon/searchSqon';
+import { searchSqon } from '../../sqon/searchSqon';
 import { sendSetInSQSQueue } from '../../SQS/sendEvent';
 import { createSet, deleteSet, getSets, SubActionTypes, updateSetContent, updateSetTag } from './setsFeature';
 import { CreateSetBody, Set, Sort, UpdateSetContentBody, UpdateSetTagBody } from './setsTypes';
@@ -42,7 +43,7 @@ describe('Set management', () => {
 
     const mockParticipantIds = ['participant_1', 'participant_2'];
 
-    const riff = {
+    const riff: RiffOutput = {
         id: setId,
         alias: tag,
         content: {
@@ -50,17 +51,22 @@ describe('Set management', () => {
             sqon,
             riffType: RIFF_TYPE_SET,
             setType: type,
+            idField: 'fhir_id',
+            sort: [],
         },
         sharedPublicly: false,
         uid: 'abcedfghijkl',
         creationDate: new Date(),
         updatedDate: new Date(),
-    } as Output;
+    };
 
     const setFromRiff: Set = {
         id: setId,
         tag,
-        size: mockParticipantIds.length
+        size: mockParticipantIds.length,
+        setType: type,
+        updated_date: riff.updatedDate,
+        created_date: riff.creationDate,
     };
 
     describe('Get user sets using Riff API', () => {
@@ -70,7 +76,16 @@ describe('Set management', () => {
 
         it('should send get riffs and return result filtered to keep only set with tag and convert to Set', async () => {
             const mockUserRiffs = [riff, { ...riff, content: {} }, { ...riff, alias: '' }];
-            const expectedSets = [{ id: riff.id, tag: riff.alias, size: riff.content.ids.length } as Set];
+            const expectedSets: Set[] = [
+                {
+                    id: riff.id,
+                    tag: riff.alias,
+                    size: riff.content.ids.length,
+                    setType: riff.content.setType,
+                    created_date: riff.creationDate,
+                    updated_date: riff.updatedDate,
+                },
+            ];
             (getRiffs as jest.Mock).mockImplementation(() => mockUserRiffs);
 
             const result = await getSets(accessToken, userId);
@@ -117,7 +132,7 @@ describe('Set management', () => {
             },
         };
 
-        const sqs = new AWS.SQS({ apiVersion: '2012-11-05' });
+        const sqs = new SQS({ apiVersion: '2012-11-05' });
 
         beforeEach(() => {
             (resolveSetsInSqon as jest.Mock).mockReset();
@@ -273,13 +288,13 @@ describe('Set management', () => {
             content: riff.content,
         };
 
-        const updatedRiff: Output = {
+        const updatedRiff: RiffOutput = {
             ...riff,
             alias: 'tag updated',
             updatedDate: new Date(),
         };
 
-        const sqs = new AWS.SQS({ apiVersion: '2012-11-05' });
+        const sqs = new SQS({ apiVersion: '2012-11-05' });
 
         beforeEach(() => {
             (getRiffs as jest.Mock).mockReset();
@@ -288,7 +303,11 @@ describe('Set management', () => {
         });
 
         it('should send put riff and return result', async () => {
-            const setFromUpdatedRiff: Set = { ...setFromRiff, tag: 'tag updated' };
+            const setFromUpdatedRiff: Set = {
+                ...setFromRiff,
+                tag: 'tag updated',
+                updated_date: updatedRiff.updatedDate,
+            };
 
             (getRiffs as jest.Mock).mockImplementation(() => mockExistingSets);
             (putRiff as jest.Mock).mockImplementation(() => updatedRiff);
@@ -306,7 +325,7 @@ describe('Set management', () => {
         });
 
         it('should not send message in SQS for empty tag sets', async () => {
-            const setFromUpdatedRiff: Set = { ...setFromRiff, tag: '' };
+            const setFromUpdatedRiff: Set = { ...setFromRiff, tag: '', updated_date: updatedRiff.updatedDate };
 
             (getRiffs as jest.Mock).mockImplementation(() => mockExistingSets);
             (putRiff as jest.Mock).mockImplementation(() => ({ ...updatedRiff, alias: '' }));
@@ -370,7 +389,7 @@ describe('Set management', () => {
 
         const updateSetContentRemoveSqon = { ...updateSetContentAddSqon, subAction: SubActionTypes.REMOVE_IDS };
 
-        const sqs = new AWS.SQS({ apiVersion: '2012-11-05' });
+        const sqs = new SQS({ apiVersion: '2012-11-05' });
 
         beforeEach(() => {
             (getRiffs as jest.Mock).mockReset();
@@ -381,17 +400,7 @@ describe('Set management', () => {
         });
 
         it('should send put riff and return result - case add ids', async () => {
-            const setFromUpdatedRiff: Set = { ...setFromRiff, size: 3 };
             const expectedAddSqon = { op: 'or', content: [sqon, newSqon] };
-            const expectedUpdateRiffBody: CreateUpdateBody = {
-                alias: riff.alias,
-                sharedPublicly: riff.sharedPublicly,
-                content: {
-                    ...riff.content,
-                    sqon: expectedAddSqon,
-                    ids: ['participant_1', 'participant_2', 'participant_3'],
-                },
-            };
             const updatedRiff = {
                 ...riff,
                 content: {
@@ -400,6 +409,18 @@ describe('Set management', () => {
                     ids: ['participant_1', 'participant_2', 'participant_3'],
                 },
                 updatedDate: new Date(),
+            };
+
+            const setFromUpdatedRiff: Set = { ...setFromRiff, size: 3, updated_date: updatedRiff.updatedDate };
+
+            const expectedUpdateRiffBody: CreateUpdateBody = {
+                alias: riff.alias,
+                sharedPublicly: riff.sharedPublicly,
+                content: {
+                    ...riff.content,
+                    sqon: expectedAddSqon,
+                    ids: ['participant_1', 'participant_2', 'participant_3'],
+                },
             };
 
             (getRiffs as jest.Mock).mockImplementation(() => mockExistingSets);
@@ -430,17 +451,7 @@ describe('Set management', () => {
                 op: 'and',
                 content: [{ op: 'in', content: { field: 'kf_id', value: mockNewSqonParticipantIds } }],
             };
-            const setFromUpdatedRiff: Set = { ...setFromRiff, size: 3 };
             const expectedAddSqon = { op: 'or', content: [sqon, newSqonWithSetId] };
-            const expectedUpdateRiffBody: CreateUpdateBody = {
-                alias: riff.alias,
-                sharedPublicly: riff.sharedPublicly,
-                content: {
-                    ...riff.content,
-                    sqon: expectedAddSqon,
-                    ids: ['participant_1', 'participant_2', 'participant_3'],
-                },
-            };
             const updatedRiff = {
                 ...riff,
                 content: {
@@ -449,6 +460,17 @@ describe('Set management', () => {
                     ids: ['participant_1', 'participant_2', 'participant_3'],
                 },
                 updatedDate: new Date(),
+            };
+            const setFromUpdatedRiff: Set = { ...setFromRiff, size: 3, updated_date: updatedRiff.updatedDate };
+
+            const expectedUpdateRiffBody: CreateUpdateBody = {
+                alias: riff.alias,
+                sharedPublicly: riff.sharedPublicly,
+                content: {
+                    ...riff.content,
+                    sqon: expectedAddSqon,
+                    ids: ['participant_1', 'participant_2', 'participant_3'],
+                },
             };
 
             (getRiffs as jest.Mock).mockImplementation(() => mockExistingSets);
@@ -480,9 +502,8 @@ describe('Set management', () => {
         });
 
         it('should not send message in SQS for empty tag sets', async () => {
-            const setFromUpdatedRiff: Set = { ...setFromRiff, size: 3, tag: '' };
             const expectedAddSqon = { op: 'or', content: [sqon, newSqon] };
-            const updatedRiff: Output = {
+            const updatedRiff: RiffOutput = {
                 ...riff,
                 alias: '',
                 content: {
@@ -492,6 +513,8 @@ describe('Set management', () => {
                 },
                 updatedDate: new Date(),
             };
+
+            const setFromUpdatedRiff: Set = { ...setFromRiff, size: 3, tag: '', updated_date: updatedRiff.updatedDate };
 
             (getRiffs as jest.Mock).mockImplementation(() => [{ ...riff, tag: '' }]);
             (resolveSetsInSqon as jest.Mock).mockImplementation(sqon => sqon);
@@ -509,19 +532,9 @@ describe('Set management', () => {
         });
 
         it('should send put riff and return result - case remove ids', async () => {
-            const setFromUpdatedRiff: Set = { ...setFromRiff, size: 1 };
             const expectedRemoveSqon = {
                 op: 'and',
                 content: [sqon, { op: 'not', content: [newSqon] }],
-            };
-            const expectedUpdateRiffBody: CreateUpdateBody = {
-                alias: riff.alias,
-                sharedPublicly: riff.sharedPublicly,
-                content: {
-                    ...riff.content,
-                    sqon: expectedRemoveSqon,
-                    ids: ['participant_2'],
-                },
             };
             const updatedRiff = {
                 ...riff,
@@ -531,6 +544,17 @@ describe('Set management', () => {
                     ids: ['participant_2'],
                 },
                 updatedDate: new Date(),
+            };
+            const setFromUpdatedRiff: Set = { ...setFromRiff, size: 1, updated_date: updatedRiff.updatedDate };
+
+            const expectedUpdateRiffBody: CreateUpdateBody = {
+                alias: riff.alias,
+                sharedPublicly: riff.sharedPublicly,
+                content: {
+                    ...riff.content,
+                    sqon: expectedRemoveSqon,
+                    ids: ['participant_2'],
+                },
             };
 
             (getRiffs as jest.Mock).mockImplementation(() => mockExistingSets);
@@ -598,7 +622,7 @@ describe('Set management', () => {
     });
 
     describe('Delete set using Riff API', () => {
-        const sqs = new AWS.SQS({ apiVersion: '2012-11-05' });
+        const sqs = new SQS({ apiVersion: '2012-11-05' });
 
         beforeEach(() => {
             (searchSqon as jest.Mock).mockReset();

@@ -1,7 +1,7 @@
-import { updateFieldExtendedMapping } from '@arranger/admin/dist/schemas/ExtendedMapping/utils';
-import { createNewIndex, getProjectMetadataEsLocation } from '@arranger/admin/dist/schemas/IndexSchema/utils';
-import { addArrangerProject } from '@arranger/admin/dist/schemas/ProjectSchema/utils';
-import { constants } from '@arranger/admin/dist/services/constants';
+import { updateFieldExtendedMapping } from '@arranger/admin/dist/schemas/ExtendedMapping/utils.js';
+import { createNewIndex, getProjectMetadataEsLocation } from '@arranger/admin/dist/schemas/IndexSchema/utils.js';
+import { addArrangerProject } from '@arranger/admin/dist/schemas/ProjectSchema/utils.js';
+import { constants } from '@arranger/admin/dist/services/constants.js';
 
 const createNewIndices = async (esClient, confIndices) => {
     const createNewIndexWithClient = createNewIndex(esClient);
@@ -10,11 +10,12 @@ const createNewIndices = async (esClient, confIndices) => {
     }
 };
 
-const fixExtendedMapping = async (esClient, confExtendedMappingMutations) => {
+const fixExtendedMapping = async (esClient, mutations) => {
     const updateFieldExtendedMappingWithClient = updateFieldExtendedMapping(esClient);
-    for (const confExtendedMappingMutation of confExtendedMappingMutations) {
+    for (const [index, mutation] of mutations.entries()) {
+        console.debug('updating field = ', mutation?.field, ` ${index + 1} of ${mutations.length}`);
         await updateFieldExtendedMappingWithClient({
-            ...confExtendedMappingMutation,
+            ...mutation,
         });
     }
 };
