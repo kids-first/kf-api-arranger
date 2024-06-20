@@ -2,7 +2,7 @@
 @Library(value="kids-first/aws-infra-jenkins-shared-libraries", changelog=false) _
 deploy {
     architecture_type = "aws-ecs-service-type-1"
-    jenkinsfile_name  = "kf.deploy" 
+    jenkinsfile_name  = "next.deploy" 
     main_branch="master"
     projectName = "kf-api-arranger"
     environments = "qa,prd"
