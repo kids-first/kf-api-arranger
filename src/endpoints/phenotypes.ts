@@ -105,9 +105,8 @@ export const getPhenotypesNodes = async (
     type: string,
     aggregations_filter_themselves: boolean,
     accessToken: string,
-    userId: string,
 ) => {
-    const newSqon = await replaceSetByIds(sqon, accessToken, userId);
+    const newSqon = await replaceSetByIds(sqon, accessToken);
 
     const participantIds = await getParticipantIds(newSqon as SetSqon, projectId, getProject);
 
