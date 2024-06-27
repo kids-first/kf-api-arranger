@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 
+import { RIFF_TYPE_SET } from '../endpoints/sets/setsTypes';
 import { getSharedSet, getUserContents, Output as UserSetOutput } from '../userApi/userApiClient';
 import { retrieveSetsFromUsers } from './resolveSetInSqon';
 
@@ -20,6 +21,7 @@ describe('retrieveSetsFromUsers', () => {
             sqon: { op: 'and', content: [] },
             idField: 'fhir_id',
             sort: [],
+            riffType: RIFF_TYPE_SET,
             setType: 'participant',
         },
         sharedpublicly: false,
@@ -35,6 +37,7 @@ describe('retrieveSetsFromUsers', () => {
             sqon: { op: 'and', content: [] },
             idField: 'fhir_id',
             sort: [],
+            riffType: RIFF_TYPE_SET,
             setType: 'participant',
         },
         sharedpublicly: false,
@@ -50,6 +53,7 @@ describe('retrieveSetsFromUsers', () => {
             sqon: { op: 'and', content: [] },
             idField: 'fhir_id',
             sort: [],
+            riffType: RIFF_TYPE_SET,
             setType: 'participant',
         },
         sharedpublicly: true,
