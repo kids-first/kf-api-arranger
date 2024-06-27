@@ -70,7 +70,7 @@ const allStudiesSearchResponse = await client.search({
     },
 });
 
-const allStudiesHits = (allStudiesSearchResponse?.body?.hits?.hits || []).sort();
+const allStudiesHits = allStudiesSearchResponse?.body?.hits?.hits || [];
 
 const fhirUrls = {
     ['kf-qa']: 'https://kf-api-fhir-service-upgrade-qa.kf-strides.org',
@@ -82,7 +82,10 @@ const fhirUrls = {
 if (project === 'include') {
     const payloadInc = {
         releaseId: rel,
-        studyIds: allStudiesHits.filter(x => !x._index.includes('kf')).map(x => x._source.study_id),
+        studyIds: allStudiesHits
+            .filter(x => !x._index.includes('kf'))
+            .map(x => x._source.study_id)
+            .sort(),
         clusterSize: 'medium',
         portalEtlName: `clin-${env}-inc-${rel}`,
         fhirUrl: fhirUrls[`inc-${env}`],
@@ -97,7 +100,10 @@ const addKfSuffixToRelIfInclude = () => `${rel}${isInclude ? '_kf' : ''}`;
 
 const payloadKf = {
     releaseId: addKfSuffixToRelIfInclude(),
-    studyIds: allStudiesHits.filter(x => (isInclude ? x._index.includes('kf') : x)).map(x => x._source.study_id),
+    studyIds: allStudiesHits
+        .filter(x => (isInclude ? x._index.includes('kf') : x))
+        .map(x => x._source.study_id)
+        .sort(),
     clusterSize: 'medium',
     portalEtlName: `clin-${env}-${isInclude ? 'inc-kf' : 'kf'}-${addKfSuffixToRelIfInclude()}`,
     fhirUrl: fhirUrls[`kf-${env}`],
