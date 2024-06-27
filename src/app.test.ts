@@ -16,6 +16,7 @@ import {
 } from './endpoints/sets/setsFeature';
 import { Set, UpdateSetContentBody, UpdateSetTagBody } from './endpoints/sets/setsTypes';
 import { getStatistics, getStudiesStatistics, Statistics } from './endpoints/statistics';
+import { UserApiError } from './userApi/userApiError';
 
 jest.mock('./endpoints/sets/setsFeature');
 jest.mock('./endpoints/statistics');
@@ -269,6 +270,21 @@ describe('Express app (without Arranger)', () => {
                 .expect(200, expectedSets);
             expect((getSets as jest.Mock).mock.calls.length).toEqual(1);
         });
+
+        it('should return 500 if Authorization header contains valid token but an error occurs', async () => {
+            const expectedError = new UserApiError(404, { message: 'OOPS' });
+            (getSets as jest.Mock).mockImplementation(() => {
+                throw expectedError;
+            });
+
+            const token = getToken();
+
+            await request(app)
+                .get('/sets')
+                .set({ Authorization: `Bearer ${token}` })
+                .expect(500, { error: 'Internal Server Error' });
+            expect((getSets as jest.Mock).mock.calls.length).toEqual(1);
+        });
     });
 
     describe('POST /sets', () => {
@@ -322,6 +338,23 @@ describe('Express app (without Arranger)', () => {
                 .set({ Authorization: `Bearer ${token}` })
                 .expect(checkRes)
                 .expect(200);
+            expect((createSet as jest.Mock).mock.calls.length).toEqual(1);
+        });
+
+        it('should return 500 if Authorization header contains valid token but an error occurs', async () => {
+            const expectedError = new UserApiError(400, { message: 'OOPS' });
+            (createSet as jest.Mock).mockImplementation(() => {
+                throw expectedError;
+            });
+
+            const token = getToken();
+
+            await request(app)
+                .post('/sets')
+                .send(requestBody)
+                .set('Content-type', 'application/json')
+                .set({ Authorization: `Bearer ${token}` })
+                .expect(500, { error: 'Internal Server Error' });
             expect((createSet as jest.Mock).mock.calls.length).toEqual(1);
         });
     });
@@ -457,6 +490,22 @@ describe('Express app (without Arranger)', () => {
                 .set('Content-type', 'application/json')
                 .set({ Authorization: `Bearer ${token}` })
                 .expect(200, 'true');
+            expect((deleteSet as jest.Mock).mock.calls.length).toEqual(1);
+        });
+
+        it('should return 500 if Authorization header contains valid token but an error occurs', async () => {
+            const expectedError = new UserApiError(404, { message: 'OOPS' });
+            (deleteSet as jest.Mock).mockImplementation(() => {
+                throw expectedError;
+            });
+
+            const token = getToken();
+
+            await request(app)
+                .delete('/sets/1ei')
+                .set('Content-type', 'application/json')
+                .set({ Authorization: `Bearer ${token}` })
+                .expect(500, { error: 'Internal Server Error' });
             expect((deleteSet as jest.Mock).mock.calls.length).toEqual(1);
         });
     });

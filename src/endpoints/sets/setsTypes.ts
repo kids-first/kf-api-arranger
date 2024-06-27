@@ -3,6 +3,23 @@ export type SetSqon = {
     content: any; // Since SQON is generic, it is too complex to define an explicit type for its content.
 };
 
+export const RIFF_TYPE_SET = 'set';
+
+export type CreateUpdateBody = {
+    alias: string;
+    content: Content;
+    sharedPublicly: boolean;
+};
+
+export type Content = {
+    setType: string;
+    riffType: string;
+    ids: string[];
+    sqon: SetSqon;
+    sort: Sort[];
+    idField: string;
+};
+
 export type CreateSetBody = {
     projectId: string;
     type: string;

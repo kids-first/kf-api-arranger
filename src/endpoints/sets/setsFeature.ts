@@ -13,7 +13,14 @@ import {
     putUserContent,
 } from '../../userApi/userApiClient';
 import { SetNotFoundError } from './setError';
-import { CreateSetBody, Set, UpdateSetContentBody, UpdateSetTagBody } from './setsTypes';
+import {
+    CreateSetBody,
+    CreateUpdateBody,
+    RIFF_TYPE_SET,
+    Set,
+    UpdateSetContentBody,
+    UpdateSetTagBody,
+} from './setsTypes';
 
 export const SubActionTypes = {
     RENAME_TAG: 'RENAME_TAG',
@@ -47,10 +54,10 @@ export const createSet = async (
 
     const truncatedIds = truncateIds(ids);
 
-    const payload = {
+    const payload: CreateUpdateBody = {
         alias: tag,
         sharedPublicly: false,
-        content: { ids: truncatedIds, setType: type, sqon, sort, idField },
+        content: { ids: truncatedIds, riffType: RIFF_TYPE_SET, setType: type, sqon, sort, idField },
     };
 
     if (!payload.alias || !payload.content.ids) {
@@ -63,7 +70,7 @@ export const createSet = async (
 export const updateSetTag = async (requestBody: UpdateSetTagBody, accessToken: string, setId: string): Promise<Set> => {
     const setToUpdate: UserSetOutput = await getUserSet(accessToken, setId);
 
-    const payload = {
+    const payload: CreateUpdateBody = {
         alias: requestBody.newTag,
         sharedPublicly: setToUpdate.sharedpublicly,
         content: setToUpdate.content,
@@ -108,7 +115,7 @@ export const updateSetContent = async (
         requestBody.subAction === SubActionTypes.ADD_IDS ? union(ids, newSqonIds) : difference(ids, newSqonIds);
     const truncatedIds = truncateIds(existingIdsWithNewIds);
 
-    const payload = {
+    const payload: CreateUpdateBody = {
         alias: setToUpdate.alias,
         sharedPublicly: setToUpdate.sharedpublicly,
         content: { ...setToUpdate.content, sqon: existingSqonWithNewSqon, ids: truncatedIds },
@@ -118,10 +125,8 @@ export const updateSetContent = async (
     return mapUserResultToSet(updateResult);
 };
 
-export const deleteSet = async (
-    accessToken: string,
-    setId: string
-): Promise<string> => await deleteUserContent(accessToken, setId);
+export const deleteSet = async (accessToken: string, setId: string): Promise<string> =>
+    await deleteUserContent(accessToken, setId);
 
 const mapUserResultToSet = (output: UserSetOutput): Set => ({
     id: output.id,
