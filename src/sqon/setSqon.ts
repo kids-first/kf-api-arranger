@@ -15,7 +15,7 @@ const getPathToParticipantId = (type: string) => {
 };
 
 const CAPTURING_GROUP_OF_SET_ID_VALUE = 1;
-export const replaceSetByIds = async (sqon: SetSqon, accessToken: string, userId: string): Promise<SetSqon> => {
+export const replaceSetByIds = async (sqon: SetSqon, accessToken: string): Promise<SetSqon> => {
     if (!sqon) {
         throw new Error('Sqon is missing');
     }
@@ -26,7 +26,7 @@ export const replaceSetByIds = async (sqon: SetSqon, accessToken: string, userId
             const matchesSet = setRegex.exec(content?.content?.value?.[0]);
             const setId: string | null = matchesSet && matchesSet[CAPTURING_GROUP_OF_SET_ID_VALUE];
             if (setId) {
-                const set = await getUserSet(accessToken, userId, setId);
+                const set = await getUserSet(accessToken, setId);
                 const newContent = { ...content };
                 newContent.content.field = getPathToParticipantId(set.content.setType);
                 newContent.content.value = set.content.ids;

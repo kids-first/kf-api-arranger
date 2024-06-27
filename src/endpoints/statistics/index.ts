@@ -3,6 +3,8 @@ import filesize from 'filesize';
 
 import EsInstance from '../../ElasticSearchClientInstance';
 import {
+    biospecimenIdKey,
+    esBiospecimenIndex,
     esFileIndex,
     esParticipantIndex,
     esStudyIndex,
@@ -10,13 +12,8 @@ import {
     familyIdKey,
     fileIdKey,
     participantIdKey,
-    project,
-    PROJECT_INCLUDE,
-    PROJECT_KIDSFIRST,
     studyIdKey,
 } from '../../env';
-import { fetchBiospecimenStats as fetchIncludeBiospecimen } from './includeBiospecimen';
-import { fetchBiospecimenStats as fetchKidsfirstBiospecimen } from './kidsfirstBiospecimen';
 
 export type Diagnosis = {
     mondo_id: string;
@@ -101,15 +98,14 @@ const fetchFamilyStats = async (client: Client): Promise<number> => {
 };
 
 const fetchBiospecimenStats = async (client: Client): Promise<number> => {
-    if (project === PROJECT_KIDSFIRST) {
-        return fetchKidsfirstBiospecimen(client);
-    }
-
-    if (project === PROJECT_INCLUDE) {
-        return fetchIncludeBiospecimen(client);
-    }
-
-    return Promise.resolve(0);
+    const { body } = await client.search({
+        index: esBiospecimenIndex,
+        body: {
+            aggs: { types_count: { value_count: { field: biospecimenIdKey } } },
+        },
+        size: 0,
+    });
+    return body.aggregations.types_count.value;
 };
 
 export const fetchVariantStats = async (client: Client): Promise<number> => {

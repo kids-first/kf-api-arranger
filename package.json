@@ -39,7 +39,6 @@
     "@arranger/middleware": "^2.16.0",
     "@arranger/server": "^2.16.1",
     "@awaitjs/express": "^0.8.0",
-    "@aws-sdk/client-sqs": "^3.438.0",
     "@elastic/elasticsearch": "^7.9.1",
     "ajv": "^8.12.0",
     "cors": "2.8.5",

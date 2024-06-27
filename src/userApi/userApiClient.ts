@@ -2,12 +2,10 @@ import fetch from 'node-fetch';
 
 import { SetSqon, Sort } from '../endpoints/sets/setsTypes';
 import { userApiURL } from '../env';
-import { CreateUpdateBody } from '../riff/riffClient';
 import { UserApiError } from './userApiError';
 
 export type Content = {
     setType: string;
-    riffType: string;
     ids: string[];
     sqon: SetSqon;
     sort: Sort[];
@@ -64,7 +62,7 @@ export const getUserContents = async (accessToken: string): Promise<Output[]> =>
     throw new UserApiError(response.status, body);
 };
 
-export const postUserContent = async (accessToken: string, set: CreateUpdateBody): Promise<Output> => {
+export const postUserContent = async (accessToken: string, set): Promise<Output> => {
     const uri = `${userApiURL}/user-sets`;
 
     const response = await fetch(encodeURI(uri), {
@@ -85,7 +83,7 @@ export const postUserContent = async (accessToken: string, set: CreateUpdateBody
     throw new UserApiError(response.status, body);
 };
 
-export const putUserContent = async (accessToken: string, set: CreateUpdateBody, setId: string): Promise<Output> => {
+export const putUserContent = async (accessToken: string, set, setId: string): Promise<Output> => {
     const uri = `${userApiURL}/user-sets/${setId}`;
 
     const response = await fetch(encodeURI(uri), {
