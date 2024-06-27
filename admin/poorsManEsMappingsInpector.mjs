@@ -16,10 +16,11 @@ const indicesWithMappingContainingIgnoreAbove = Object.entries(r.body)
         if (matchesStartPos.length === 0) {
             return xs;
         }
-        const radiusInChars = 75;
+        const leftRadius = 75;
+        const rightRadius = 25;
         return [
             ...xs,
-            { index: indexName, loci: matchesStartPos.map(n => sm.slice(n - radiusInChars, n + radiusInChars)) },
+            { index: indexName, loci: matchesStartPos.map(n => sm.slice(n - leftRadius, n + rightRadius)) },
         ];
     }, []);
 
