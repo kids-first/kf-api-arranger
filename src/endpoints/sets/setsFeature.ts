@@ -5,13 +5,7 @@ import { maxSetContentSize } from '../../env';
 import { addSqonToSetSqon, removeSqonToSetSqon } from '../../sqon/manipulateSqon';
 import { resolveSetsInSqon } from '../../sqon/resolveSetInSqon';
 import { searchSqon } from '../../sqon/searchSqon';
-import {
-    deleteUserContent,
-    getUserContents,
-    Output as UserSetOutput,
-    postUserContent,
-    putUserContent,
-} from '../../userApi/userApiClient';
+import { deleteUserSet, getUserSets, postUserSet, putUserSet, UserSet } from '../../userApi/userApiClient';
 import { SetNotFoundError } from './setError';
 import {
     CreateSetBody,
@@ -28,8 +22,8 @@ export const SubActionTypes = {
     REMOVE_IDS: 'REMOVE_IDS',
 };
 
-export const getUserSet = async (accessToken: string, setId: string): Promise<UserSetOutput> => {
-    const existingSetsFilterById: UserSetOutput[] = (await getUserContents(accessToken)).filter(r => r.id === setId);
+export const getUserSet = async (accessToken: string, setId: string): Promise<UserSet> => {
+    const existingSetsFilterById: UserSet[] = (await getUserSets(accessToken)).filter(r => r.id === setId);
     if (existingSetsFilterById.length !== 1) {
         throw new SetNotFoundError('Set to update can not be found !');
     }
@@ -38,7 +32,7 @@ export const getUserSet = async (accessToken: string, setId: string): Promise<Us
 };
 
 export const getSets = async (accessToken: string): Promise<Set[]> => {
-    const userContents = await getUserContents(accessToken);
+    const userContents = await getUserSets(accessToken);
     return userContents.map(set => mapUserResultToSet(set));
 };
 
@@ -63,12 +57,12 @@ export const createSet = async (
     if (!payload.alias || !payload.content.ids) {
         throw Error(`Set must have ${!payload.alias ? 'a name' : 'no set ids'}`);
     }
-    const createResult = await postUserContent(accessToken, payload);
+    const createResult = await postUserSet(accessToken, payload);
     return mapUserResultToSet(createResult);
 };
 
 export const updateSetTag = async (requestBody: UpdateSetTagBody, accessToken: string, setId: string): Promise<Set> => {
-    const setToUpdate: UserSetOutput = await getUserSet(accessToken, setId);
+    const setToUpdate: UserSet = await getUserSet(accessToken, setId);
 
     const payload: CreateUpdateBody = {
         alias: requestBody.newTag,
@@ -76,7 +70,7 @@ export const updateSetTag = async (requestBody: UpdateSetTagBody, accessToken: s
         content: setToUpdate.content,
     };
 
-    const updateResult = await putUserContent(accessToken, payload, setId);
+    const updateResult = await putUserSet(accessToken, payload, setId);
     return mapUserResultToSet(updateResult);
 };
 
@@ -121,14 +115,14 @@ export const updateSetContent = async (
         content: { ...setToUpdate.content, sqon: existingSqonWithNewSqon, ids: truncatedIds },
     };
 
-    const updateResult = await putUserContent(accessToken, payload, setId);
+    const updateResult = await putUserSet(accessToken, payload, setId);
     return mapUserResultToSet(updateResult);
 };
 
 export const deleteSet = async (accessToken: string, setId: string): Promise<string> =>
-    await deleteUserContent(accessToken, setId);
+    await deleteUserSet(accessToken, setId);
 
-const mapUserResultToSet = (output: UserSetOutput): Set => ({
+const mapUserResultToSet = (output: UserSet): Set => ({
     id: output.id,
     tag: output.alias,
     size: output.content.ids.length,
