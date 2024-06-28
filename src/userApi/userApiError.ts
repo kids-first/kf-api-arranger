@@ -3,7 +3,7 @@ export class UserApiError extends Error {
     public readonly details: unknown;
 
     constructor(status: number, details: unknown) {
-        super(`Riff returns status ${status}`);
+        super(`UserApi returns status ${status}`);
         Object.setPrototypeOf(this, UserApiError.prototype);
         this.name = UserApiError.name;
         this.status = status;

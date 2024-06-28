@@ -1,5 +1,4 @@
 import addAsync from '@awaitjs/express';
-import { SQSClient } from '@aws-sdk/client-sqs';
 import cors from 'cors';
 import express, { Express } from 'express';
 import { Keycloak } from 'keycloak-connect';
@@ -10,8 +9,6 @@ import { ArrangerProject } from './arrangerUtils';
 import { computeAuthorizedStudiesForAllFences } from './endpoints/authorizedStudies/computeAuthorizedStudies';
 import genomicFeatureSuggestions, { SUGGESTIONS_TYPES } from './endpoints/genomicFeatureSuggestions';
 import { getPhenotypesNodes } from './endpoints/phenotypes';
-import { searchAllSources } from './endpoints/searchByIds/searchAllSources';
-import { SearchByIdsResult } from './endpoints/searchByIds/searchByIdsTypes';
 import {
     createSet,
     deleteSet,
@@ -28,7 +25,7 @@ import { STATISTICS_CACHE_ID, STATISTICS_PUBLIC_CACHE_ID, verifyCache } from './
 import { injectBodyHttpHeaders } from './middleware/injectBodyHttpHeaders';
 import { resolveSetIdMiddleware } from './middleware/resolveSetIdInSqon';
 
-export default (keycloak: Keycloak, sqs: SQSClient, getProject: (projectId: string) => ArrangerProject): Express => {
+export default (keycloak: Keycloak, getProject: (projectId: string) => ArrangerProject): Express => {
     const app = addAsync.addAsync(express());
 
     const cache = new NodeCache({ stdTTL: cacheTTL });
@@ -88,18 +85,9 @@ export default (keycloak: Keycloak, sqs: SQSClient, getProject: (projectId: stri
         res.json(data);
     });
 
-    app.postAsync('/searchByIds', keycloak.protect(), async (req, res) => {
-        const ids: string[] = req.body.ids;
-        const projectId: string = req.body.project;
-        const participants: SearchByIdsResult[] = await searchAllSources(ids, projectId, getProject);
-
-        res.send({ participants });
-    });
-
     app.getAsync('/sets', keycloak.protect(), async (req, res) => {
         const accessToken = req.headers.authorization;
-        const userId = req['kauth']?.grant?.access_token?.content?.sub;
-        const userSets = await getSets(accessToken, userId);
+        const userSets = await getSets(accessToken);
 
         res.send(userSets);
     });
@@ -107,7 +95,7 @@ export default (keycloak: Keycloak, sqs: SQSClient, getProject: (projectId: stri
     app.postAsync('/sets', keycloak.protect(), async (req, res) => {
         const accessToken = req.headers.authorization;
         const userId = req['kauth']?.grant?.access_token?.content?.sub;
-        const createdSet = await createSet(req.body as CreateSetBody, accessToken, userId, sqs, getProject);
+        const createdSet = await createSet(req.body as CreateSetBody, accessToken, userId, getProject);
 
         res.send(createdSet);
     });
@@ -120,14 +108,13 @@ export default (keycloak: Keycloak, sqs: SQSClient, getProject: (projectId: stri
         let updatedSet: Set;
 
         if (requestBody.subAction === SubActionTypes.RENAME_TAG) {
-            updatedSet = await updateSetTag(requestBody as UpdateSetTagBody, accessToken, userId, setId, sqs);
+            updatedSet = await updateSetTag(requestBody as UpdateSetTagBody, accessToken, setId);
         } else {
             updatedSet = await updateSetContent(
                 requestBody as UpdateSetContentBody,
                 accessToken,
                 userId,
                 setId,
-                sqs,
                 getProject,
             );
         }
@@ -136,17 +123,15 @@ export default (keycloak: Keycloak, sqs: SQSClient, getProject: (projectId: stri
 
     app.deleteAsync('/sets/:setId', keycloak.protect(), async (req, res) => {
         const accessToken = req.headers.authorization;
-        const userId = req['kauth']?.grant?.access_token?.content?.sub;
         const setId: string = req.params.setId;
 
-        const deletedResult = await deleteSet(accessToken, setId, userId, sqs);
+        const deletedResult = await deleteSet(accessToken, setId);
 
         res.send(deletedResult);
     });
 
     app.postAsync('/phenotypes', keycloak.protect(), async (req, res) => {
         const accessToken = req.headers.authorization;
-        const userId = req['kauth']?.grant?.access_token?.content?.sub;
         const sqon: SetSqon = req.body.sqon;
         const type: string = req.body.type;
         const projectId: string = req.body.project;
@@ -158,7 +143,6 @@ export default (keycloak: Keycloak, sqs: SQSClient, getProject: (projectId: stri
             type,
             aggregations_filter_themselves,
             accessToken,
-            userId,
         );
 
         res.send({ data });

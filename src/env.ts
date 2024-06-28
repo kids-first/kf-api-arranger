@@ -2,10 +2,10 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-export const PROJECT_KIDSFIRST = 'KidsFirst';
-export const PROJECT_INCLUDE = 'Include';
+//TODO DELETE in confs //export const PROJECT_KIDSFIRST = 'KidsFirst';
+//TODO DELETE in confs //export const PROJECT_INCLUDE = 'Include';
 
-export const project = process.env.PROJECT || PROJECT_KIDSFIRST;
+//TODO DELETE in confs //export const project = process.env.PROJECT || PROJECT_KIDSFIRST;
 export const port = process.env.PORT || 5050;
 
 export const keycloakURL = process.env.KEYCLOAK_URL || 'https://kf-keycloak-qa.kf-strides.org/auth';
@@ -28,11 +28,12 @@ export const maxNOfGenomicFeatureSuggestions = process.env.MAX_NUMBER_OF_GF_SUGG
 export const indexNameGeneFeatureSuggestion = process.env.GENES_SUGGESTIONS_INDEX_NAME;
 export const indexNameVariantFeatureSuggestion = process.env.VARIANTS_SUGGESTIONS_INDEX_NAME;
 
-export const riffURL = process.env.RIFF_URL || 'https://riff-qa.kf-strides.org';
+//TODO DELETE in confs //export const riffURL = process.env.RIFF_URL || 'https://riff-qa.kf-strides.org';
 export const userApiURL = process.env.USER_API_URL || 'https://include-users-api-qa.373997854230.d3b.io';
-export const sendUpdateToSqs = process.env.SEND_UPDATE_TO_SQS !== 'false';
-export const sqsQueueUrl = process.env.SQS_QUEUE_URL || '';
+//TODO DELETE in confs //export const sendUpdateToSqs = process.env.SEND_UPDATE_TO_SQS !== 'false';
+//TODO DELETE in confs //export const sqsQueueUrl = process.env.SQS_QUEUE_URL || '';
 export const maxSetContentSize: number = Number.parseInt(process.env.MAX_SET_CONTENT_SIZE) || 100000;
+//TODO change default values
 export const idKey = process.env.ID_KEY || 'kf_id';
 export const fileIdKey = process.env.FILE_ID_KEY || 'kf_id';
 export const studyIdKey = process.env.STUDY_ID_KEY || 'kf_id';
