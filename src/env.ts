@@ -2,7 +2,6 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-
 export const port = process.env.PORT || 5050;
 
 export const keycloakURL = process.env.KEYCLOAK_URL || 'https://kf-keycloak-qa.kf-strides.org/auth';
@@ -25,19 +24,8 @@ export const maxNOfGenomicFeatureSuggestions = process.env.MAX_NUMBER_OF_GF_SUGG
 export const indexNameGeneFeatureSuggestion = process.env.GENES_SUGGESTIONS_INDEX_NAME;
 export const indexNameVariantFeatureSuggestion = process.env.VARIANTS_SUGGESTIONS_INDEX_NAME;
 
-
 export const userApiURL = process.env.USER_API_URL || 'https://include-users-api-qa.373997854230.d3b.io';
 
-export const maxSetContentSize: number = Number.parseInt(process.env.MAX_SET_CONTENT_SIZE) || 100000;
-
-export const idKey = process.env.ID_KEY || 'fhir_id';
-export const fileIdKey = process.env.FILE_ID_KEY || 'file_id';
-export const studyIdKey = process.env.STUDY_ID_KEY || 'study_id';
-export const participantIdKey = process.env.PARTICIPANT_ID_KEY || 'participant_id';
-export const biospecimenIdKey = process.env.BIOSPECIMEN_ID_KEY || 'sample_id';
-export const familyIdKey = process.env.FAMILY_ID_KEY || 'family.family_id';
-export const participantKey = process.env.TO_PARTICIPANT_ID_KEY || 'fhir_id';
-export const participantFileKey = process.env.TO_PARTICIPANT_FILE_ID_KEY || 'files.fhir_id';
-export const participantBiospecimenKey = process.env.TO_PARTICIPANT_BIOSPECIMEN_ID_KEY || 'files.biospecimens.fhir_id';
+export const maxSetContentSize: number = Number.parseInt(process.env.MAX_SET_CONTENT_SIZE) || 10000;
 
 export const cacheTTL: number = Number.parseInt(process.env.CACHE_TTL_SEC) || 3600;

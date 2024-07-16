@@ -3,8 +3,8 @@ import { get } from 'lodash';
 
 import { runProjectQuery } from '../arrangerUtils';
 import { ArrangerProject } from '../arrangerUtils';
-import { idKey } from '../env';
 import { throwErrorsFromGqlQueryIfExist } from '../errors';
+import { idKey } from '../fieldsKeys';
 import { replaceSetByIds } from '../sqon/setSqon';
 import { SetSqon } from './sets/setsTypes';
 
