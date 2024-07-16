@@ -1,6 +1,6 @@
 import { getUserSet } from '../endpoints/sets/setsFeature';
 import { SetSqon } from '../endpoints/sets/setsTypes';
-import { participantBiospecimenKey, participantFileKey, participantKey } from '../env';
+import { participantBiospecimenKey, participantFileKey, participantKey } from '../fieldsKeys';
 
 const setRegex = /^set_id:(.+)$/gm;
 

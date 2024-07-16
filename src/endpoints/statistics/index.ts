@@ -2,18 +2,8 @@ import { Client } from '@elastic/elasticsearch';
 import filesize from 'filesize';
 
 import EsInstance from '../../ElasticSearchClientInstance';
-import {
-    biospecimenIdKey,
-    esBiospecimenIndex,
-    esFileIndex,
-    esParticipantIndex,
-    esStudyIndex,
-    esVariantIndex,
-    familyIdKey,
-    fileIdKey,
-    participantIdKey,
-    studyIdKey,
-} from '../../env';
+import { esBiospecimenIndex, esFileIndex, esParticipantIndex, esStudyIndex, esVariantIndex } from '../../env';
+import { biospecimenIdKey, familyIdKey, fileIdKey, participantIdKey, studyIdKey } from '../../fieldsKeys';
 
 export type Diagnosis = {
     mondo_id: string;
