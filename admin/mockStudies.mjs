@@ -97,7 +97,6 @@ export const mockStudies = [
         date_collection_start_year: '2016',
         institutions: ['Linda Crnic Institute for Down Syndrome'],
         investigator_names: ['Joaquin M. Espinosa'],
-        is_harmonized: true,
         study_code: 'HTP',
     },
     {
@@ -153,7 +152,6 @@ export const mockStudies = [
         date_collection_start_year: '',
         institutions: ['Baylor College Of Medicine'],
         investigator_names: ['Phillip J. Lupo'],
-        is_harmonized: true,
         study_code: 'DS-COG-ALL',
     },
     {
@@ -209,7 +207,6 @@ export const mockStudies = [
         date_collection_start_year: '',
         institutions: ['Emory University School of Medicine'],
         investigator_names: ['Stephanie Sherman'],
-        is_harmonized: true,
         study_code: 'DS360-CHD',
     },
     {
@@ -265,7 +262,6 @@ export const mockStudies = [
         date_collection_start_year: '',
         institutions: ["Cincinnati Children's Hospital Medical Center"],
         investigator_names: ['Eileen C. King'],
-        is_harmonized: true,
         study_code: 'DS-PCGC',
     },
     {
@@ -344,7 +340,6 @@ export const mockStudies = [
         date_collection_start_year: '',
         institutions: ["Children's Hospital of Philadelphia"],
         investigator_names: ['Hakon Hakonarson'],
-        is_harmonized: true,
         study_code: 'X01-Hakonarson',
     },
     {
@@ -400,7 +395,6 @@ export const mockStudies = [
         date_collection_start_year: '',
         institutions: ['University of Oxford'],
         investigator_names: ['Adam de Smith'],
-        is_harmonized: true,
         study_code: 'X01-deSmith',
     },
     {
@@ -409,7 +403,6 @@ export const mockStudies = [
         date_collection_start_year: '2018',
         institutions: ['Benaroya Research Institute'],
         investigator_names: ['Jane Buckner'],
-        is_harmonized: true,
         study_code: 'BRI-DSR',
     },
     {
@@ -418,7 +411,6 @@ export const mockStudies = [
         date_collection_start_year: '',
         institutions: ['Linda Crnic Institute for Down Syndrome'],
         investigator_names: ['Joaquin Espinosa'],
-        is_harmonized: true,
         study_code: 'DS-NEXUS',
     },
     {
@@ -427,7 +419,6 @@ export const mockStudies = [
         date_collection_start_year: '',
         institutions: ['Geisinger Health System'],
         investigator_names: ['Christa Martin'],
-        is_harmonized: true,
         study_code: 'DS-Sleep',
     },
     {
@@ -460,7 +451,6 @@ export const mockStudies = [
         date_collection_start_year: '2013',
         institutions: ['Eunice Kennedy Shriver National Institute of Child Health and Human Development'],
         investigator_names: ['Sujata Bardhan'],
-        is_harmonized: true,
         study_code: 'DSC',
     },
     {
@@ -469,7 +459,6 @@ export const mockStudies = [
         date_collection_start_year: '',
         institutions: ['University of Pittsburgh'],
         investigator_names: ['Bradley T. Christian', 'Benjamin L. Handen', 'Elizabeth Head', 'Mark Mapstone'],
-        is_harmonized: true,
         study_code: 'ABC-DS',
     },
 ];
@@ -569,9 +558,6 @@ const sSchema = {
             items: {
                 type: 'string',
             },
-        },
-        is_harmonized: {
-            type: 'boolean',
         },
         investigator_names: {
             type: 'array',
