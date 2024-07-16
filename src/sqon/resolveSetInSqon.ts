@@ -1,10 +1,7 @@
 import { Dictionary, flattenDeep, get, isArray, zipObject } from 'lodash';
 
-import { mapRiffOutputToUserOutput } from '../endpoints/sets/setsFeature';
 import { SetSqon } from '../endpoints/sets/setsTypes';
-import { project, PROJECT_INCLUDE } from '../env';
-import { getRiffs } from '../riff/riffClient';
-import { getSharedSet, getUserContents, Output as UserSetOutput } from '../userApi/userApiClient';
+import { getSharedSet, getUserSets, UserSet } from '../userApi/userApiClient';
 
 const getSetIdsFromSqon = (sqon: SetSqon, collection = []) =>
     (isArray(sqon.content)
@@ -34,13 +31,7 @@ const injectIdsIntoSqon = (sqon: SetSqon, setIdsToValueMap: Dictionary<string[]>
 export const resolveSetsInSqon = async (sqon: SetSqon, userId: string, accessToken: string): Promise<SetSqon> => {
     const setIds: string[] = getSetIdsFromSqon(sqon || ({} as SetSqon));
     if (setIds.length) {
-        let userSets: UserSetOutput[];
-        if (project === PROJECT_INCLUDE) {
-            userSets = await retrieveSetsFromUsers(accessToken, setIds);
-        } else {
-            userSets = (await getRiffs(accessToken, userId)).map(s => mapRiffOutputToUserOutput(s));
-        }
-
+        const userSets: UserSet[] = await retrieveSetsFromUsers(accessToken, setIds);
         const ids = setIds.map(setId => get(userSets.filter(r => r.id === setId)[0], 'content.ids', []));
         const setIdsToValueMap: Dictionary<string[]> = zipObject(
             setIds.map(id => `set_id:${id}`),
@@ -53,9 +44,9 @@ export const resolveSetsInSqon = async (sqon: SetSqon, userId: string, accessTok
     }
 };
 
-export const retrieveSetsFromUsers = async (accessToken: string, setIds: string[]): Promise<UserSetOutput[]> => {
+export const retrieveSetsFromUsers = async (accessToken: string, setIds: string[]): Promise<UserSet[]> => {
     // Get all user sets
-    const userSets = await getUserContents(accessToken);
+    const userSets = await getUserSets(accessToken);
     const userSetsIds = userSets.map(us => us.id);
 
     for (const setId of setIds) {

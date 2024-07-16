@@ -2,18 +2,6 @@ import Ajv from 'ajv';
 
 export const mockStudies = [
     {
-        controlled_access: ['Registered', 'Controlled'],
-        data_category: [
-            'Genomics',
-            'Transcriptomics',
-            'Proteomics',
-            'Metabolomics',
-            'Cognitive',
-            'Immune maps',
-            'Microbiome',
-            'Imaging',
-            'Clinical',
-        ],
         dataset: [
             {
                 dataset_id: 'HTP-TR',
@@ -107,33 +95,11 @@ export const mockStudies = [
         ],
         date_collection_end_year: '',
         date_collection_start_year: '2016',
-        experimental_strategies: [
-            {
-                file_count: 3200,
-                experimental_strategy: 'RNA-Seq',
-            },
-            {
-                file_count: 880,
-                experimental_strategy: 'Whole Genome Sequencing',
-            },
-            {
-                file_count: 447,
-                experimental_strategy: 'Multiplex Immunoassay',
-            },
-            {
-                file_count: 418,
-                experimental_strategy: 'LCMS Metabolomics',
-            },
-        ],
-        external_ids: ['phs002330', 'phs002981'],
         institutions: ['Linda Crnic Institute for Down Syndrome'],
         investigator_names: ['Joaquin M. Espinosa'],
-        is_harmonized: true,
         study_code: 'HTP',
     },
     {
-        controlled_access: ['Registered', 'Controlled'],
-        data_category: ['Genomics', 'Clinical'],
         dataset: [
             {
                 dataset_id: 'DS-COG-ALL-GEN',
@@ -184,33 +150,11 @@ export const mockStudies = [
         ],
         date_collection_end_year: '',
         date_collection_start_year: '',
-        experimental_strategies: [
-            {
-                file_count: 0,
-                experimental_strategy: 'RNA-Seq',
-            },
-            {
-                file_count: 7211,
-                experimental_strategy: 'Whole Genome Sequencing',
-            },
-            {
-                file_count: 0,
-                experimental_strategy: 'Multiplex Immunoassay',
-            },
-            {
-                file_count: 0,
-                experimental_strategy: 'LCMS Metabolomics',
-            },
-        ],
-        external_ids: ['phs002330'],
         institutions: ['Baylor College Of Medicine'],
         investigator_names: ['Phillip J. Lupo'],
-        is_harmonized: true,
         study_code: 'DS-COG-ALL',
     },
     {
-        controlled_access: ['Controlled'],
-        data_category: ['Genomics', 'Clinical'],
         dataset: [
             {
                 dataset_id: 'DS360-CHD-GEN',
@@ -261,33 +205,11 @@ export const mockStudies = [
         ],
         date_collection_end_year: '',
         date_collection_start_year: '',
-        experimental_strategies: [
-            {
-                file_count: 0,
-                experimental_strategy: 'RNA-Seq',
-            },
-            {
-                file_count: 3769,
-                experimental_strategy: 'Whole Genome Sequencing',
-            },
-            {
-                file_count: 0,
-                experimental_strategy: 'Multiplex Immunoassay',
-            },
-            {
-                file_count: 0,
-                experimental_strategy: 'LCMS Metabolomics',
-            },
-        ],
-        external_ids: ['phs002330'],
         institutions: ['Emory University School of Medicine'],
         investigator_names: ['Stephanie Sherman'],
-        is_harmonized: true,
         study_code: 'DS360-CHD',
     },
     {
-        controlled_access: ['Controlled'],
-        data_category: ['Genomics', 'Clinical'],
         dataset: [
             {
                 dataset_id: 'DS-PCGC-GEN',
@@ -338,33 +260,11 @@ export const mockStudies = [
         ],
         date_collection_end_year: '',
         date_collection_start_year: '',
-        experimental_strategies: [
-            {
-                file_count: 0,
-                experimental_strategy: 'RNA-Seq',
-            },
-            {
-                file_count: 818,
-                experimental_strategy: 'Whole Genome Sequencing',
-            },
-            {
-                file_count: 0,
-                experimental_strategy: 'Multiplex Immunoassay',
-            },
-            {
-                file_count: 0,
-                experimental_strategy: 'LCMS Metabolomics',
-            },
-        ],
-        external_ids: ['phs001138', 'phs002330'],
         institutions: ["Cincinnati Children's Hospital Medical Center"],
         investigator_names: ['Eileen C. King'],
-        is_harmonized: true,
         study_code: 'DS-PCGC',
     },
     {
-        controlled_access: ['Registered'],
-        data_category: ['Genomics', 'Transcriptomics', 'Imaging', 'Clinical'],
         dataset: [
             {
                 dataset_id: 'X01-Hakon-GEN',
@@ -438,33 +338,11 @@ export const mockStudies = [
         ],
         date_collection_end_year: '',
         date_collection_start_year: '',
-        experimental_strategies: [
-            {
-                file_count: 2565,
-                experimental_strategy: 'RNA-Seq',
-            },
-            {
-                file_count: 0,
-                experimental_strategy: 'Whole Genome Sequencing',
-            },
-            {
-                file_count: 0,
-                experimental_strategy: 'Multiplex Immunoassay',
-            },
-            {
-                file_count: 0,
-                experimental_strategy: 'LCMS Metabolomics',
-            },
-        ],
-        external_ids: ['phs002983'],
         institutions: ["Children's Hospital of Philadelphia"],
         investigator_names: ['Hakon Hakonarson'],
-        is_harmonized: true,
         study_code: 'X01-Hakonarson',
     },
     {
-        controlled_access: ['Registered'],
-        data_category: ['Clinical'],
         dataset: [
             {
                 dataset_id: 'X01-deSmith-GEN',
@@ -515,123 +393,35 @@ export const mockStudies = [
         ],
         date_collection_end_year: '',
         date_collection_start_year: '',
-        experimental_strategies: [
-            {
-                file_count: 0,
-                experimental_strategy: 'RNA-Seq',
-            },
-            {
-                file_count: 0,
-                experimental_strategy: 'Whole Genome Sequencing',
-            },
-            {
-                file_count: 0,
-                experimental_strategy: 'Multiplex Immunoassay',
-            },
-            {
-                file_count: 0,
-                experimental_strategy: 'LCMS Metabolomics',
-            },
-        ],
-        external_ids: ['phs002982'],
         institutions: ['University of Oxford'],
         investigator_names: ['Adam de Smith'],
-        is_harmonized: true,
         study_code: 'X01-deSmith',
     },
     {
-        controlled_access: ['Registered'],
-        data_category: ['Transcriptomics', 'Clinical'],
         dataset: [],
         date_collection_end_year: '',
         date_collection_start_year: '2018',
-        experimental_strategies: [
-            {
-                file_count: 253,
-                experimental_strategy: 'RNA-Seq',
-            },
-            {
-                file_count: 0,
-                experimental_strategy: 'Whole Genome Sequencing',
-            },
-            {
-                file_count: 0,
-                experimental_strategy: 'Multiplex Immunoassay',
-            },
-            {
-                file_count: 0,
-                experimental_strategy: 'LCMS Metabolomics',
-            },
-        ],
-        external_ids: [],
         institutions: ['Benaroya Research Institute'],
         investigator_names: ['Jane Buckner'],
-        is_harmonized: true,
         study_code: 'BRI-DSR',
     },
     {
-        controlled_access: ['Controlled'],
-        data_category: ['Genomics', 'Clinical'],
         dataset: [],
         date_collection_end_year: '',
         date_collection_start_year: '',
-        experimental_strategies: [
-            {
-                file_count: 0,
-                experimental_strategy: 'RNA-Seq',
-            },
-            {
-                file_count: 123,
-                experimental_strategy: 'Whole Genome Sequencing',
-            },
-            {
-                file_count: 0,
-                experimental_strategy: 'Multiplex Immunoassay',
-            },
-            {
-                file_count: 0,
-                experimental_strategy: 'LCMS Metabolomics',
-            },
-        ],
-        external_ids: [],
         institutions: ['Linda Crnic Institute for Down Syndrome'],
         investigator_names: ['Joaquin Espinosa'],
-        is_harmonized: true,
         study_code: 'DS-NEXUS',
     },
     {
-        controlled_access: [],
-        data_category: ['Clinical'],
         dataset: [],
         date_collection_end_year: '',
         date_collection_start_year: '',
-        experimental_strategies: [
-            {
-                file_count: 0,
-                experimental_strategy: 'RNA-Seq',
-            },
-            {
-                file_count: 0,
-                experimental_strategy: 'Whole Genome Sequencing',
-            },
-            {
-                file_count: 0,
-                experimental_strategy: 'Multiplex Immunoassay',
-            },
-            {
-                file_count: 0,
-                experimental_strategy: 'LCMS Metabolomics',
-            },
-        ],
-        external_ids: [],
         institutions: ['Geisinger Health System'],
         investigator_names: ['Christa Martin'],
-        is_harmonized: true,
         study_code: 'DS-Sleep',
     },
     {
-        controlled_access: [],
-        data_category: ['Clinical'],
         dataset: [
             {
                 dataset_id: 'DS-Connect-UNHAR',
@@ -659,58 +449,16 @@ export const mockStudies = [
         ],
         date_collection_end_year: '',
         date_collection_start_year: '2013',
-        experimental_strategies: [
-            {
-                file_count: 0,
-                experimental_strategy: 'RNA-Seq',
-            },
-            {
-                file_count: 0,
-                experimental_strategy: 'Whole Genome Sequencing',
-            },
-            {
-                file_count: 0,
-                experimental_strategy: 'Multiplex Immunoassay',
-            },
-            {
-                file_count: 0,
-                experimental_strategy: 'LCMS Metabolomics',
-            },
-        ],
-        external_ids: [],
         institutions: ['Eunice Kennedy Shriver National Institute of Child Health and Human Development'],
         investigator_names: ['Sujata Bardhan'],
-        is_harmonized: true,
         study_code: 'DSC',
     },
     {
-        controlled_access: [],
-        data_category: ['Clinical'],
         dataset: [],
         date_collection_end_year: '',
         date_collection_start_year: '',
-        experimental_strategies: [
-            {
-                file_count: 0,
-                experimental_strategy: 'RNA-Seq',
-            },
-            {
-                file_count: 0,
-                experimental_strategy: 'Whole Genome Sequencing',
-            },
-            {
-                file_count: 0,
-                experimental_strategy: 'Multiplex Immunoassay',
-            },
-            {
-                file_count: 0,
-                experimental_strategy: 'LCMS Metabolomics',
-            },
-        ],
-        external_ids: [],
         institutions: ['University of Pittsburgh'],
         investigator_names: ['Bradley T. Christian', 'Benjamin L. Handen', 'Elizabeth Head', 'Mark Mapstone'],
-        is_harmonized: true,
         study_code: 'ABC-DS',
     },
 ];
@@ -719,18 +467,6 @@ const sSchema = {
     title: 'Study',
     type: 'object',
     properties: {
-        controlled_access: {
-            type: 'array',
-            items: {
-                type: 'string',
-            },
-        },
-        data_category: {
-            type: 'array',
-            items: {
-                type: 'string',
-            },
-        },
         dataset: {
             type: 'array',
             items: {
@@ -817,34 +553,11 @@ const sSchema = {
         date_collection_start_year: {
             type: 'string',
         },
-        experimental_strategies: {
-            type: 'array',
-            items: {
-                type: 'object',
-                properties: {
-                    file_count: {
-                        type: 'integer',
-                    },
-                    experimental_strategy: {
-                        type: 'string',
-                    },
-                },
-            },
-        },
-        external_ids: {
-            type: 'array',
-            items: {
-                type: 'string',
-            },
-        },
         institutions: {
             type: 'array',
             items: {
                 type: 'string',
             },
-        },
-        is_harmonized: {
-            type: 'boolean',
         },
         investigator_names: {
             type: 'array',

@@ -1,11 +1,10 @@
 import fetch from 'node-fetch';
 
-import { SetSqon, Sort } from '../endpoints/sets/setsTypes';
+import { CreateUpdateBody, SetSqon, Sort } from '../endpoints/sets/setsTypes';
 import { userApiURL } from '../env';
-import { CreateUpdateBody } from '../riff/riffClient';
 import { UserApiError } from './userApiError';
 
-export type Content = {
+export type UserSetContent = {
     setType: string;
     riffType: string;
     ids: string[];
@@ -14,17 +13,17 @@ export type Content = {
     idField: string;
 };
 
-export type Output = {
+export type UserSet = {
     id: string;
     keycloak_id: string;
-    content: Content;
+    content: UserSetContent;
     alias: string;
     sharedpublicly: boolean;
     creation_date: Date;
     updated_date: Date;
 };
 
-export const getSharedSet = async (accessToken: string, setId: string): Promise<Output> => {
+export const getSharedSet = async (accessToken: string, setId: string): Promise<UserSet> => {
     const uri = `${userApiURL}/user-sets/shared/${setId}`;
 
     const response = await fetch(encodeURI(uri), {
@@ -44,7 +43,7 @@ export const getSharedSet = async (accessToken: string, setId: string): Promise<
     throw new UserApiError(response.status, body);
 };
 
-export const getUserContents = async (accessToken: string): Promise<Output[]> => {
+export const getUserSets = async (accessToken: string): Promise<UserSet[]> => {
     const uri = `${userApiURL}/user-sets`;
 
     const response = await fetch(encodeURI(uri), {
@@ -64,7 +63,7 @@ export const getUserContents = async (accessToken: string): Promise<Output[]> =>
     throw new UserApiError(response.status, body);
 };
 
-export const postUserContent = async (accessToken: string, set: CreateUpdateBody): Promise<Output> => {
+export const postUserSet = async (accessToken: string, set: CreateUpdateBody): Promise<UserSet> => {
     const uri = `${userApiURL}/user-sets`;
 
     const response = await fetch(encodeURI(uri), {
@@ -85,7 +84,7 @@ export const postUserContent = async (accessToken: string, set: CreateUpdateBody
     throw new UserApiError(response.status, body);
 };
 
-export const putUserContent = async (accessToken: string, set: CreateUpdateBody, setId: string): Promise<Output> => {
+export const putUserSet = async (accessToken: string, set: CreateUpdateBody, setId: string): Promise<UserSet> => {
     const uri = `${userApiURL}/user-sets/${setId}`;
 
     const response = await fetch(encodeURI(uri), {
@@ -106,7 +105,7 @@ export const putUserContent = async (accessToken: string, set: CreateUpdateBody,
     throw new UserApiError(response.status, body);
 };
 
-export const deleteUserContent = async (accessToken: string, setId: string): Promise<string> => {
+export const deleteUserSet = async (accessToken: string, setId: string): Promise<string> => {
     const uri = `${userApiURL}/user-sets/${setId}`;
 
     const response = await fetch(encodeURI(uri), {

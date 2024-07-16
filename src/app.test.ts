@@ -1,4 +1,3 @@
-import { SQSClient } from '@aws-sdk/client-sqs';
 import { Express } from 'express';
 import Keycloak from 'keycloak-connect';
 import request from 'supertest';
@@ -6,7 +5,6 @@ import request from 'supertest';
 import { fakeKeycloakClient, fakeKeycloakRealm, fakeKeycloakUrl, getToken, publicKey } from '../test/authTestUtils';
 import buildApp from './app';
 import { ArrangerProject } from './arrangerUtils';
-import { searchAllSources } from './endpoints/searchByIds/searchAllSources';
 import { SetNotFoundError } from './endpoints/sets/setError';
 import {
     createSet,
@@ -18,11 +16,10 @@ import {
 } from './endpoints/sets/setsFeature';
 import { Set, UpdateSetContentBody, UpdateSetTagBody } from './endpoints/sets/setsTypes';
 import { getStatistics, getStudiesStatistics, Statistics } from './endpoints/statistics';
-import { RiffError } from './riff/riffError';
+import { UserApiError } from './userApi/userApiError';
 
 jest.mock('./endpoints/sets/setsFeature');
 jest.mock('./endpoints/statistics');
-jest.mock('./endpoints/searchByIds/searchAllSources');
 
 describe('Express app (without Arranger)', () => {
     let app: Express;
@@ -31,7 +28,6 @@ describe('Express app (without Arranger)', () => {
     const getProject = (_s: string) => ({} as ArrangerProject);
 
     beforeEach(() => {
-        const sqs = new SQSClient({});
         const publicKeyToVerify = publicKey;
         keycloakFakeConfig = {
             realm: fakeKeycloakRealm,
@@ -43,7 +39,7 @@ describe('Express app (without Arranger)', () => {
             'realm-public-key': publicKeyToVerify, // For test purpose, we use public key to validate token.
         };
         const keycloak = new Keycloak({}, keycloakFakeConfig);
-        app = buildApp(keycloak, sqs, getProject); // Re-create app between each test to ensure isolation between tests.
+        app = buildApp(keycloak, getProject); // Re-create app between each test to ensure isolation between tests.
     });
 
     it('GET /status (public) should responds with json', async () => {
@@ -276,7 +272,7 @@ describe('Express app (without Arranger)', () => {
         });
 
         it('should return 500 if Authorization header contains valid token but an error occurs', async () => {
-            const expectedError = new RiffError(404, { message: 'OOPS' });
+            const expectedError = new UserApiError(404, { message: 'OOPS' });
             (getSets as jest.Mock).mockImplementation(() => {
                 throw expectedError;
             });
@@ -346,7 +342,7 @@ describe('Express app (without Arranger)', () => {
         });
 
         it('should return 500 if Authorization header contains valid token but an error occurs', async () => {
-            const expectedError = new RiffError(400, { message: 'OOPS' });
+            const expectedError = new UserApiError(400, { message: 'OOPS' });
             (createSet as jest.Mock).mockImplementation(() => {
                 throw expectedError;
             });
@@ -420,11 +416,11 @@ describe('Express app (without Arranger)', () => {
                 .set({ Authorization: `Bearer ${token}` })
                 .expect(checkRes)
                 .expect(200);
+
             expect((updateSetTag as jest.Mock).mock.calls.length).toEqual(1);
             expect((updateSetTag as jest.Mock).mock.calls[0][0]).toEqual(updateSetTagBody);
             expect((updateSetTag as jest.Mock).mock.calls[0][1]).toEqual(`Bearer ${token}`);
-            expect((updateSetTag as jest.Mock).mock.calls[0][2]).toEqual(userId);
-            expect((updateSetTag as jest.Mock).mock.calls[0][3]).toEqual('1eh');
+            expect((updateSetTag as jest.Mock).mock.calls[0][2]).toEqual('1eh');
         });
 
         it('should return 200 if Authorization header contains valid token and no error occurs - update content', async () => {
@@ -498,7 +494,7 @@ describe('Express app (without Arranger)', () => {
         });
 
         it('should return 500 if Authorization header contains valid token but an error occurs', async () => {
-            const expectedError = new RiffError(404, { message: 'OOPS' });
+            const expectedError = new UserApiError(404, { message: 'OOPS' });
             (deleteSet as jest.Mock).mockImplementation(() => {
                 throw expectedError;
             });
@@ -511,56 +507,6 @@ describe('Express app (without Arranger)', () => {
                 .set({ Authorization: `Bearer ${token}` })
                 .expect(500, { error: 'Internal Server Error' });
             expect((deleteSet as jest.Mock).mock.calls.length).toEqual(1);
-        });
-    });
-
-    describe('POST /searchByIds', () => {
-        const requestBody = {
-            project: '2021_05_03_v2',
-            ids: ['PT_HXDR3ZX6'],
-        };
-
-        beforeEach(() => {
-            (searchAllSources as jest.Mock).mockReset();
-        });
-
-        it('should return 403 if no Authorization header', () =>
-            request(app)
-                .post('/searchByIds')
-                .expect(403));
-
-        it('should return 200 if Authorization header contains valid token and no error occurs', async () => {
-            const mockSearchByIdsResponse = [
-                { search: 'PT_HXDR3ZX6', type: 'PARTICIPANT', participantIds: ['PT_HXDR3ZX6'] },
-            ];
-            (searchAllSources as jest.Mock).mockImplementation(() => mockSearchByIdsResponse);
-
-            const token = getToken();
-
-            await request(app)
-                .post('/searchByIds')
-                .send(requestBody)
-                .set('Content-type', 'application/json')
-                .set({ Authorization: `Bearer ${token}` })
-                .expect(200, { participants: mockSearchByIdsResponse });
-            expect((searchAllSources as jest.Mock).mock.calls.length).toEqual(1);
-        });
-
-        it('should return 500 if Authorization header contains valid token but an error occurs', async () => {
-            const expectedError = new Error('OOPS');
-            (searchAllSources as jest.Mock).mockImplementation(() => {
-                throw expectedError;
-            });
-
-            const token = getToken();
-
-            await request(app)
-                .post('/searchByIds')
-                .send(requestBody)
-                .set('Content-type', 'application/json')
-                .set({ Authorization: `Bearer ${token}` })
-                .expect(500, { error: 'Internal Server Error' });
-            expect((searchAllSources as jest.Mock).mock.calls.length).toEqual(1);
         });
     });
 });
