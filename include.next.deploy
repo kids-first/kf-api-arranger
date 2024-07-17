@@ -2,7 +2,7 @@
 deploy {
     architecture_type = "aws-ecs-service-type-1"
     jenkinsfile_name  = "include.next.deploy" 
-    main_branch="2.0"
+    main_branch="master"
     projectName = "arranger-next"
     environments = "qa,prd"
     docker_image_type = "alpine"
