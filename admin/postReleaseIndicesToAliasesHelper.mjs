@@ -4,7 +4,7 @@
  *
  *  npm run post-re-alias-helper -- release:re_test_023 action:remove
  *
- *   npm run post-re-alias-helper -- release:re_test_023 action:remove test
+ *   npm run post-re-alias-helper -- release:re_test_023 action:remove
  *
  * */
 import assert from 'node:assert/strict';
@@ -30,9 +30,6 @@ assert(
         ALIAS_ACTIONS.remove
     }"`,
 );
-
-const testArgument = args.find(a => a.startsWith('test')) ?? '';
-const isTest = !!testArgument;
 
 const userReadline = readline.createInterface({
     input: process.stdin,
@@ -86,37 +83,18 @@ await displayIndicesQuestion();
 
 const INDICES_PREFIXES = ['biospecimen_centric', 'participant_centric', 'study_centric', 'file_centric'];
 
-const allAliases = await client.cat.aliases({
-    h: 'alias',
-    format: 'json',
-});
-
-//At this point, KF next uses the prefix next.
-const isNextFormat = allAliases.body
-    .map(x => x.alias)
-    .some(
-        x =>
-            x.startsWith('next_study_centric') ||
-            x.startsWith('next_participant_centric') ||
-            x.startsWith('next_biospecimen_centric') ||
-            x.startsWith('next_variant_centric') ||
-            x.startsWith('next_gene_centric') ||
-            x.startsWith('next_file_centric'),
-    );
-
 const actions = releaseIndices.reduce((xs, x) => {
     const prefix = INDICES_PREFIXES.find(p => x.startsWith(p));
     if (!prefix) {
         // Must never happen
         return xs;
     }
-    const alias = isNextFormat ? `next_${prefix}` : prefix;
     return [
         ...xs,
         {
             [aliasAction]: {
                 index: x,
-                alias: isTest ? `${alias}_test` : alias,
+                alias: prefix,
             },
         },
     ];
@@ -126,7 +104,7 @@ assert(actions.length === releaseIndices.length);
 const allIndexTargetsCorrectAlias = actions.every(a => {
     const index = a[aliasAction].index;
     const alias = a[aliasAction].alias;
-    return index.startsWith(alias.replace('next_', ''));
+    return index.startsWith(alias);
 });
 assert(allIndexTargetsCorrectAlias);
 

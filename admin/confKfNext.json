@@ -2,15 +2,15 @@
   "indices": [
     {
       "graphqlField": "biospecimen",
-      "esIndex": "next_biospecimen_centric"
+      "esIndex": "biospecimen_centric"
     },
     {
       "graphqlField": "file",
-      "esIndex": "next_file_centric"
+      "esIndex": "file_centric"
     },
     {
       "graphqlField": "genes",
-      "esIndex": "next_gene_centric"
+      "esIndex": "gene_centric"
     },
     {
       "graphqlField": "members",
@@ -18,15 +18,15 @@
     },
     {
       "graphqlField": "participant",
-      "esIndex": "next_participant_centric"
+      "esIndex": "participant_centric"
     },
     {
       "graphqlField": "study",
-      "esIndex": "next_study_centric"
+      "esIndex": "study_centric"
     },
     {
       "graphqlField": "variants",
-      "esIndex": "next_variant_centric"
+      "esIndex": "variant_centric"
     }
   ],
   "extendedMappingMutations": [
