@@ -1,4 +1,4 @@
-import { keycloakClient, keycloakPublicKey, keycloakRealm, keycloakURL } from './env';
+import { keycloakClient, keycloakRealm, keycloakURL } from './env';
 
 const keycloakConfig = {
     realm: keycloakRealm,
@@ -7,7 +7,6 @@ const keycloakConfig = {
     'auth-server-url': keycloakURL,
     'ssl-required': 'external',
     resource: keycloakClient,
-    'realm-public-key': keycloakPublicKey,
 };
 
 export default keycloakConfig;
