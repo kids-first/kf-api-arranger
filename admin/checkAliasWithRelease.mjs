@@ -15,10 +15,7 @@ const rAllAliases = await client.cat.aliases({
 assert(rAllAliases.statusCode === 200);
 
 const allAliases = rAllAliases.body;
-const hasNext = allAliases.some(x => x.alias.includes('next_'));
-const clinicalAliases = allAliases
-    .filter(cbKeepClinicalIndicesOnly)
-    .filter(x => (hasNext ? x.alias.includes('next_') : x));
+const clinicalAliases = allAliases.filter(cbKeepClinicalIndicesOnly);
 
 const aliasToReleases = clinicalAliases.reduce((xs, x) => {
     const r = 're' + x.index.split('_re_')[1];
@@ -34,9 +31,9 @@ const { all, ...entities } = aliasToReleases;
 console.log(`\n`);
 
 //not the best test but it should suffice
-const ok = hasNext ? all.length === 1 : all.length <= 2
+const ok = all.length <= 2;
 if (!ok) {
-    console.warn('Check if the clinical aliases are ok - There might be a problem')
+    console.warn('Check if the clinical aliases are ok - There might be a problem');
 }
 console.log(`Release(s) found: ${all}`);
 console.log(entities);

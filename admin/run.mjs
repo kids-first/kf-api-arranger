@@ -1,5 +1,5 @@
 // docker run -u node -it --rm --network host -v ${PWD}:/code --workdir /code node:20-alpine3.18 sh
-// examples: npm run admin-project p:include e:include test OR npm run admin-project p:next_prd (will default to kf)
+// examples: npm run admin-project p:include e:include OR npm run admin-project p:prd (will default to kf)
 //kf-api-arranger/node_modules/@arranger/mapping-utils/dist/extendMapping.js change  rangeStep: ['double', 'float', 'half_float', 'scaled_float'].includes(type) ? 0.01 : 1 to rangeStep: 1.0
 /* eslint-disable no-console */
 import 'regenerator-runtime/runtime.js';
@@ -10,7 +10,6 @@ import { countNOfDocs, createIndexIfNeeded } from '../dist/src/esUtils.js';
 import { ArrangerApi } from './arrangerApi.mjs';
 import { projectsConfig } from './projectsConfig.mjs';
 import { esHost } from '../dist/src/env.js';
-import { clinicalIndexStems, isClinicalIndex } from './releaseStatsUtils.mjs';
 
 const hasProjectArrangerMetadataIndex = async (esClient, projectName) => {
     const r = await esClient.indices.exists({
@@ -40,7 +39,7 @@ const ENV = {
 const args = process.argv.slice(2);
 
 //de-hardcode when possible
-const SUPPORTED_PROJECT_NAMES = ['next_prd', 'next_qa', 'include', 'test'];
+const SUPPORTED_PROJECT_NAMES = ['prd', 'qa', 'include'];
 const projectArg = args.find(a => a.startsWith('p:'))?.split(':')[1];
 if (!projectArg || !SUPPORTED_PROJECT_NAMES.some(sp => sp === projectArg)) {
     console.warn(
@@ -73,35 +72,16 @@ console.info(`admin-project-script - Project value is=${envVal}`);
 console.debug(`admin-project-script - Reaching to ElasticSearch at ${esHost}`);
 const client = await EsInstance.default.getInstance();
 
-const isTest = args.some(a => a === 'test');
-const appendTestIfNeeded = x => (isTest && isClinicalIndex(x) ? `${x}_test` : x);
-if (isTest) {
-    const allAliases = await client.cat.aliases({
-        h: 'alias',
-        format: 'json',
-    });
-    const clinicalTestAliases = allAliases.body
-        .filter(x => isClinicalIndex(x.alias) && x.alias.endsWith('_test'))
-        .map(x => x.alias);
-    if (!clinicalTestAliases || !clinicalIndexStems.every(s => clinicalTestAliases.some(x => x.includes(s)))) {
-        console.debug(
-            `admin-project-script - Terminating. When creating a test, all clinical entities must be aliased with _test suffix`,
-        );
-        console.debug(`admin-project-script - received test aliases: `);
-        console.debug(clinicalTestAliases);
-        process.exit(1);
-    }
-}
 //values are hardcoded for now, but as soon as possible, we should use env var from env.ts
-const kfNext = [
-    'next_participant_centric',
-    'next_study_centric',
-    'next_biospecimen_centric',
-    'next_file_centric',
-    'next_variant_centric',
-    'next_gene_centric',
+const kf = [
+    'participant_centric',
+    'study_centric',
+    'biospecimen_centric',
+    'file_centric',
+    'variant_centric',
+    'gene_centric',
     'members-public',
-].map(x => (isTest && isClinicalIndex(x) ? appendTestIfNeeded(x) : x));
+];
 
 const include = [
     'participant_centric',
@@ -110,10 +90,10 @@ const include = [
     'file_centric',
     'variant_centric',
     'gene_centric',
-].map(x => (isTest && isClinicalIndex(x) ? appendTestIfNeeded(x) : x));
+];
 
 const envToIndicesPrefixes = {
-    kf: kfNext,
+    kf: kf,
     include: include,
 };
 
@@ -134,7 +114,7 @@ const projectName = projectArg;
 const allProjectsConf = projectsConfig(projectName, envVal);
 
 const projectsConf = allProjectsConf
-    .map(x => ({ ...x, indices: x.indices.map(i => ({ ...i, esIndex: appendTestIfNeeded(i.esIndex) })) }))
+    .map(x => ({ ...x, indices: x.indices.map(i => ({ ...i, esIndex: i.esIndex })) }))
     .filter(p => {
         const indicesInConf = p.indices.map(i => i.esIndex);
         // indices in conf are the same as target indices from env vars?
@@ -200,9 +180,9 @@ if (updateConditions.every(b => b)) {
     );
     if (nOfDocsInProjectMetadata === projectConf.indices.length) {
         console.debug(`admin-project-script - Applying extended mapping mutations.`);
-        console.time("fixExtendedMapping")
+        console.time('fixExtendedMapping');
         await ArrangerApi.fixExtendedMapping(client, projectConf.extendedMappingMutations);
-        console.timeEnd("fixExtendedMapping")
+        console.timeEnd('fixExtendedMapping');
     }
 }
 
