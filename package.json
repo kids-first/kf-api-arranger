@@ -39,7 +39,7 @@
     "@arranger/middleware": "^2.16.0",
     "@arranger/server": "^2.16.1",
     "@awaitjs/express": "^0.8.0",
-    "@elastic/elasticsearch": "^7.9.1",
+    "@elastic/elasticsearch": "^7.17.14",
     "ajv": "^8.12.0",
     "cors": "2.8.5",
     "dotenv": "^10.0.0",
