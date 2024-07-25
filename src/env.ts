@@ -7,17 +7,10 @@ export const port = process.env.PORT || 5050;
 export const keycloakURL = process.env.KEYCLOAK_URL || 'https://kf-keycloak-qa.kf-strides.org/auth';
 export const keycloakRealm = process.env.KEYCLOAK_REALM || 'kidsfirstdrc';
 export const keycloakClient = process.env.KEYCLOAK_CLIENT || 'kidsfirst-apis';
-export const keycloakPublicKey = process.env.KEYCLOAK_PUBLIC_KEY;
 
 export const esHost = process.env.ES_HOST || 'http://localhost:9200';
 export const esUser = process.env.ES_USER;
 export const esPass = process.env.ES_PASS;
-
-export const esFileIndex = process.env.ES_FILE_INDEX || 'file_centric';
-export const esStudyIndex = process.env.ES_STUDY_INDEX || 'study_centric';
-export const esParticipantIndex = process.env.ES_PARTICIPANT_INDEX || 'participant_centric';
-export const esBiospecimenIndex = process.env.ES_BIOSPECIMEN_INDEX || 'biospecimen_centric';
-export const esVariantIndex = process.env.ES_VARIANT_INDEX || 'variant_centric';
 
 export const maxNOfGenomicFeatureSuggestions = process.env.MAX_NUMBER_OF_GF_SUGGESTIONS || 5;
 

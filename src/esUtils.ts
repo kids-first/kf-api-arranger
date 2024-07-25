@@ -1,5 +1,11 @@
 import { Client } from '@elastic/elasticsearch';
 
+export const esFileIndex = 'file_centric';
+export const esStudyIndex = 'study_centric';
+export const esParticipantIndex = 'participant_centric';
+export const esBiospecimenIndex = 'biospecimen_centric';
+export const esVariantIndex = 'variant_centric';
+
 export const createIndexIfNeeded = async (esClient: Client, indexName: string): Promise<boolean> => {
     const existsResp = await esClient.indices.exists({
         index: indexName,

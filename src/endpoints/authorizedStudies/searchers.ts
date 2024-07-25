@@ -1,6 +1,6 @@
 import { Client } from '@elastic/elasticsearch';
 
-import { esFileIndex } from '../../env';
+import { esFileIndex } from '../../esUtils';
 import { FileAccessCountsResponse, SearchBucket } from './types';
 
 const MAX_SIZE_FOR_HITS = 10000;

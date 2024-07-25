@@ -2,7 +2,7 @@ import { Client } from '@elastic/elasticsearch';
 import filesize from 'filesize';
 
 import EsInstance from '../../ElasticSearchClientInstance';
-import { esBiospecimenIndex, esFileIndex, esParticipantIndex, esStudyIndex, esVariantIndex } from '../../env';
+import { esBiospecimenIndex, esFileIndex, esParticipantIndex, esStudyIndex, esVariantIndex } from '../../esUtils';
 import { biospecimenIdKey, familyIdKey, fileIdKey, participantIdKey, studyIdKey } from '../../fieldsKeys';
 
 export type Diagnosis = {
