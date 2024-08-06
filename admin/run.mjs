@@ -8,7 +8,7 @@ import EsInstance from '../dist/src/ElasticSearchClientInstance.js';
 import { countNOfDocs, createIndexIfNeeded } from '../dist/src/esUtils.js';
 
 import { ArrangerApi } from './arrangerApi.mjs';
-import { projectsConfig } from './projectsConfig.mjs';
+import { projectConfig } from './projectConfig.mjs';
 import { esHost } from '../dist/src/env.js';
 
 const hasProjectArrangerMetadataIndex = async (esClient, projectName) => {
@@ -72,68 +72,9 @@ console.info(`admin-project-script - Project value is=${envVal}`);
 console.debug(`admin-project-script - Reaching to ElasticSearch at ${esHost}`);
 const client = await EsInstance.default.getInstance();
 
-//values are hardcoded for now, but as soon as possible, we should use env var from env.ts
-const kf = [
-    'participant_centric',
-    'study_centric',
-    'biospecimen_centric',
-    'file_centric',
-    'variant_centric',
-    'gene_centric',
-    'members-public',
-];
-
-const include = [
-    'participant_centric',
-    'study_centric',
-    'biospecimen_centric',
-    'file_centric',
-    'variant_centric',
-    'gene_centric',
-];
-
-const envToIndicesPrefixes = {
-    kf: kf,
-    include: include,
-};
-
-const indicesPrefixes = envToIndicesPrefixes[envVal];
-
-const projectIndices = indicesPrefixes?.filter(p => !!p)?.map(p => p?.trim()) ?? [];
-
-if (projectIndices.length === 0) {
-    console.warn(
-        `admin-project-script - Terminating. No indices needed to build a project was found in the env var 'PROJECT_INDICES'.`,
-    );
-    process.exit(0);
-}
-
 const projectName = projectArg;
 
-//TODO: refactor to tolerate only 1 project per conf
-const allProjectsConf = projectsConfig(projectName, envVal);
-
-const projectsConf = allProjectsConf
-    .map(x => ({ ...x, indices: x.indices.map(i => ({ ...i, esIndex: i.esIndex })) }))
-    .filter(p => {
-        const indicesInConf = p.indices.map(i => i.esIndex);
-        // indices in conf are the same as target indices from env vars?
-        return sameIndices(indicesInConf, projectIndices);
-    });
-
-if (projectsConf.length === 0) {
-    console.info(
-        'admin-project-script - Terminating. Found no sane project configuration to process. Make sure it exists and that if matches with project indices.',
-    );
-    process.exit(0);
-} else if (projectsConf.length > 1) {
-    console.info(
-        'admin-project-script - Terminating. Found more than one candidates for project configurations. This is ambiguous.',
-    );
-    process.exit(0);
-}
-
-const projectConf = projectsConf[0];
+const arrangerProjectConf = projectConfig(projectName);
 
 const addArrangerProjectWithClient = ArrangerApi.addArrangerProject(client);
 
@@ -159,9 +100,9 @@ if (creationConditions.every(b => !b)) {
     console.debug(`admin-project-script - (Project addition) received this response from arranger api: `, addResp);
     console.debug(
         `admin-project-script - Creating these new graphql fields: `,
-        projectConf.indices.map(i => `${i.graphqlField}' from es index '${i.esIndex}`),
+        arrangerProjectConf.indices.map(i => `${i.graphqlField}' from es index '${i.esIndex}`),
     );
-    await ArrangerApi.createNewIndices(client, projectConf.indices);
+    await ArrangerApi.createNewIndices(client, arrangerProjectConf.indices);
 } else if (creationConditions.some(b => b !== creationConditions[0])) {
     console.warn(
         `admin-project-script - The project seems to be in a weird state for '${projectName}' does ${
@@ -178,10 +119,10 @@ if (updateConditions.every(b => b)) {
         client,
         ArrangerApi.getProjectMetadataEsLocation(projectName).index,
     );
-    if (nOfDocsInProjectMetadata === projectConf.indices.length) {
+    if (nOfDocsInProjectMetadata === arrangerProjectConf.indices.length) {
         console.debug(`admin-project-script - Applying extended mapping mutations.`);
         console.time('fixExtendedMapping');
-        await ArrangerApi.fixExtendedMapping(client, projectConf.extendedMappingMutations);
+        await ArrangerApi.fixExtendedMapping(client, arrangerProjectConf.extendedMappingMutations);
         console.timeEnd('fixExtendedMapping');
     }
 }

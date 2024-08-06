@@ -26,7 +26,7 @@ const indicesWithMappingContainingIgnoreAbove = Object.entries(r.body)
 
 console.log(`==> Inspection for all centric mappings from: ${esHost}`);
 if (indicesWithMappingContainingIgnoreAbove.length === 0) {
-    console.log('No ignore_above found in any mappings for entity');
+    console.log('No "ignore_above" found in any mappings for any entity');
 } else {
     console.table(indicesWithMappingContainingIgnoreAbove);
 }

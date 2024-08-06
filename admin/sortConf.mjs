@@ -25,22 +25,13 @@ const sortConf = conf => {
     };
 };
 
-const processConf = path => {
-    const guessProject = (() => {
-        if (path.toLocaleLowerCase().includes('include')) {
-            return 'Include';
-        }
-        if (path.toLocaleLowerCase().includes('kfnext')) {
-            return 'Kids-First Next';
-        }
-        return '';
-    })();
+const processConf = path =>
     fs.readFile(path, 'utf8', (err, data) => {
         if (err) {
             console.error(err);
             return;
         }
-        console.info(`Reading ${guessProject} Conf...`);
+        console.info(`Reading Conf...`);
         const conf = { ...JSON.parse(data) };
         assert(Object.keys(conf).every(k => ['indices', 'extendedMappingMutations'].includes(k)));
         const sConf = { ...sortConf(conf) };
@@ -52,11 +43,8 @@ const processConf = path => {
             if (err) {
                 console.error(err);
             }
-            console.info(`Writing Sorted ${guessProject} Conf...`);
+            console.info(`Writing Sorted Conf...`);
         });
     });
-};
 
-processConf('admin/confKfNext.json');
-processConf('admin/confInclude.json');
-
+processConf('admin/arrangerProjectConf.json');
