@@ -40,21 +40,27 @@ const makeReleaseToCreationDate = l =>
 const clinicalIndicesNotAliased = clinicalIndices.filter(x => clinicalAliases.every(a => a.index !== x.index));
 const unaliasedClinicalIndicesWithCreationDate = makeReleaseToCreationDate(clinicalIndicesNotAliased);
 
-// Make sure that no aliased index contains previously found unaliased releases.
-const unaliasedReleases = unaliasedClinicalIndicesWithCreationDate.map(x => x.release);
-assert(clinicalAliases.every(x => !unaliasedReleases.includes(`re_${x.index.split('re_')[1]}`)), 'more than one releases aliased was detected');
-
 console.log(`===== Not Aliased (pattern:re_*)`);
-
 unaliasedClinicalIndicesWithCreationDate.length
     ? console.table(unaliasedClinicalIndicesWithCreationDate)
     : console.log('None');
 
 console.log(`===== Aliased (pattern:re_*)`);
 const clinicalIndicesAliased = clinicalIndices.filter(x => clinicalAliases.some(a => a.index === x.index));
+
+//===== EDGE case
+const showIfOnlyCbtn = re => {
+    const isCbtnOnly = clinicalIndicesAliased
+        .filter(x => x.index.endsWith(re))
+        .every(x => x.index.includes('_sd_bhjxbdqk_'));
+    return isCbtnOnly ? `${re} (cbtn only)` : re
+};
+
+//======
+
 const aliasedClinicalIndicesWithCreationDate = makeReleaseToCreationDate(clinicalIndicesAliased);
 aliasedClinicalIndicesWithCreationDate.length
-    ? console.table(aliasedClinicalIndicesWithCreationDate)
+    ? console.table(aliasedClinicalIndicesWithCreationDate.map(x => ({ ...x, release: showIfOnlyCbtn(x.release) })))
     : console.log('None');
 
 console.log(`===== Others (Clinical)`);

@@ -2,9 +2,9 @@
  * This script is a helper that can be used to create
  * aliases for indices of a given release.
  *
- *  npm run post-re-alias-helper -- release:re_test_023 action:remove
+ *   npm run post-re-alias-helper -- release:re_test_023 #add
  *
- *   npm run post-re-alias-helper -- release:re_test_023 action:remove
+ *   npm run post-re-alias-helper -- release:re_test_023 action:remove #remove
  *
  * */
 import assert from 'node:assert/strict';
