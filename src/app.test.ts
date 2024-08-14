@@ -155,10 +155,6 @@ describe('Express app (without Arranger)', () => {
                         count: 867,
                     },
                 ],
-                members: {
-                    totalCount: 12343,
-                    publicCount: 345,
-                },
             };
             (getStatistics as jest.Mock).mockImplementation(() => expectedStats);
 

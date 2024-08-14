@@ -3,9 +3,10 @@
  *  npm run delete-clinical-indices-helper -- release:re_20231030_1
  *
  * */
+import { Client } from '@elastic/elasticsearch';
 import assert from 'node:assert/strict';
 import readline from 'readline';
-import { Client } from '@elastic/elasticsearch';
+
 import { esHost } from '../dist/src/env.js';
 import { cbKeepClinicalIndicesOnly } from './utils.mjs';
 
@@ -56,10 +57,7 @@ assert(Array.isArray(releaseClinicalIndices) && releaseClinicalIndices.length > 
 // Extra check. Might not be needed, but cheap to test.
 const hasOnlyClinicalIndices = releaseClinicalIndices.every(r => {
     const indexPrefix = r.split('_')[0];
-    return (
-        ['gene', 'variant', 'member'].some(prefix => !r.startsWith(prefix)) &&
-        INDEX_CLINICAL_CATEGORIES.includes(indexPrefix)
-    );
+    return ['gene', 'variant'].some(prefix => !r.startsWith(prefix)) && INDEX_CLINICAL_CATEGORIES.includes(indexPrefix);
 });
 assert(
     hasOnlyClinicalIndices,
