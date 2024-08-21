@@ -4,6 +4,7 @@ import filesize from 'filesize';
 import EsInstance from '../../ElasticSearchClientInstance';
 import { esBiospecimenIndex, esFileIndex, esParticipantIndex, esStudyIndex, esVariantIndex } from '../../esUtils';
 import { biospecimenIdKey, familyIdKey, fileIdKey, participantIdKey, studyIdKey } from '../../fieldsKeys';
+import { isInclude } from '../../projectUtils';
 
 export type Diagnosis = {
     mondo_id: string;
@@ -246,21 +247,34 @@ export const fetchDemographicsStats = async (client: Client): Promise<Record<str
 };
 
 export const fetchTopDiagnosis = async (client: Client): Promise<Diagnosis[]> => {
+    const excludeDownSyndrom = '.*MONDO:(0700030|0008608|0700129|0700127|0700130|0700128|0700126).*';
+
+    const groupByDiagnosisTerms = {
+        field: 'diagnosis.mondo_display_term',
+        size: 1000,
+    };
+
+    const groupByDiagnosisTermsWithExcludeDownSyndrom = {
+        ...groupByDiagnosisTerms,
+        exclude: excludeDownSyndrom,
+    };
+
     const response = await client.search({
         index: esParticipantIndex,
         body: {
             size: 0,
             aggs: {
-                top_diagnosis_ids: {
+                nested_diagnosis: {
                     nested: {
                         path: 'diagnosis',
                     },
                     aggs: {
-                        filtered_diagnosis_ids: {
-                            terms: {
-                                field: 'diagnosis.mondo_display_term',
-                                size: 10,
-                                exclude: '.*MONDO:(0700030|0008608|0700129|0700127|0700130|0700128|0700126).*',
+                        group_by_diagnosis: {
+                            terms: isInclude ? groupByDiagnosisTermsWithExcludeDownSyndrom : groupByDiagnosisTerms,
+                            aggs: {
+                                distinct_participant: {
+                                    reverse_nested: {},
+                                },
                             },
                         },
                     },
@@ -269,10 +283,13 @@ export const fetchTopDiagnosis = async (client: Client): Promise<Diagnosis[]> =>
         },
     });
 
-    return response.body.aggregations.top_diagnosis_ids.filtered_diagnosis_ids.buckets.map(bucket => ({
-        mondo_id: bucket.key,
-        count: bucket.doc_count,
-    }));
+    return response.body.aggregations.nested_diagnosis.group_by_diagnosis.buckets
+        .map(bucket => ({
+            mondo_id: bucket.key,
+            count: bucket.distinct_participant.doc_count,
+        }))
+        .sort((a: Diagnosis, b: Diagnosis) => b.count - a.count)
+        .slice(0, 10);
 };
 
 export const getStatistics = async (): Promise<Statistics> => {
