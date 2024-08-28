@@ -17,6 +17,7 @@ export const fetchDiffGeneExp = async (): Promise<DiffGeneExpVolcano[]> => {
                         by_id: {
                             terms: {
                                 field: '_id',
+                                size: 100000,
                             },
                             aggs: {
                                 docs: {
