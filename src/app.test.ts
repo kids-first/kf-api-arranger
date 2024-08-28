@@ -16,10 +16,12 @@ import {
 } from './endpoints/sets/setsFeature';
 import { Set, UpdateSetContentBody, UpdateSetTagBody } from './endpoints/sets/setsTypes';
 import { getStatistics, getStudiesStatistics, Statistics } from './endpoints/statistics';
+import { fetchDiffGeneExp } from './endpoints/transcriptomics';
 import { UserApiError } from './userApi/userApiError';
 
 jest.mock('./endpoints/sets/setsFeature');
 jest.mock('./endpoints/statistics');
+jest.mock('./endpoints/transcriptomics');
 
 describe('Express app (without Arranger)', () => {
     let app: Express;
@@ -503,6 +505,60 @@ describe('Express app (without Arranger)', () => {
                 .set({ Authorization: `Bearer ${token}` })
                 .expect(500, { error: 'Internal Server Error' });
             expect((deleteSet as jest.Mock).mock.calls.length).toEqual(1);
+        });
+    });
+
+    describe('POST /transcriptomics/diffGeneExp', () => {
+        beforeEach(() => {
+            (fetchDiffGeneExp as jest.Mock).mockReset();
+        });
+
+        it('should return 403 if no Authorization header', () =>
+            request(app)
+                .post('/transcriptomics/diffGeneExp')
+                .expect(403));
+
+        it('should return 200 if Authorization header contains valid token and no error occurs', async () => {
+            const diffGeneExpByCategory = [
+                {
+                    id: 'not_significant',
+                    data: [{ gene_symbol: 'FRG1BP', x: -0.37868998947354676, y: 10.914088963881525 }],
+                },
+                {
+                    id: 'up_regulated',
+                    data: [
+                        { gene_symbol: 'AC074032.1', x: 0.00828043785818933, y: 0.09949336001516859 },
+                        { gene_symbol: 'SEC14L1P1', x: 0.013345264376017407, y: 0.09886736960876816 },
+                    ],
+                },
+            ];
+
+            (fetchDiffGeneExp as jest.Mock).mockImplementation(() => diffGeneExpByCategory);
+
+            const token = getToken();
+
+            await request(app)
+                .post('/transcriptomics/diffGeneExp')
+                .set('Content-type', 'application/json')
+                .set({ Authorization: `Bearer ${token}` })
+                .expect(200, diffGeneExpByCategory);
+            expect((fetchDiffGeneExp as jest.Mock).mock.calls.length).toEqual(1);
+        });
+
+        it('should return 500 if Authorization header contains valid token but an error occurs', async () => {
+            const expectedError = new Error('OOPS');
+            (fetchDiffGeneExp as jest.Mock).mockImplementation(() => {
+                throw expectedError;
+            });
+
+            const token = getToken();
+
+            await request(app)
+                .post('/transcriptomics/diffGeneExp')
+                .set('Content-type', 'application/json')
+                .set({ Authorization: `Bearer ${token}` })
+                .expect(500, { error: 'Internal Server Error' });
+            expect((fetchDiffGeneExp as jest.Mock).mock.calls.length).toEqual(1);
         });
     });
 });

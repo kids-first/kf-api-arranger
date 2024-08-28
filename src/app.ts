@@ -19,6 +19,7 @@ import {
 } from './endpoints/sets/setsFeature';
 import { CreateSetBody, Set, SetSqon, UpdateSetContentBody, UpdateSetTagBody } from './endpoints/sets/setsTypes';
 import { getStatistics, getStudiesStatistics } from './endpoints/statistics';
+import { fetchDiffGeneExp } from './endpoints/transcriptomics';
 import { cacheTTL, esHost, keycloakURL, userApiURL } from './env';
 import { globalErrorHandler, globalErrorLogger } from './errors';
 import { STATISTICS_CACHE_ID, STATISTICS_PUBLIC_CACHE_ID, verifyCache } from './middleware/cache';
@@ -146,6 +147,12 @@ export default (keycloak: Keycloak, getProject: (projectId: string) => ArrangerP
         );
 
         res.send({ data });
+    });
+
+    app.postAsync('/transcriptomics/diffGeneExp', keycloak.protect(), async (req, res) => {
+        const data = await fetchDiffGeneExp();
+
+        res.json(data);
     });
 
     app.postAsync('/authorized-studies', keycloak.protect(), computeAuthorizedStudiesForAllFences);
