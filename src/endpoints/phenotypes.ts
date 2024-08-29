@@ -4,11 +4,10 @@ import { get } from 'lodash';
 import { runProjectQuery } from '../arrangerUtils';
 import { ArrangerProject } from '../arrangerUtils';
 import { throwErrorsFromGqlQueryIfExist } from '../errors';
+import { ES_SEARCH_MAX_BUCKETS } from '../esUtils';
 import { idKey } from '../fieldsKeys';
 import { replaceSetByIds } from '../sqon/setSqon';
 import { SetSqon } from './sets/setsTypes';
-
-const MAX_PHENOTYPES = 100000;
 
 const extractPsIds = (resp): string[] => (resp?.data?.participant?.hits?.edges || []).map(edge => edge.node[idKey]);
 
@@ -169,7 +168,7 @@ const getPhenotypesNodesByIds = async (
 
     const res = await project.runQuery({
         query,
-        variables: { sqon, term_filters: termFilter, size: MAX_PHENOTYPES, offset: 0 },
+        variables: { sqon, term_filters: termFilter, size: ES_SEARCH_MAX_BUCKETS, offset: 0 },
     });
     return get(res, `data.participant.aggregations.${type}__name.buckets`, []);
 };

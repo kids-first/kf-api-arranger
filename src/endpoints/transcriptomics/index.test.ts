@@ -1,5 +1,6 @@
 import EsInstance from '../../ElasticSearchClientInstance';
-import { fetchDiffGeneExp } from '.';
+import { fetchDiffGeneExp, fetchSampleGeneExp } from '.';
+import { SampleGeneExpVolcano } from './types';
 
 jest.mock('../../ElasticSearchClientInstance');
 
@@ -205,6 +206,94 @@ describe('Transcriptomics', () => {
             }));
 
             const result = await fetchDiffGeneExp();
+
+            expect(result).toEqual(expectedResponse);
+        });
+    });
+
+    describe('fetchSampleGeneExp', () => {
+        beforeEach(() => {
+            (EsInstance.getInstance as jest.Mock).mockReset();
+        });
+
+        it('should return gene exp by sample for a specific gene symbol', async () => {
+            const mockEsResponseBody = {
+                took: 10,
+                timed_out: false,
+                _shards: {
+                    total: 5,
+                    successful: 5,
+                    skipped: 0,
+                    failed: 0,
+                },
+                hits: {
+                    total: {
+                        value: 3,
+                        relation: 'eq',
+                    },
+                    max_score: 9.83696,
+                    hits: [
+                        {
+                            _index: 'sample_gene_exp_htp_re_20240828_6',
+                            _type: '_doc',
+                            _id: 'R_1kmpEB0zu1NPYlGBAz',
+                            _score: 9.83696,
+                            _source: {
+                                sample_id: 'bs-aa000aaa',
+                                x: 1,
+                                y: 2.4399124042981217,
+                            },
+                        },
+                        {
+                            _index: 'sample_gene_exp_htp_re_20240828_6',
+                            _type: '_doc',
+                            _id: '2PlkmpEBRqsooo59Hexg',
+                            _score: 9.83696,
+                            _source: {
+                                sample_id: 'bs-bbbb11b1',
+                                x: 0,
+                                y: 0.90884870449667,
+                            },
+                        },
+                        {
+                            _index: 'sample_gene_exp_htp_re_20240828_6',
+                            _type: '_doc',
+                            _id: '5_pkmpEBRqsooo59OXsu',
+                            _score: 9.83696,
+                            _source: {
+                                sample_id: 'bs-ccc22cc2',
+                                x: 1,
+                                y: 0.909129052666039,
+                            },
+                        },
+                    ],
+                },
+            };
+
+            const expectedResponse: SampleGeneExpVolcano = {
+                data: [
+                    { sample_id: 'bs-aa000aaa', x: 1, y: 2.4399124042981217 },
+                    {
+                        sample_id: 'bs-bbbb11b1',
+                        x: 0,
+                        y: 0.90884870449667,
+                    },
+                    {
+                        sample_id: 'bs-ccc22cc2',
+                        x: 1,
+                        y: 0.909129052666039,
+                    },
+                ],
+                gene_symbol: 'LINC01881',
+                nControl: 1,
+                nT21: 2,
+            };
+
+            (EsInstance.getInstance as jest.Mock).mockImplementation(() => ({
+                search: async () => ({ body: mockEsResponseBody }),
+            }));
+
+            const result = await fetchSampleGeneExp('LINC01881');
 
             expect(result).toEqual(expectedResponse);
         });

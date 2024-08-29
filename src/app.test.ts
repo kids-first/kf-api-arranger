@@ -16,7 +16,7 @@ import {
 } from './endpoints/sets/setsFeature';
 import { Set, UpdateSetContentBody, UpdateSetTagBody } from './endpoints/sets/setsTypes';
 import { getStatistics, getStudiesStatistics, Statistics } from './endpoints/statistics';
-import { fetchDiffGeneExp } from './endpoints/transcriptomics';
+import { fetchDiffGeneExp, fetchSampleGeneExp } from './endpoints/transcriptomics';
 import { UserApiError } from './userApi/userApiError';
 
 jest.mock('./endpoints/sets/setsFeature');
@@ -559,6 +559,65 @@ describe('Express app (without Arranger)', () => {
                 .set({ Authorization: `Bearer ${token}` })
                 .expect(500, { error: 'Internal Server Error' });
             expect((fetchDiffGeneExp as jest.Mock).mock.calls.length).toEqual(1);
+        });
+    });
+
+    describe('POST /transcriptomics/sampleGeneExp', () => {
+        beforeEach(() => {
+            (fetchSampleGeneExp as jest.Mock).mockReset();
+        });
+
+        it('should return 403 if no Authorization header', () =>
+            request(app)
+                .post('/transcriptomics/sampleGeneExp')
+                .expect(403));
+
+        it('should return 200 if Authorization header contains valid token and no error occurs', async () => {
+            const sampleGeneExp = {
+                data: [
+                    { sample_id: 'bs-aa000aaa', x: 1, y: 2.4399124042981217 },
+                    {
+                        sample_id: 'bs-bbbb11b1',
+                        x: 0,
+                        y: 0.90884870449667,
+                    },
+                    {
+                        sample_id: 'bs-ccc22cc2',
+                        x: 1,
+                        y: 0.909129052666039,
+                    },
+                ],
+                gene_symbol: 'LINC01881',
+                nControl: 1,
+                nT21: 2,
+            };
+
+            (fetchSampleGeneExp as jest.Mock).mockImplementation(() => sampleGeneExp);
+
+            const token = getToken();
+
+            await request(app)
+                .post('/transcriptomics/sampleGeneExp')
+                .set('Content-type', 'application/json')
+                .set({ Authorization: `Bearer ${token}` })
+                .expect(200, sampleGeneExp);
+            expect((fetchSampleGeneExp as jest.Mock).mock.calls.length).toEqual(1);
+        });
+
+        it('should return 500 if Authorization header contains valid token but an error occurs', async () => {
+            const expectedError = new Error('OOPS');
+            (fetchSampleGeneExp as jest.Mock).mockImplementation(() => {
+                throw expectedError;
+            });
+
+            const token = getToken();
+
+            await request(app)
+                .post('/transcriptomics/sampleGeneExp')
+                .set('Content-type', 'application/json')
+                .set({ Authorization: `Bearer ${token}` })
+                .expect(500, { error: 'Internal Server Error' });
+            expect((fetchSampleGeneExp as jest.Mock).mock.calls.length).toEqual(1);
         });
     });
 });

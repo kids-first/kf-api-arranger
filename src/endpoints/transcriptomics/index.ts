@@ -1,6 +1,12 @@
 import EsInstance from '../../ElasticSearchClientInstance';
-import { esDiffGeneExp } from '../../esUtils';
-import { DiffGeneExpPoint, DiffGeneExpVolcano, FetchDiffGeneExpResponse } from './types';
+import { ES_SEARCH_MAX_BUCKETS, ES_SEARCH_MAX_HITS, esDiffGeneExp, esSampleGeneExp } from '../../esUtils';
+import {
+    DiffGeneExpPoint,
+    DiffGeneExpVolcano,
+    FetchDiffGeneExpResponse,
+    SampleGeneExpPoint,
+    SampleGeneExpVolcano,
+} from './types';
 
 export const fetchDiffGeneExp = async (): Promise<DiffGeneExpVolcano[]> => {
     const client = EsInstance.getInstance();
@@ -17,7 +23,7 @@ export const fetchDiffGeneExp = async (): Promise<DiffGeneExpVolcano[]> => {
                         by_id: {
                             terms: {
                                 field: '_id',
-                                size: 100000,
+                                size: ES_SEARCH_MAX_BUCKETS,
                             },
                             aggs: {
                                 docs: {
@@ -47,4 +53,29 @@ export const fetchDiffGeneExp = async (): Promise<DiffGeneExpVolcano[]> => {
             data: points,
         };
     });
+};
+
+export const fetchSampleGeneExp = async (gene_symbol: string): Promise<SampleGeneExpVolcano> => {
+    const client = EsInstance.getInstance();
+    const { body } = await client.search({
+        index: esSampleGeneExp,
+        body: {
+            size: ES_SEARCH_MAX_HITS,
+            query: {
+                match: {
+                    gene_symbol,
+                },
+            },
+            _source: ['sample_id', 'x', 'y'],
+        },
+    });
+
+    const points: SampleGeneExpPoint[] = body.hits.hits.map(hit => hit._source);
+
+    return {
+        data: points,
+        gene_symbol,
+        nControl: points.filter(p => p.x === 0).length,
+        nT21: points.filter(p => p.x === 1).length,
+    };
 };
