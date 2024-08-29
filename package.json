@@ -47,7 +47,7 @@
     "filesize": "^3.6.1",
     "graphql-parse-resolve-info": "^4.13.0",
     "http-status-codes": "^2.3.0",
-    "keycloak-connect": "^24.0.3",
+    "keycloak-connect": "^25.0.4",
     "lodash": "^4.17.21",
     "node-cache": "^5.1.2",
     "node-fetch": "^2.6.5",
