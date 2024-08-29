@@ -6,6 +6,10 @@ export const esParticipantIndex = 'participant_centric';
 export const esBiospecimenIndex = 'biospecimen_centric';
 export const esVariantIndex = 'variant_centric';
 export const esDiffGeneExp = 'diff_gene_exp';
+export const esSampleGeneExp = 'sample_gene_exp';
+
+export const ES_SEARCH_MAX_BUCKETS = 100000;
+export const ES_SEARCH_MAX_HITS = 10000;
 
 export const createIndexIfNeeded = async (esClient: Client, indexName: string): Promise<boolean> => {
     const existsResp = await esClient.indices.exists({

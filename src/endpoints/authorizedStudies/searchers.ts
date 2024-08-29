@@ -1,9 +1,7 @@
 import { Client } from '@elastic/elasticsearch';
 
-import { esFileIndex } from '../../esUtils';
+import { ES_SEARCH_MAX_HITS, esFileIndex } from '../../esUtils';
 import { FileAccessCountsResponse, SearchBucket } from './types';
-
-const MAX_SIZE_FOR_HITS = 10000;
 
 export const searchAggregatedAuthorizedStudiesForFence = async (
     client: Client,
@@ -37,14 +35,14 @@ export const searchAggregatedAuthorizedStudiesForFence = async (
                 study_ids: {
                     terms: {
                         field: 'study_id',
-                        size: MAX_SIZE_FOR_HITS,
+                        size: ES_SEARCH_MAX_HITS,
                     },
                     aggs: {
                         // Nice to have/do: filter out all the acl values that the user does not have.
                         acls: {
                             terms: {
                                 field: 'acl',
-                                size: MAX_SIZE_FOR_HITS,
+                                size: ES_SEARCH_MAX_HITS,
                             },
                         },
                         top_study_hits: {
