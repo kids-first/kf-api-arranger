@@ -115,6 +115,13 @@ describe('Express app (without Arranger)', () => {
                     'Native Hawaiian or Other Pacific Islander': 8,
                     'not available': 3,
                 },
+                ethnicity: {
+                    'Not Hispanic or Latino': 20460,
+                    NoInformation: 6263,
+                    'Hispanic or Latino': 4107,
+                    'not available': 1419,
+                    unknown: 775,
+                },
                 diagnosis: [
                     {
                         mondo_id: 'speech disorder (MONDO:0004730)',
