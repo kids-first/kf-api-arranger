@@ -91,7 +91,7 @@ export const fetchSampleGeneExp = async (gene_symbol: string): Promise<SampleGen
 export const fetchFacets = async (): Promise<Facets> => {
     const client = EsInstance.getInstance();
     const { body } = await client.search({
-        index: esSampleGeneExp,
+        index: esDiffGeneExp,
         body: {
             size: 0,
             aggs: {
