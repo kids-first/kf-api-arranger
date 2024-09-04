@@ -3,8 +3,8 @@ import {
     ES_CHROMOSOME_AGG_SIZE,
     ES_SEARCH_MAX_BUCKETS,
     ES_SEARCH_MAX_HITS,
-    esDiffGeneExp,
-    esSampleGeneExp,
+    esDiffGeneExpIndex,
+    esSampleGeneExpIndex,
 } from '../../esUtils';
 import {
     DiffGeneExpPoint,
@@ -18,7 +18,7 @@ import {
 export const fetchDiffGeneExp = async (): Promise<DiffGeneExpVolcano[]> => {
     const client = EsInstance.getInstance();
     const { body } = await client.search({
-        index: esDiffGeneExp,
+        index: esDiffGeneExpIndex,
         body: {
             aggs: {
                 by_category: {
@@ -66,7 +66,7 @@ export const fetchDiffGeneExp = async (): Promise<DiffGeneExpVolcano[]> => {
 export const fetchSampleGeneExp = async (gene_symbol: string): Promise<SampleGeneExpVolcano> => {
     const client = EsInstance.getInstance();
     const { body } = await client.search({
-        index: esSampleGeneExp,
+        index: esSampleGeneExpIndex,
         body: {
             size: ES_SEARCH_MAX_HITS,
             query: {
@@ -91,7 +91,7 @@ export const fetchSampleGeneExp = async (gene_symbol: string): Promise<SampleGen
 export const fetchFacets = async (): Promise<Facets> => {
     const client = EsInstance.getInstance();
     const { body } = await client.search({
-        index: esDiffGeneExp,
+        index: esDiffGeneExpIndex,
         body: {
             size: 0,
             aggs: {
