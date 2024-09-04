@@ -1,5 +1,11 @@
 import EsInstance from '../../ElasticSearchClientInstance';
-import { ES_SEARCH_MAX_BUCKETS, ES_SEARCH_MAX_HITS, esDiffGeneExp, esSampleGeneExp } from '../../esUtils';
+import {
+    ES_CHROMOSOME_AGG_SIZE,
+    ES_SEARCH_MAX_BUCKETS,
+    ES_SEARCH_MAX_HITS,
+    esDiffGeneExp,
+    esSampleGeneExp,
+} from '../../esUtils';
 import {
     DiffGeneExpPoint,
     DiffGeneExpVolcano,
@@ -92,7 +98,7 @@ export const fetchFacets = async (): Promise<Facets> => {
                 by_chr: {
                     terms: {
                         field: 'chromosome',
-                        size: 25,
+                        size: ES_CHROMOSOME_AGG_SIZE,
                     },
                 },
             },
