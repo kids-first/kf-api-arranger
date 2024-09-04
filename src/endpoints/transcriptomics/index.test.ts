@@ -1,6 +1,6 @@
 import EsInstance from '../../ElasticSearchClientInstance';
-import { fetchDiffGeneExp, fetchSampleGeneExp } from '.';
-import { SampleGeneExpVolcano } from './types';
+import { fetchDiffGeneExp, fetchFacets, fetchSampleGeneExp } from '.';
+import { DiffGeneExpVolcano, Facets, SampleGeneExpVolcano } from './types';
 
 jest.mock('../../ElasticSearchClientInstance');
 
@@ -187,16 +187,28 @@ describe('Transcriptomics', () => {
                 },
             };
 
-            const expectedResponse = [
+            const expectedResponse: DiffGeneExpVolcano[] = [
                 {
                     id: 'not_significant',
-                    data: [{ gene_symbol: 'FRG1BP', x: -0.37868998947354676, y: 10.914088963881525 }],
+                    data: [
+                        { gene_symbol: 'FRG1BP', x: -0.37868998947354676, y: 10.914088963881525, chromosome: 'chr20' },
+                    ],
                 },
                 {
                     id: 'up_regulated',
                     data: [
-                        { gene_symbol: 'AC074032.1', x: 0.00828043785818933, y: 0.09949336001516859 },
-                        { gene_symbol: 'SEC14L1P1', x: 0.013345264376017407, y: 0.09886736960876816 },
+                        {
+                            gene_symbol: 'AC074032.1',
+                            x: 0.00828043785818933,
+                            y: 0.09949336001516859,
+                            chromosome: 'chr12',
+                        },
+                        {
+                            gene_symbol: 'SEC14L1P1',
+                            x: 0.013345264376017407,
+                            y: 0.09886736960876816,
+                            chromosome: 'chr11',
+                        },
                     ],
                 },
             ];
@@ -294,6 +306,79 @@ describe('Transcriptomics', () => {
             }));
 
             const result = await fetchSampleGeneExp('LINC01881');
+
+            expect(result).toEqual(expectedResponse);
+        });
+    });
+
+    describe('fetchFacets', () => {
+        beforeEach(() => {
+            (EsInstance.getInstance as jest.Mock).mockReset();
+        });
+
+        it('should return chromosome and doc count for each one', async () => {
+            const mockEsResponseBody = {
+                took: 1,
+                timed_out: false,
+                _shards: {
+                    total: 5,
+                    successful: 5,
+                    skipped: 0,
+                    failed: 0,
+                },
+                hits: {
+                    total: {
+                        value: 10000,
+                        relation: 'gte',
+                    },
+                    max_score: null,
+                    hits: [],
+                },
+                aggregations: {
+                    by_chr: {
+                        doc_count_error_upper_bound: 518,
+                        sum_other_doc_count: 10610,
+                        buckets: [
+                            {
+                                key: 'chr1',
+                                doc_count: 1692,
+                            },
+                            {
+                                key: 'chr19',
+                                doc_count: 1318,
+                            },
+                            {
+                                key: 'chr2',
+                                doc_count: 1098,
+                            },
+                            {
+                                key: 'chr17',
+                                doc_count: 1084,
+                            },
+                            {
+                                key: 'chr11',
+                                doc_count: 939,
+                            },
+                        ],
+                    },
+                },
+            };
+
+            const expectedResponse: Facets = {
+                chromosome: [
+                    { key: 'chr1', doc_count: 1692 },
+                    { key: 'chr19', doc_count: 1318 },
+                    { key: 'chr2', doc_count: 1098 },
+                    { key: 'chr17', doc_count: 1084 },
+                    { key: 'chr11', doc_count: 939 },
+                ],
+            };
+
+            (EsInstance.getInstance as jest.Mock).mockImplementation(() => ({
+                search: async () => ({ body: mockEsResponseBody }),
+            }));
+
+            const result = await fetchFacets();
 
             expect(result).toEqual(expectedResponse);
         });
