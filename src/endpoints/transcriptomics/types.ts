@@ -46,6 +46,7 @@ export type DiffGeneExpPoint = {
     gene_symbol: string;
     x: number;
     y: number;
+    chromosome: string;
 };
 
 export type DiffGeneExpVolcano = {
@@ -83,4 +84,11 @@ export type FetchDiffGeneExpResponse = {
             };
         }[];
     };
+};
+
+export type Facets = {
+    chromosome: {
+        key: string;
+        doc_count: number;
+    }[];
 };

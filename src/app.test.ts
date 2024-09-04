@@ -16,7 +16,8 @@ import {
 } from './endpoints/sets/setsFeature';
 import { Set, UpdateSetContentBody, UpdateSetTagBody } from './endpoints/sets/setsTypes';
 import { getStatistics, getStudiesStatistics, Statistics } from './endpoints/statistics';
-import { fetchDiffGeneExp, fetchSampleGeneExp } from './endpoints/transcriptomics';
+import { fetchDiffGeneExp, fetchFacets, fetchSampleGeneExp } from './endpoints/transcriptomics';
+import { DiffGeneExpVolcano, Facets as TranscriptomicsFacets } from './endpoints/transcriptomics/types';
 import { UserApiError } from './userApi/userApiError';
 
 jest.mock('./endpoints/sets/setsFeature');
@@ -526,16 +527,28 @@ describe('Express app (without Arranger)', () => {
                 .expect(403));
 
         it('should return 200 if Authorization header contains valid token and no error occurs', async () => {
-            const diffGeneExpByCategory = [
+            const diffGeneExpByCategory: DiffGeneExpVolcano[] = [
                 {
                     id: 'not_significant',
-                    data: [{ gene_symbol: 'FRG1BP', x: -0.37868998947354676, y: 10.914088963881525 }],
+                    data: [
+                        { gene_symbol: 'FRG1BP', x: -0.37868998947354676, y: 10.914088963881525, chromosome: 'chr20' },
+                    ],
                 },
                 {
                     id: 'up_regulated',
                     data: [
-                        { gene_symbol: 'AC074032.1', x: 0.00828043785818933, y: 0.09949336001516859 },
-                        { gene_symbol: 'SEC14L1P1', x: 0.013345264376017407, y: 0.09886736960876816 },
+                        {
+                            gene_symbol: 'AC074032.1',
+                            x: 0.00828043785818933,
+                            y: 0.09949336001516859,
+                            chromosome: 'chr12',
+                        },
+                        {
+                            gene_symbol: 'SEC14L1P1',
+                            x: 0.013345264376017407,
+                            y: 0.09886736960876816,
+                            chromosome: 'chr11',
+                        },
                     ],
                 },
             ];
@@ -574,9 +587,14 @@ describe('Express app (without Arranger)', () => {
             (fetchSampleGeneExp as jest.Mock).mockReset();
         });
 
+        const requestBody = {
+            gene_symbol: 'LINC01881',
+        };
+
         it('should return 403 if no Authorization header', () =>
             request(app)
                 .post('/transcriptomics/sampleGeneExp')
+                .send(requestBody)
                 .expect(403));
 
         it('should return 200 if Authorization header contains valid token and no error occurs', async () => {
@@ -605,10 +623,12 @@ describe('Express app (without Arranger)', () => {
 
             await request(app)
                 .post('/transcriptomics/sampleGeneExp')
+                .send(requestBody)
                 .set('Content-type', 'application/json')
                 .set({ Authorization: `Bearer ${token}` })
                 .expect(200, sampleGeneExp);
             expect((fetchSampleGeneExp as jest.Mock).mock.calls.length).toEqual(1);
+            expect((fetchSampleGeneExp as jest.Mock).mock.calls[0][0]).toEqual('LINC01881');
         });
 
         it('should return 500 if Authorization header contains valid token but an error occurs', async () => {
@@ -621,10 +641,62 @@ describe('Express app (without Arranger)', () => {
 
             await request(app)
                 .post('/transcriptomics/sampleGeneExp')
+                .send(requestBody)
                 .set('Content-type', 'application/json')
                 .set({ Authorization: `Bearer ${token}` })
                 .expect(500, { error: 'Internal Server Error' });
             expect((fetchSampleGeneExp as jest.Mock).mock.calls.length).toEqual(1);
+            expect((fetchSampleGeneExp as jest.Mock).mock.calls[0][0]).toEqual('LINC01881');
+        });
+    });
+
+    describe('POST /transcriptomics/facets', () => {
+        beforeEach(() => {
+            (fetchFacets as jest.Mock).mockReset();
+        });
+
+        it('should return 403 if no Authorization header', () =>
+            request(app)
+                .post('/transcriptomics/facets')
+                .expect(403));
+
+        it('should return 200 if Authorization header contains valid token and no error occurs', async () => {
+            const facets: TranscriptomicsFacets = {
+                chromosome: [
+                    { key: 'chr1', doc_count: 1692 },
+                    { key: 'chr19', doc_count: 1318 },
+                    { key: 'chr2', doc_count: 1098 },
+                    { key: 'chr17', doc_count: 1084 },
+                    { key: 'chr11', doc_count: 939 },
+                ],
+            };
+
+            (fetchFacets as jest.Mock).mockImplementation(() => facets);
+
+            const token = getToken();
+
+            await request(app)
+                .post('/transcriptomics/facets')
+                .set('Content-type', 'application/json')
+                .set({ Authorization: `Bearer ${token}` })
+                .expect(200, facets);
+            expect((fetchFacets as jest.Mock).mock.calls.length).toEqual(1);
+        });
+
+        it('should return 500 if Authorization header contains valid token but an error occurs', async () => {
+            const expectedError = new Error('OOPS');
+            (fetchFacets as jest.Mock).mockImplementation(() => {
+                throw expectedError;
+            });
+
+            const token = getToken();
+
+            await request(app)
+                .post('/transcriptomics/facets')
+                .set('Content-type', 'application/json')
+                .set({ Authorization: `Bearer ${token}` })
+                .expect(500, { error: 'Internal Server Error' });
+            expect((fetchFacets as jest.Mock).mock.calls.length).toEqual(1);
         });
     });
 });
