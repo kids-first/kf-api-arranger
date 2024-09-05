@@ -304,7 +304,7 @@ describe('Transcriptomics', () => {
                         y: 0.909129052666039,
                     },
                 ],
-                gene_symbol: 'LINC01881',
+                ensembl_gene_id: 'ENSG00000272368.2',
                 nControl: 1,
                 nT21: 2,
             };
@@ -313,7 +313,7 @@ describe('Transcriptomics', () => {
                 search: async () => ({ body: mockEsResponseBody }),
             }));
 
-            const result = await fetchSampleGeneExp('LINC01881');
+            const result = await fetchSampleGeneExp('ENSG00000272368.2');
 
             expect(result).toEqual(expectedResponse);
         });

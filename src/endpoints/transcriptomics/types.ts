@@ -63,7 +63,7 @@ export type SampleGeneExpPoint = {
 
 export type SampleGeneExpVolcano = {
     data: SampleGeneExpPoint[];
-    gene_symbol: string;
+    ensembl_gene_id: string;
     nControl: number;
     nT21: number;
 };

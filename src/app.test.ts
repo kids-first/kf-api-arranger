@@ -17,7 +17,11 @@ import {
 import { Set, UpdateSetContentBody, UpdateSetTagBody } from './endpoints/sets/setsTypes';
 import { getStatistics, getStudiesStatistics, Statistics } from './endpoints/statistics';
 import { fetchDiffGeneExp, fetchFacets, fetchSampleGeneExp } from './endpoints/transcriptomics';
-import { DiffGeneExpVolcano, Facets as TranscriptomicsFacets } from './endpoints/transcriptomics/types';
+import {
+    DiffGeneExpVolcano,
+    Facets as TranscriptomicsFacets,
+    SampleGeneExpVolcano,
+} from './endpoints/transcriptomics/types';
 import { UserApiError } from './userApi/userApiError';
 
 jest.mock('./endpoints/sets/setsFeature');
@@ -606,7 +610,7 @@ describe('Express app (without Arranger)', () => {
                 .expect(403));
 
         it('should return 200 if Authorization header contains valid token and no error occurs', async () => {
-            const sampleGeneExp = {
+            const sampleGeneExp: SampleGeneExpVolcano = {
                 data: [
                     { sample_id: 'bs-aa000aaa', x: 1, y: 2.4399124042981217 },
                     {
@@ -620,7 +624,7 @@ describe('Express app (without Arranger)', () => {
                         y: 0.909129052666039,
                     },
                 ],
-                gene_symbol: 'LINC01881',
+                ensembl_gene_id: 'ENSG00000272368.2',
                 nControl: 1,
                 nT21: 2,
             };
