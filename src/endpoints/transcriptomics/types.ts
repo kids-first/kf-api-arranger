@@ -47,6 +47,7 @@ export type DiffGeneExpPoint = {
     x: number;
     y: number;
     chromosome: string;
+    ensembl_gene_id: string;
 };
 
 export type DiffGeneExpVolcano = {
