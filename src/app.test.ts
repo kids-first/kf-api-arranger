@@ -600,7 +600,7 @@ describe('Express app (without Arranger)', () => {
         });
 
         const requestBody = {
-            gene_symbol: 'LINC01881',
+            ensembl_gene_id: 'ENSG00000272368.2',
         };
 
         it('should return 403 if no Authorization header', () =>
@@ -640,7 +640,7 @@ describe('Express app (without Arranger)', () => {
                 .set({ Authorization: `Bearer ${token}` })
                 .expect(200, sampleGeneExp);
             expect((fetchSampleGeneExp as jest.Mock).mock.calls.length).toEqual(1);
-            expect((fetchSampleGeneExp as jest.Mock).mock.calls[0][0]).toEqual('LINC01881');
+            expect((fetchSampleGeneExp as jest.Mock).mock.calls[0][0]).toEqual('ENSG00000272368.2');
         });
 
         it('should return 500 if Authorization header contains valid token but an error occurs', async () => {
@@ -658,7 +658,7 @@ describe('Express app (without Arranger)', () => {
                 .set({ Authorization: `Bearer ${token}` })
                 .expect(500, { error: 'Internal Server Error' });
             expect((fetchSampleGeneExp as jest.Mock).mock.calls.length).toEqual(1);
-            expect((fetchSampleGeneExp as jest.Mock).mock.calls[0][0]).toEqual('LINC01881');
+            expect((fetchSampleGeneExp as jest.Mock).mock.calls[0][0]).toEqual('ENSG00000272368.2');
         });
     });
 
