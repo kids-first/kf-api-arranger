@@ -55,6 +55,7 @@ export const fetchDiffGeneExp = async (): Promise<DiffGeneExpVolcano[]> => {
             x: exp.docs.hits.hits[0]._source.x,
             y: exp.docs.hits.hits[0]._source.y,
             chromosome: exp.docs.hits.hits[0]._source.chromosome,
+            ensembl_gene_id: exp.docs.hits.hits[0]._source.ensembl_gene_id,
         }));
         return {
             id: categoryBucket.key,
@@ -63,7 +64,7 @@ export const fetchDiffGeneExp = async (): Promise<DiffGeneExpVolcano[]> => {
     });
 };
 
-export const fetchSampleGeneExp = async (gene_symbol: string): Promise<SampleGeneExpVolcano> => {
+export const fetchSampleGeneExp = async (ensembl_gene_id: string): Promise<SampleGeneExpVolcano> => {
     const client = EsInstance.getInstance();
     const { body } = await client.search({
         index: esSampleGeneExpIndex,
@@ -71,7 +72,7 @@ export const fetchSampleGeneExp = async (gene_symbol: string): Promise<SampleGen
             size: ES_SEARCH_MAX_HITS,
             query: {
                 match: {
-                    gene_symbol,
+                    ensembl_gene_id,
                 },
             },
             _source: ['sample_id', 'x', 'y'],
@@ -82,7 +83,7 @@ export const fetchSampleGeneExp = async (gene_symbol: string): Promise<SampleGen
 
     return {
         data: points,
-        gene_symbol,
+        ensembl_gene_id,
         nControl: points.filter(p => p.x === 0).length,
         nT21: points.filter(p => p.x === 1).length,
     };

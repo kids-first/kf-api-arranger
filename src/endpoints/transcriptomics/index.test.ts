@@ -191,7 +191,13 @@ describe('Transcriptomics', () => {
                 {
                     id: 'not_significant',
                     data: [
-                        { gene_symbol: 'FRG1BP', x: -0.37868998947354676, y: 10.914088963881525, chromosome: 'chr20' },
+                        {
+                            gene_symbol: 'FRG1BP',
+                            x: -0.37868998947354676,
+                            y: 10.914088963881525,
+                            chromosome: 'chr20',
+                            ensembl_gene_id: 'ENSG00000149531.15',
+                        },
                     ],
                 },
                 {
@@ -202,12 +208,14 @@ describe('Transcriptomics', () => {
                             x: 0.00828043785818933,
                             y: 0.09949336001516859,
                             chromosome: 'chr12',
+                            ensembl_gene_id: 'ENSG00000272368.2',
                         },
                         {
                             gene_symbol: 'SEC14L1P1',
                             x: 0.013345264376017407,
                             y: 0.09886736960876816,
                             chromosome: 'chr11',
+                            ensembl_gene_id: 'ENSG00000213693.4',
                         },
                     ],
                 },
@@ -296,7 +304,7 @@ describe('Transcriptomics', () => {
                         y: 0.909129052666039,
                     },
                 ],
-                gene_symbol: 'LINC01881',
+                ensembl_gene_id: 'ENSG00000272368.2',
                 nControl: 1,
                 nT21: 2,
             };
@@ -305,7 +313,7 @@ describe('Transcriptomics', () => {
                 search: async () => ({ body: mockEsResponseBody }),
             }));
 
-            const result = await fetchSampleGeneExp('LINC01881');
+            const result = await fetchSampleGeneExp('ENSG00000272368.2');
 
             expect(result).toEqual(expectedResponse);
         });
