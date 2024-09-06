@@ -156,8 +156,8 @@ export default (keycloak: Keycloak, getProject: (projectId: string) => ArrangerP
     });
 
     app.postAsync('/transcriptomics/sampleGeneExp', keycloak.protect(), async (req, res) => {
-        const gene_symbol: string = req.body.gene_symbol;
-        const data = await fetchSampleGeneExp(gene_symbol);
+        const ensembl_gene_id: string = req.body.ensembl_gene_id;
+        const data = await fetchSampleGeneExp(ensembl_gene_id);
 
         res.json(data);
     });
