@@ -191,7 +191,7 @@ describe('Express app (without Arranger)', () => {
         });
     });
 
-    describe('GET /statistics/public', () => {
+    describe('GET /statistics/studies', () => {
         beforeEach(() => {
             (getStudiesStatistics as jest.Mock).mockReset();
         });
@@ -199,29 +199,34 @@ describe('Express app (without Arranger)', () => {
         it('should return 200 if no error occurs', async () => {
             const expectedPublicStats = {
                 studies: [
-                    { participant_count: 334, study_code: 'KF-EATF' },
+                    { participant_count: 334, domain: 'BIRTHDEFECT', study_code: 'KF-EATF' },
                     {
                         participant_count: 183,
+                        domain: 'CANCER',
                         study_code: 'KF-DSD',
                     },
-                    { participant_count: 759, study_code: 'KF-OFCAA' },
+                    { participant_count: 759, domain: 'BIRTHDEFECTANDCANCER', study_code: 'KF-OFCAA' },
                     {
                         participant_count: 50,
+                        domain: 'BIRTHDEFECT',
                         study_code: 'KF-FASD',
                     },
-                    { participant_count: 774, study_code: 'KF-RSBD' },
+                    { participant_count: 774, domain: 'BIRTHDEFECTANDCANCER', study_code: 'KF-RSBD' },
                     {
                         participant_count: 356,
+                        domain: 'CANCER',
                         study_code: 'KF-IGCT',
                     },
-                    { participant_count: 599, study_code: 'KF-AIS' },
+                    { participant_count: 599, domain: 'CANCER', study_code: 'KF-AIS' },
                     {
                         participant_count: 185,
+                        domain: 'BIRTHDEFECT',
                         study_code: 'KF-FALL',
                     },
-                    { participant_count: 255, study_code: 'KF-CDL' },
+                    { participant_count: 255, domain: 'BIRTHDEFECT', study_code: 'KF-CDL' },
                     {
                         participant_count: 517,
+                        domain: 'BIRTHDEFECTANDCANCER',
                         study_code: 'KF-CHARGE',
                     },
                 ],
