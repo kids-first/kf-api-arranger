@@ -56,6 +56,8 @@ export const fetchDiffGeneExp = async (): Promise<DiffGeneExpVolcano[]> => {
             y: exp.docs.hits.hits[0]._source.y,
             chromosome: exp.docs.hits.hits[0]._source.chromosome,
             ensembl_gene_id: exp.docs.hits.hits[0]._source.ensembl_gene_id,
+            padj: exp.docs.hits.hits[0]._source.padj,
+            fold_change: exp.docs.hits.hits[0]._source.fold_change,
         }));
         return {
             id: categoryBucket.key,

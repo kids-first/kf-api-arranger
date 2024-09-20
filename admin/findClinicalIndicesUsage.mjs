@@ -4,12 +4,12 @@
 import assert from 'node:assert/strict';
 import { Client } from '@elastic/elasticsearch';
 import { esHost } from '../dist/src/env.js';
-import { cbKeepClinicalIndicesOnly } from './utils.mjs';
+import { cbKeepClinicalPlusTranscriptomicsIndicesOnly, isIndexNameFromTranscriptomics } from './utils.mjs';
 
 const client = new Client({ node: esHost });
 
 const catIndicesResponse = await client.cat.indices({
-    index: `*centric*`,
+    index: `*`,
     h: 'index,creation.date,creation.date.string',
     format: 'json',
 });
@@ -19,7 +19,7 @@ if (catIndicesResponse.statusCode !== 200) {
     process.exit(1);
 }
 
-const clinicalIndices = catIndicesResponse.body.filter(cbKeepClinicalIndicesOnly);
+const clinicalIndices = catIndicesResponse.body.filter(cbKeepClinicalPlusTranscriptomicsIndicesOnly);
 assert(Array.isArray(clinicalIndices) && clinicalIndices.length > 0, 'No index found. Terminating');
 
 const allAliases = await client.cat.aliases({
@@ -27,15 +27,15 @@ const allAliases = await client.cat.aliases({
     format: 'json',
 });
 
-const clinicalAliases = allAliases.body.filter(cbKeepClinicalIndicesOnly);
+const clinicalAliases = allAliases.body.filter(cbKeepClinicalPlusTranscriptomicsIndicesOnly);
 
 const makeReleaseToCreationDate = l =>
     l
         .filter(x => x.index.includes('_re_'))
         .sort((a, b) => b['creation.date'] - a['creation.date'])
-        .map(x => ['re_' + x.index.split('re_')[1], x['creation.date.string']])
+        .map(x => ['re_' + x.index.split('re_')[1], x['creation.date.string'], isIndexNameFromTranscriptomics(x.index)])
         .reduce((xs, x) => (xs.some(y => y[0] === x[0]) ? xs : [...xs, x]), [])
-        .map(x => ({ release: x[0], creation_date: x[1] }));
+        .map(x => ({ release: x[0], creation_date: x[1], transcriptomics: x[2] }));
 
 const clinicalIndicesNotAliased = clinicalIndices.filter(x => clinicalAliases.every(a => a.index !== x.index));
 const unaliasedClinicalIndicesWithCreationDate = makeReleaseToCreationDate(clinicalIndicesNotAliased);
@@ -53,7 +53,7 @@ const showIfOnlyCbtn = re => {
     const isCbtnOnly = clinicalIndicesAliased
         .filter(x => x.index.endsWith(re))
         .every(x => x.index.includes('_sd_bhjxbdqk_'));
-    return isCbtnOnly ? `${re} (cbtn only)` : re
+    return isCbtnOnly ? `${re} (cbtn only)` : re;
 };
 
 //======
@@ -73,9 +73,9 @@ const othersClinical = clinicalIndices
             .split('_')
             .slice(1)
             .join('_');
-        return [release, x['creation.date.string']];
+        return [release, x['creation.date.string'], isIndexNameFromTranscriptomics(x.index)];
     })
     .reduce((xs, x) => (xs.some(y => y[0] === x[0]) ? xs : [...xs, x]), [])
-    .map(x => ({ release: x[0], creation_date: x[1] }));
+    .map(x => ({ release: x[0], creation_date: x[1], transcriptomics: x[2] }));
 
 othersClinical.length ? console.table(othersClinical) : console.log('None');
