@@ -3,7 +3,7 @@ import filesize from 'filesize';
 
 import EsInstance from '../../ElasticSearchClientInstance';
 import { esBiospecimenIndex, esFileIndex, esParticipantIndex, esStudyIndex, esVariantIndex } from '../../esUtils';
-import { biospecimenIdKey, familyIdKey, fileIdKey, participantIdKey, studyIdKey } from '../../fieldsKeys';
+import { biospecimenIdKey, familyCountKey, fileIdKey, participantIdKey, studyIdKey } from '../../fieldsKeys';
 import { isInclude } from '../../projectUtils';
 
 export type Diagnosis = {
@@ -74,9 +74,9 @@ const fetchParticipantStats = async (client: Client): Promise<number> => {
 
 const fetchFamilyStats = async (client: Client): Promise<number> => {
     const { body } = await client.search({
-        index: esParticipantIndex,
+        index: esStudyIndex,
         body: {
-            aggs: { types_count: { value_count: { field: familyIdKey } } },
+            aggs: { types_count: { value_count: { field: familyCountKey } } },
         },
         size: 0,
     });
