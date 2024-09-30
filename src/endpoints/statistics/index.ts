@@ -76,7 +76,7 @@ const fetchFamilyStats = async (client: Client): Promise<number> => {
     const { body } = await client.search({
         index: esStudyIndex,
         body: {
-            aggs: { types_count: { value_count: { field: familyCountKey } } },
+            aggs: { types_count: { sum: { field: familyCountKey } } },
         },
         size: 0,
     });
