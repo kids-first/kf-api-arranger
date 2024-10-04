@@ -55,6 +55,20 @@
       }
     },
     {
+      "field": "imaging_sequence_types",
+      "graphqlField": "file",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "imaging_techniques",
+      "graphqlField": "file",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
       "field": "participants",
       "graphqlField": "file",
       "extendedFieldMappingInput": {
