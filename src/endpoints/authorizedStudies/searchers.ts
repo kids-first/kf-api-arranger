@@ -8,6 +8,20 @@ export const searchAggregatedAuthorizedStudiesForFence = async (
     fence: string,
     userAcl: string[],
 ): Promise<SearchBucket[]> => {
+    // FIXME temporary fix because repository is always empty for dcf
+    const fenceCondition =
+        fence === 'dcf'
+            ? {
+                  study_id: {
+                      value: 'SD_BHJXBDQK',
+                  },
+              }
+            : {
+                  repository: {
+                      value: fence,
+                  },
+              };
+
     const r = await client.search({
         index: esFileIndex,
         body: {
@@ -22,11 +36,7 @@ export const searchAggregatedAuthorizedStudiesForFence = async (
                             },
                         },
                         {
-                            term: {
-                                repository: {
-                                    value: fence,
-                                },
-                            },
+                            term: fenceCondition,
                         },
                     ],
                 },
@@ -67,6 +77,19 @@ export const multiSearchFilesAccessCounts = async (
     fence: string,
     studyIds: string[],
 ): Promise<FileAccessCountsResponse[]> => {
+    // FIXME temporary fix because repository is always empty for dcf
+    const fenceCondition =
+        fence === 'dcf'
+            ? {
+                  study_id: {
+                      value: 'SD_BHJXBDQK',
+                  },
+              }
+            : {
+                  repository: {
+                      value: fence,
+                  },
+              };
     const { body: bodyMSearch } = await client.msearch({
         body: studyIds
             .map((s: string) => [
@@ -76,7 +99,7 @@ export const multiSearchFilesAccessCounts = async (
                     size: 0,
                     query: {
                         bool: {
-                            must: [{ term: { study_id: { value: s } } }, { term: { repository: { value: fence } } }],
+                            must: [{ term: { study_id: { value: s } } }, { term: fenceCondition }],
                         },
                     },
                 },
@@ -89,7 +112,7 @@ export const multiSearchFilesAccessCounts = async (
                             must: [
                                 { term: { study_id: { value: s } } },
                                 { term: { acl: { value: 'open_access' } } },
-                                { term: { repository: { value: fence } } },
+                                { term: fenceCondition },
                             ],
                         },
                     },
