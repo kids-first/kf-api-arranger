@@ -316,6 +316,13 @@
       }
     },
     {
+      "field": "study_meta_categories",
+      "graphqlField": "study",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
       "field": "clinvar.clin_sig",
       "graphqlField": "variants",
       "extendedFieldMappingInput": {
