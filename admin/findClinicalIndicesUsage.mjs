@@ -29,16 +29,30 @@ const allAliases = await client.cat.aliases({
 
 const clinicalAliases = allAliases.body.filter(cbKeepClinicalPlusTranscriptomicsIndicesOnly);
 
-const makeReleaseToCreationDate = l =>
+const formatTableContent = (l, standardRePattern = true) =>
     l
-        .filter(x => x.index.includes('_re_'))
+        .filter(x => (standardRePattern ? x.index.includes('_re_') : !x.index.includes('_re_')))
         .sort((a, b) => b['creation.date'] - a['creation.date'])
-        .map(x => ['re_' + x.index.split('re_')[1], x['creation.date.string'], isIndexNameFromTranscriptomics(x.index)])
-        .reduce((xs, x) => (xs.some(y => y[0] === x[0]) ? xs : [...xs, x]), [])
+        .map(x => {
+            if (standardRePattern) {
+                return [
+                    're_' + x.index.split('re_')[1],
+                    x['creation.date.string'],
+                    isIndexNameFromTranscriptomics(x.index),
+                ];
+            }
+            const release = x.index
+                .split('sd_')[1]
+                .split('_')
+                .slice(1)
+                .join('_');
+            return [release, x['creation.date.string'], isIndexNameFromTranscriptomics(x.index)];
+        })
+        .reduce((xs, x) => (xs.some(y => y[0] === x[0] && y[2] === x[2]) ? xs : [...xs, x]), [])
         .map(x => ({ release: x[0], creation_date: x[1], transcriptomics: x[2] }));
 
 const clinicalIndicesNotAliased = clinicalIndices.filter(x => clinicalAliases.every(a => a.index !== x.index));
-const unaliasedClinicalIndicesWithCreationDate = makeReleaseToCreationDate(clinicalIndicesNotAliased);
+const unaliasedClinicalIndicesWithCreationDate = formatTableContent(clinicalIndicesNotAliased);
 
 console.log(`===== Not Aliased (pattern:re_*)`);
 unaliasedClinicalIndicesWithCreationDate.length
@@ -58,24 +72,12 @@ const showIfOnlyCbtn = re => {
 
 //======
 
-const aliasedClinicalIndicesWithCreationDate = makeReleaseToCreationDate(clinicalIndicesAliased);
+const aliasedClinicalIndicesWithCreationDate = formatTableContent(clinicalIndicesAliased);
 aliasedClinicalIndicesWithCreationDate.length
     ? console.table(aliasedClinicalIndicesWithCreationDate.map(x => ({ ...x, release: showIfOnlyCbtn(x.release) })))
     : console.log('None');
 
 console.log(`===== Others (Clinical)`);
-const othersClinical = clinicalIndices
-    .filter(x => !x.index.includes('_re_'))
-    .sort((a, b) => b['creation.date'] - a['creation.date'])
-    .map(x => {
-        const release = x.index
-            .split('sd_')[1]
-            .split('_')
-            .slice(1)
-            .join('_');
-        return [release, x['creation.date.string'], isIndexNameFromTranscriptomics(x.index)];
-    })
-    .reduce((xs, x) => (xs.some(y => y[0] === x[0]) ? xs : [...xs, x]), [])
-    .map(x => ({ release: x[0], creation_date: x[1], transcriptomics: x[2] }));
+const othersClinical = formatTableContent(clinicalIndices, false);
 
 othersClinical.length ? console.table(othersClinical) : console.log('None');
