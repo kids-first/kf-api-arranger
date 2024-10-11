@@ -34,18 +34,14 @@ const formatTableContent = (l, standardRePattern = true) =>
         .filter(x => (standardRePattern ? x.index.includes('_re_') : !x.index.includes('_re_')))
         .sort((a, b) => b['creation.date'] - a['creation.date'])
         .map(x => {
-            if (standardRePattern) {
-                return [
-                    're_' + x.index.split('re_')[1],
-                    x['creation.date.string'],
-                    isIndexNameFromTranscriptomics(x.index),
-                ];
-            }
-            const release = x.index
-                .split('sd_')[1]
-                .split('_')
-                .slice(1)
-                .join('_');
+            const release = standardRePattern
+                ? 're_' + x.index.split('re_')[1]
+                : x.index
+                      .split('sd_')[1]
+                      .split('_')
+                      .slice(1)
+                      .join('_');
+
             return [release, x['creation.date.string'], isIndexNameFromTranscriptomics(x.index)];
         })
         .reduce((xs, x) => (xs.some(y => y[0] === x[0] && y[2] === x[2]) ? xs : [...xs, x]), [])
