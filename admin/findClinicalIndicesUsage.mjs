@@ -1,8 +1,9 @@
 /**
 (WIP) Helper script to find unused indices
  * */
-import assert from 'node:assert/strict';
 import { Client } from '@elastic/elasticsearch';
+import assert from 'node:assert/strict';
+
 import { esHost } from '../dist/src/env.js';
 import { cbKeepClinicalPlusTranscriptomicsIndicesOnly, isIndexNameFromTranscriptomics } from './utils.mjs';
 
