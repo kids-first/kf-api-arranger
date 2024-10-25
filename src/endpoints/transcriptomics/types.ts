@@ -95,3 +95,11 @@ export type Facets = {
         doc_count: number;
     }[];
 };
+
+export type FetchSampleGeneExpBySampleIdResponse = {
+    by_sample: {
+        buckets: {
+            key: string;
+        }[];
+    };
+};

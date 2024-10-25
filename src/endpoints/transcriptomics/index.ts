@@ -11,6 +11,7 @@ import {
     DiffGeneExpVolcano,
     Facets,
     FetchDiffGeneExpResponse,
+    FetchSampleGeneExpBySampleIdResponse,
     SampleGeneExpPoint,
     SampleGeneExpVolcano,
 } from './types';
@@ -113,4 +114,48 @@ export const fetchFacets = async (): Promise<Facets> => {
     return {
         chromosome: by_chr_buckets,
     };
+};
+
+export const checkSampleIdsAndGene = async (sample_ids: string[], ensembl_gene_id?: string): Promise<string[]> => {
+    const client = EsInstance.getInstance();
+
+    const filter: unknown[] = [
+        {
+            terms: {
+                sample_id: sample_ids,
+            },
+        },
+    ];
+
+    if (ensembl_gene_id && ensembl_gene_id.length > 0) {
+        filter.push({
+            match: {
+                ensembl_gene_id,
+            },
+        });
+    }
+
+    const { body } = await client.search({
+        index: esSampleGeneExpIndex,
+        body: {
+            size: 0,
+            query: {
+                bool: {
+                    must: filter,
+                },
+            },
+            aggs: {
+                by_sample: {
+                    terms: {
+                        field: 'sample_id',
+                        size: sample_ids.length,
+                    },
+                },
+            },
+        },
+    });
+
+    const sampleGeneExpBySample: FetchSampleGeneExpBySampleIdResponse = body?.aggregations;
+
+    return sampleGeneExpBySample.by_sample.buckets.map(b => b.key);
 };

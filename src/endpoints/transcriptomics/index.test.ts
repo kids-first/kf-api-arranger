@@ -1,5 +1,5 @@
 import EsInstance from '../../ElasticSearchClientInstance';
-import { fetchDiffGeneExp, fetchFacets, fetchSampleGeneExp } from '.';
+import { checkSampleIdsAndGene, fetchDiffGeneExp, fetchFacets, fetchSampleGeneExp } from '.';
 import { DiffGeneExpVolcano, Facets, SampleGeneExpVolcano } from './types';
 
 jest.mock('../../ElasticSearchClientInstance');
@@ -393,6 +393,95 @@ describe('Transcriptomics', () => {
             }));
 
             const result = await fetchFacets();
+
+            expect(result).toEqual(expectedResponse);
+        });
+    });
+
+    describe('checkSampleIdsAndGene', () => {
+        beforeEach(() => {
+            (EsInstance.getInstance as jest.Mock).mockReset();
+        });
+
+        it('should return sample ids that are in the data for the gene in param', async () => {
+            const mockEsResponseBody = {
+                took: 10,
+                timed_out: false,
+                _shards: {
+                    total: 5,
+                    successful: 5,
+                    skipped: 0,
+                    failed: 0,
+                },
+                hits: [],
+                aggregations: {
+                    by_sample: {
+                        doc_count_error_upper_bound: 0,
+                        sum_other_doc_count: 0,
+                        buckets: [
+                            {
+                                key: 'bs-aa000aaa',
+                                doc_count: 1,
+                            },
+                            {
+                                key: 'bs-bbbb11b1',
+                                doc_count: 1,
+                            },
+                        ],
+                    },
+                },
+            };
+
+            const expectedResponse: string[] = ['bs-aa000aaa', 'bs-bbbb11b1'];
+
+            (EsInstance.getInstance as jest.Mock).mockImplementation(() => ({
+                search: async () => ({ body: mockEsResponseBody }),
+            }));
+
+            const result = await checkSampleIdsAndGene(
+                ['bs-aa000aaa', 'bs-bbbb11b1', 'bs-ccc22cc2'],
+                'ENSG00000272368.2',
+            );
+
+            expect(result).toEqual(expectedResponse);
+        });
+
+        it('should return sample ids that are in the data', async () => {
+            const mockEsResponseBody = {
+                took: 10,
+                timed_out: false,
+                _shards: {
+                    total: 5,
+                    successful: 5,
+                    skipped: 0,
+                    failed: 0,
+                },
+                hits: [],
+                aggregations: {
+                    by_sample: {
+                        doc_count_error_upper_bound: 0,
+                        sum_other_doc_count: 0,
+                        buckets: [
+                            {
+                                key: 'bs-aa000aaa',
+                                doc_count: 1,
+                            },
+                            {
+                                key: 'bs-bbbb11b1',
+                                doc_count: 1,
+                            },
+                        ],
+                    },
+                },
+            };
+
+            const expectedResponse: string[] = ['bs-aa000aaa', 'bs-bbbb11b1'];
+
+            (EsInstance.getInstance as jest.Mock).mockImplementation(() => ({
+                search: async () => ({ body: mockEsResponseBody }),
+            }));
+
+            const result = await checkSampleIdsAndGene(['bs-aa000aaa', 'bs-bbbb11b1', 'bs-ccc22cc2']);
 
             expect(result).toEqual(expectedResponse);
         });
