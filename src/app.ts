@@ -22,7 +22,12 @@ import { getStatistics, getStudiesStatistics } from './endpoints/statistics';
 import { checkSampleIdsAndGene, fetchDiffGeneExp, fetchFacets, fetchSampleGeneExp } from './endpoints/transcriptomics';
 import { cacheTTL, esHost, keycloakURL, userApiURL } from './env';
 import { globalErrorHandler, globalErrorLogger } from './errors';
-import { STATISTICS_CACHE_ID, STATISTICS_PUBLIC_CACHE_ID, verifyCache } from './middleware/cache';
+import {
+    STATISTICS_CACHE_ID,
+    STATISTICS_PUBLIC_CACHE_ID,
+    TRANSCRIPTOMICS_DIFF_GENE_EXP_CACHE_ID,
+    verifyCache,
+} from './middleware/cache';
 import { injectBodyHttpHeaders } from './middleware/injectBodyHttpHeaders';
 import { resolveSetIdMiddleware } from './middleware/resolveSetIdInSqon';
 
@@ -149,11 +154,16 @@ export default (keycloak: Keycloak, getProject: (projectId: string) => ArrangerP
         res.send({ data });
     });
 
-    app.postAsync('/transcriptomics/diffGeneExp', keycloak.protect(), async (req, res) => {
-        const data = await fetchDiffGeneExp();
+    app.postAsync(
+        '/transcriptomics/diffGeneExp',
+        [keycloak.protect(), verifyCache(TRANSCRIPTOMICS_DIFF_GENE_EXP_CACHE_ID, cache)],
+        async (req, res) => {
+            const data = await fetchDiffGeneExp();
+            cache.set(TRANSCRIPTOMICS_DIFF_GENE_EXP_CACHE_ID, data);
 
-        res.json(data);
-    });
+            res.json(data);
+        },
+    );
 
     app.postAsync('/transcriptomics/sampleGeneExp', keycloak.protect(), async (req, res) => {
         const ensembl_gene_id: string = req.body.ensembl_gene_id;
