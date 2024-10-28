@@ -1,3 +1,5 @@
+import { max, min } from 'lodash';
+
 import EsInstance from '../../ElasticSearchClientInstance';
 import {
     ES_CHROMOSOME_AGG_SIZE,
@@ -82,11 +84,13 @@ export const fetchSampleGeneExp = async (ensembl_gene_id: string): Promise<Sampl
         },
     });
 
+    const hits = body.hits.hits ?? [];
+
     const points: SampleGeneExpPoint[] = [];
-    let min_age_at_biospecimen_collection_years = Number.MAX_VALUE;
-    let max_age_at_biospecimen_collection_years = Number.MIN_VALUE;
-    let min_fpkm_value = Number.MAX_VALUE;
-    let max_fpkm_value = Number.MIN_VALUE;
+    let min_age_at_biospecimen_collection_years = hits[0]._source.age_at_biospecimen_collection_years;
+    let max_age_at_biospecimen_collection_years = hits[0]._source.age_at_biospecimen_collection_years;
+    let min_fpkm_value = hits[0]._source.y;
+    let max_fpkm_value = hits[0]._source.y;
     let nControl = 0;
     let nT21 = 0;
 
