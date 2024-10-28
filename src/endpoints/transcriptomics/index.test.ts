@@ -268,6 +268,7 @@ describe('Transcriptomics', () => {
                                 sample_id: 'bs-aa000aaa',
                                 x: 1,
                                 y: 2.4399124042981217,
+                                age_at_biospecimen_collection_years: 1.6,
                             },
                         },
                         {
@@ -279,6 +280,7 @@ describe('Transcriptomics', () => {
                                 sample_id: 'bs-bbbb11b1',
                                 x: 0,
                                 y: 0.90884870449667,
+                                age_at_biospecimen_collection_years: 2.7,
                             },
                         },
                         {
@@ -290,6 +292,7 @@ describe('Transcriptomics', () => {
                                 sample_id: 'bs-ccc22cc2',
                                 x: 1,
                                 y: 0.909129052666039,
+                                age_at_biospecimen_collection_years: 3.9,
                             },
                         },
                     ],
@@ -313,6 +316,10 @@ describe('Transcriptomics', () => {
                 ensembl_gene_id: 'ENSG00000272368.2',
                 nControl: 1,
                 nT21: 2,
+                min_age_at_biospecimen_collection_years: 1.6,
+                max_age_at_biospecimen_collection_years: 3.9,
+                min_fpkm_value: 0.90884870449667,
+                max_fpkm_value: 2.4399124042981217,
             };
 
             (EsInstance.getInstance as jest.Mock).mockImplementation(() => ({

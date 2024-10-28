@@ -16,7 +16,7 @@ import {
 } from './endpoints/sets/setsFeature';
 import { Set, UpdateSetContentBody, UpdateSetTagBody } from './endpoints/sets/setsTypes';
 import { getStatistics, getStudiesStatistics, Statistics } from './endpoints/statistics';
-import { fetchDiffGeneExp, fetchFacets, fetchSampleGeneExp } from './endpoints/transcriptomics';
+import { checkSampleIdsAndGene, fetchDiffGeneExp, fetchFacets, fetchSampleGeneExp } from './endpoints/transcriptomics';
 import {
     DiffGeneExpVolcano,
     Facets as TranscriptomicsFacets,
@@ -638,6 +638,10 @@ describe('Express app (without Arranger)', () => {
                 ensembl_gene_id: 'ENSG00000272368.2',
                 nControl: 1,
                 nT21: 2,
+                min_age_at_biospecimen_collection_years: 1.6,
+                max_age_at_biospecimen_collection_years: 3.9,
+                min_fpkm_value: 0.90884870449667,
+                max_fpkm_value: 2.4399124042981217,
             };
 
             (fetchSampleGeneExp as jest.Mock).mockImplementation(() => sampleGeneExp);
@@ -720,6 +724,60 @@ describe('Express app (without Arranger)', () => {
                 .set({ Authorization: `Bearer ${token}` })
                 .expect(500, { error: 'Internal Server Error' });
             expect((fetchFacets as jest.Mock).mock.calls.length).toEqual(1);
+        });
+    });
+
+    describe('POST /transcriptomics/checkSampleIdsAndGene', () => {
+        beforeEach(() => {
+            (checkSampleIdsAndGene as jest.Mock).mockReset();
+        });
+
+        const requestBody = {
+            ensembl_gene_id: 'ENSG00000272368.2',
+            sample_ids: ['bs-aa000aaa', 'bs-bbbb11b1', 'abc'],
+        };
+
+        it('should return 403 if no Authorization header', () =>
+            request(app)
+                .post('/transcriptomics/checkSampleIdsAndGene')
+                .set('Content-type', 'application/json')
+                .send(requestBody)
+                .expect(403));
+
+        it('should return 200 if Authorization header contains valid token and no error occurs', async () => {
+            const sample_ids = ['bs-aa000aaa', 'bs-bbbb11b1'];
+            (checkSampleIdsAndGene as jest.Mock).mockImplementation(() => sample_ids);
+
+            const token = getToken();
+
+            await request(app)
+                .post('/transcriptomics/checkSampleIdsAndGene')
+                .set('Content-type', 'application/json')
+                .set({ Authorization: `Bearer ${token}` })
+                .send(requestBody)
+                .expect(200, sample_ids);
+            expect((checkSampleIdsAndGene as jest.Mock).mock.calls.length).toEqual(1);
+            expect((checkSampleIdsAndGene as jest.Mock).mock.calls[0][0]).toEqual(requestBody.sample_ids);
+            expect((checkSampleIdsAndGene as jest.Mock).mock.calls[0][1]).toEqual(requestBody.ensembl_gene_id);
+        });
+
+        it('should return 500 if Authorization header contains valid token but an error occurs', async () => {
+            const expectedError = new Error('OOPS');
+            (checkSampleIdsAndGene as jest.Mock).mockImplementation(() => {
+                throw expectedError;
+            });
+
+            const token = getToken();
+
+            await request(app)
+                .post('/transcriptomics/checkSampleIdsAndGene')
+                .set('Content-type', 'application/json')
+                .set({ Authorization: `Bearer ${token}` })
+                .send(requestBody)
+                .expect(500, { error: 'Internal Server Error' });
+            expect((checkSampleIdsAndGene as jest.Mock).mock.calls.length).toEqual(1);
+            expect((checkSampleIdsAndGene as jest.Mock).mock.calls[0][0]).toEqual(requestBody.sample_ids);
+            expect((checkSampleIdsAndGene as jest.Mock).mock.calls[0][1]).toEqual(requestBody.ensembl_gene_id);
         });
     });
 });
