@@ -1,3 +1,5 @@
+import { max, min } from 'lodash';
+
 import EsInstance from '../../ElasticSearchClientInstance';
 import {
     ES_CHROMOSOME_AGG_SIZE,
@@ -78,17 +80,63 @@ export const fetchSampleGeneExp = async (ensembl_gene_id: string): Promise<Sampl
                     ensembl_gene_id,
                 },
             },
-            _source: ['sample_id', 'x', 'y'],
+            _source: ['sample_id', 'x', 'y', 'age_at_biospecimen_collection_years'],
         },
     });
 
-    const points: SampleGeneExpPoint[] = body.hits.hits.map(hit => hit._source);
+    const hits = body.hits.hits ?? [];
+
+    const points: SampleGeneExpPoint[] = [];
+    let min_age_at_biospecimen_collection_years = hits[0]._source.age_at_biospecimen_collection_years;
+    let max_age_at_biospecimen_collection_years = hits[0]._source.age_at_biospecimen_collection_years;
+    let min_fpkm_value = hits[0]._source.y;
+    let max_fpkm_value = hits[0]._source.y;
+    let nControl = 0;
+    let nT21 = 0;
+
+    for (const hit of body.hits.hits) {
+        // Add new point
+        points.push({
+            sample_id: hit._source.sample_id,
+            x: hit._source.x,
+            y: hit._source.y,
+        });
+
+        // Add point to nT21 or nControl depending on x
+        if (hit._source.x === 0) {
+            nControl += 1;
+        }
+        if (hit._source.x === 1) {
+            nT21 += 1;
+        }
+
+        // Calculate min and max of age and fpkm
+        if (hit._source.age_at_biospecimen_collection_years > max_age_at_biospecimen_collection_years) {
+            max_age_at_biospecimen_collection_years = hit._source.age_at_biospecimen_collection_years;
+        }
+
+        if (hit._source.age_at_biospecimen_collection_years < min_age_at_biospecimen_collection_years) {
+            min_age_at_biospecimen_collection_years = hit._source.age_at_biospecimen_collection_years;
+        }
+
+        if (hit._source.y > max_fpkm_value) {
+            max_fpkm_value = hit._source.y;
+        }
+
+        if (hit._source.y < min_fpkm_value) {
+            min_fpkm_value = hit._source.y;
+        }
+    }
 
     return {
         data: points,
         ensembl_gene_id,
-        nControl: points.filter(p => p.x === 0).length,
-        nT21: points.filter(p => p.x === 1).length,
+        nControl,
+        nT21,
+        min_age_at_biospecimen_collection_years,
+        max_age_at_biospecimen_collection_years,
+        min_fpkm_value,
+        max_fpkm_value,
     };
 };
 

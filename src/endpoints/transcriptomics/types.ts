@@ -68,6 +68,10 @@ export type SampleGeneExpVolcano = {
     ensembl_gene_id: string;
     nControl: number;
     nT21: number;
+    min_age_at_biospecimen_collection_years: number;
+    max_age_at_biospecimen_collection_years: number;
+    min_fpkm_value: number;
+    max_fpkm_value: number;
 };
 
 export type FetchDiffGeneExpResponse = {
