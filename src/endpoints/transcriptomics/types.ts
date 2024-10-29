@@ -107,3 +107,19 @@ export type FetchSampleGeneExpBySampleIdResponse = {
         }[];
     };
 };
+
+export type MatchedGene = {
+    gene_symbol: string;
+    ensembl_gene_id: string;
+};
+
+export type FetchDistinctGenesBySymbolOrEnsemblId = {
+    distinct_genes: {
+        buckets: {
+            key: {
+                gene_symbol: string;
+                ensembl_gene_id: string;
+            };
+        }[];
+    };
+};

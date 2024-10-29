@@ -1,6 +1,6 @@
 import EsInstance from '../../ElasticSearchClientInstance';
-import { checkSampleIdsAndGene, fetchDiffGeneExp, fetchFacets, fetchSampleGeneExp } from '.';
-import { DiffGeneExpVolcano, Facets, SampleGeneExpVolcano } from './types';
+import { checkGenesExist, checkSampleIdsAndGene, fetchDiffGeneExp, fetchFacets, fetchSampleGeneExp } from '.';
+import { DiffGeneExpVolcano, Facets, MatchedGene, SampleGeneExpVolcano } from './types';
 
 jest.mock('../../ElasticSearchClientInstance');
 
@@ -489,6 +489,80 @@ describe('Transcriptomics', () => {
             }));
 
             const result = await checkSampleIdsAndGene(['bs-aa000aaa', 'bs-bbbb11b1', 'bs-ccc22cc2']);
+
+            expect(result).toEqual(expectedResponse);
+        });
+    });
+
+    describe('checkGenesExist', () => {
+        beforeEach(() => {
+            (EsInstance.getInstance as jest.Mock).mockReset();
+        });
+
+        it('should return gene_symbol and ensembl_gene_id for the list of gene_symbol and or ensembl_gene_id received in param', async () => {
+            const mockEsResponseBody = {
+                took: 10,
+                timed_out: false,
+                _shards: {
+                    total: 5,
+                    successful: 5,
+                    skipped: 0,
+                    failed: 0,
+                },
+                hits: [],
+                aggregations: {
+                    distinct_genes: {
+                        after_key: {
+                            gene_symbol: 'TRIM46',
+                            ensembl_gene_id: 'ENSG00000163462.18',
+                        },
+                        buckets: [
+                            {
+                                key: {
+                                    gene_symbol: 'GPR20',
+                                    ensembl_gene_id: 'ENSG00000204882.4',
+                                },
+                                doc_count: 400,
+                            },
+                            {
+                                key: {
+                                    gene_symbol: 'TRIM46',
+                                    ensembl_gene_id: 'ENSG00000163462.18',
+                                },
+                                doc_count: 400,
+                            },
+                        ],
+                    },
+                },
+            };
+
+            const expectedResponse: MatchedGene[] = [
+                {
+                    gene_symbol: 'GPR20',
+                    ensembl_gene_id: 'ENSG00000204882.4',
+                },
+                {
+                    gene_symbol: 'TRIM46',
+                    ensembl_gene_id: 'ENSG00000163462.18',
+                },
+            ];
+
+            (EsInstance.getInstance as jest.Mock).mockImplementation(() => ({
+                search: async () => ({ body: mockEsResponseBody }),
+            }));
+
+            const result = await checkGenesExist([
+                'CYB5R1',
+                'TBCA',
+                'TOMM5',
+                'NRXN2',
+                'ENSG00000163462.18',
+                'ENSG00000211592',
+                'ENSG000002137410',
+                'FUT7',
+                'AL139424',
+                'ENSG00000204882.4',
+            ]);
 
             expect(result).toEqual(expectedResponse);
         });

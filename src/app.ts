@@ -19,7 +19,13 @@ import {
 } from './endpoints/sets/setsFeature';
 import { CreateSetBody, Set, SetSqon, UpdateSetContentBody, UpdateSetTagBody } from './endpoints/sets/setsTypes';
 import { getStatistics, getStudiesStatistics } from './endpoints/statistics';
-import { checkSampleIdsAndGene, fetchDiffGeneExp, fetchFacets, fetchSampleGeneExp } from './endpoints/transcriptomics';
+import {
+    checkGenesExist,
+    checkSampleIdsAndGene,
+    fetchDiffGeneExp,
+    fetchFacets,
+    fetchSampleGeneExp,
+} from './endpoints/transcriptomics';
 import { cacheTTL, esHost, keycloakURL, userApiURL } from './env';
 import { globalErrorHandler, globalErrorLogger } from './errors';
 import {
@@ -183,6 +189,14 @@ export default (keycloak: Keycloak, getProject: (projectId: string) => ArrangerP
         const sample_ids: string[] = req.body.sample_ids;
 
         const data = await checkSampleIdsAndGene(sample_ids, ensembl_gene_id);
+
+        res.json(data);
+    });
+
+    app.postAsync('/transcriptomics/checkGenesExist', keycloak.protect(), async (req, res) => {
+        const genes: string = req.body.genes;
+
+        const data = await checkGenesExist(genes.split(','));
 
         res.json(data);
     });

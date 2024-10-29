@@ -1,5 +1,3 @@
-import { max, min } from 'lodash';
-
 import EsInstance from '../../ElasticSearchClientInstance';
 import {
     ES_CHROMOSOME_AGG_SIZE,
@@ -13,7 +11,9 @@ import {
     DiffGeneExpVolcano,
     Facets,
     FetchDiffGeneExpResponse,
+    FetchDistinctGenesBySymbolOrEnsemblId,
     FetchSampleGeneExpBySampleIdResponse,
+    MatchedGene,
     SampleGeneExpPoint,
     SampleGeneExpVolcano,
 } from './types';
@@ -206,4 +206,49 @@ export const checkSampleIdsAndGene = async (sample_ids: string[], ensembl_gene_i
     const sampleGeneExpBySample: FetchSampleGeneExpBySampleIdResponse = body?.aggregations;
 
     return sampleGeneExpBySample.by_sample.buckets.map(b => b.key);
+};
+
+export const checkGenesExist = async (genes: string[]): Promise<MatchedGene[]> => {
+    const client = EsInstance.getInstance();
+
+    const { body } = await client.search({
+        index: esSampleGeneExpIndex,
+        body: {
+            query: {
+                bool: {
+                    should: [
+                        {
+                            terms: {
+                                symbol: genes,
+                            },
+                        },
+                        {
+                            terms: {
+                                ensembl_gene_id: genes,
+                            },
+                        },
+                    ],
+                },
+            },
+            size: 0,
+            aggs: {
+                distinct_genes: {
+                    composite: {
+                        sources: [
+                            { gene_symbol: { terms: { field: 'gene_symbol' } } },
+                            { ensembl_gene_id: { terms: { field: 'ensembl_gene_id' } } },
+                        ],
+                        size: genes.length,
+                    },
+                },
+            },
+        },
+    });
+
+    const distinctGenesBySymbolOrEnsemblId: FetchDistinctGenesBySymbolOrEnsemblId = body?.aggregations;
+
+    return distinctGenesBySymbolOrEnsemblId.distinct_genes.buckets.map(bucket => ({
+        gene_symbol: bucket.key.gene_symbol,
+        ensembl_gene_id: bucket.key.ensembl_gene_id,
+    }));
 };
