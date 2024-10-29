@@ -16,7 +16,13 @@ import {
 } from './endpoints/sets/setsFeature';
 import { Set, UpdateSetContentBody, UpdateSetTagBody } from './endpoints/sets/setsTypes';
 import { getStatistics, getStudiesStatistics, Statistics } from './endpoints/statistics';
-import { checkSampleIdsAndGene, fetchDiffGeneExp, fetchFacets, fetchSampleGeneExp } from './endpoints/transcriptomics';
+import {
+    checkGenesExist,
+    checkSampleIdsAndGene,
+    fetchDiffGeneExp,
+    fetchFacets,
+    fetchSampleGeneExp,
+} from './endpoints/transcriptomics';
 import {
     DiffGeneExpVolcano,
     Facets as TranscriptomicsFacets,
@@ -745,8 +751,8 @@ describe('Express app (without Arranger)', () => {
                 .expect(403));
 
         it('should return 200 if Authorization header contains valid token and no error occurs', async () => {
-            const sample_ids = ['bs-aa000aaa', 'bs-bbbb11b1'];
-            (checkSampleIdsAndGene as jest.Mock).mockImplementation(() => sample_ids);
+            const sampleIds = ['bs-aa000aaa', 'bs-bbbb11b1'];
+            (checkSampleIdsAndGene as jest.Mock).mockImplementation(() => sampleIds);
 
             const token = getToken();
 
@@ -755,7 +761,7 @@ describe('Express app (without Arranger)', () => {
                 .set('Content-type', 'application/json')
                 .set({ Authorization: `Bearer ${token}` })
                 .send(requestBody)
-                .expect(200, sample_ids);
+                .expect(200, sampleIds);
             expect((checkSampleIdsAndGene as jest.Mock).mock.calls.length).toEqual(1);
             expect((checkSampleIdsAndGene as jest.Mock).mock.calls[0][0]).toEqual(requestBody.sample_ids);
             expect((checkSampleIdsAndGene as jest.Mock).mock.calls[0][1]).toEqual(requestBody.ensembl_gene_id);
@@ -778,6 +784,89 @@ describe('Express app (without Arranger)', () => {
             expect((checkSampleIdsAndGene as jest.Mock).mock.calls.length).toEqual(1);
             expect((checkSampleIdsAndGene as jest.Mock).mock.calls[0][0]).toEqual(requestBody.sample_ids);
             expect((checkSampleIdsAndGene as jest.Mock).mock.calls[0][1]).toEqual(requestBody.ensembl_gene_id);
+        });
+    });
+
+    describe('POST /transcriptomics/checkGenesExist', () => {
+        beforeEach(() => {
+            (checkGenesExist as jest.Mock).mockReset();
+        });
+
+        const requestBody = {
+            genes:
+                'CYB5R1,TBCA,TOMM5,NRXN2,ENSG00000163462.18,ENSG00000211592,ENSG000002137410,FUT7,AL139424,ENSG00000204882.4',
+        };
+
+        it('should return 403 if no Authorization header', () =>
+            request(app)
+                .post('/transcriptomics/checkGenesExist')
+                .set('Content-type', 'application/json')
+                .send(requestBody)
+                .expect(403));
+
+        it('should return 200 if Authorization header contains valid token and no error occurs', async () => {
+            const matchedGenes = [
+                {
+                    gene_symbol: 'GPR20',
+                    ensembl_gene_id: 'ENSG00000204882.4',
+                },
+                {
+                    gene_symbol: 'TRIM46',
+                    ensembl_gene_id: 'ENSG00000163462.18',
+                },
+            ];
+            (checkGenesExist as jest.Mock).mockImplementation(() => matchedGenes);
+
+            const token = getToken();
+
+            await request(app)
+                .post('/transcriptomics/checkGenesExist')
+                .set('Content-type', 'application/json')
+                .set({ Authorization: `Bearer ${token}` })
+                .send(requestBody)
+                .expect(200, matchedGenes);
+            expect((checkGenesExist as jest.Mock).mock.calls.length).toEqual(1);
+            expect((checkGenesExist as jest.Mock).mock.calls[0][0]).toEqual([
+                'CYB5R1',
+                'TBCA',
+                'TOMM5',
+                'NRXN2',
+                'ENSG00000163462.18',
+                'ENSG00000211592',
+                'ENSG000002137410',
+                'FUT7',
+                'AL139424',
+                'ENSG00000204882.4',
+            ]);
+        });
+
+        it('should return 500 if Authorization header contains valid token but an error occurs', async () => {
+            const expectedError = new Error('OOPS');
+            (checkGenesExist as jest.Mock).mockImplementation(() => {
+                throw expectedError;
+            });
+
+            const token = getToken();
+
+            await request(app)
+                .post('/transcriptomics/checkGenesExist')
+                .set('Content-type', 'application/json')
+                .set({ Authorization: `Bearer ${token}` })
+                .send(requestBody)
+                .expect(500, { error: 'Internal Server Error' });
+            expect((checkGenesExist as jest.Mock).mock.calls.length).toEqual(1);
+            expect((checkGenesExist as jest.Mock).mock.calls[0][0]).toEqual([
+                'CYB5R1',
+                'TBCA',
+                'TOMM5',
+                'NRXN2',
+                'ENSG00000163462.18',
+                'ENSG00000211592',
+                'ENSG000002137410',
+                'FUT7',
+                'AL139424',
+                'ENSG00000204882.4',
+            ]);
         });
     });
 });
