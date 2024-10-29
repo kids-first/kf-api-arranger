@@ -194,9 +194,9 @@ export default (keycloak: Keycloak, getProject: (projectId: string) => ArrangerP
     });
 
     app.postAsync('/transcriptomics/checkGenesExist', keycloak.protect(), async (req, res) => {
-        const genes: string = req.body.genes;
+        const genes: string[] = req.body.genes;
 
-        const data = await checkGenesExist(genes.split(','));
+        const data = await checkGenesExist(genes);
 
         res.json(data);
     });

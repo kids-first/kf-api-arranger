@@ -793,8 +793,18 @@ describe('Express app (without Arranger)', () => {
         });
 
         const requestBody = {
-            genes:
-                'CYB5R1,TBCA,TOMM5,NRXN2,ENSG00000163462.18,ENSG00000211592,ENSG000002137410,FUT7,AL139424,ENSG00000204882.4',
+            genes: [
+                'CYB5R1',
+                'TBCA',
+                'TOMM5',
+                'NRXN2',
+                'ENSG00000163462.18',
+                'ENSG00000211592',
+                'ENSG000002137410',
+                'FUT7',
+                'AL139424',
+                'ENSG00000204882.4',
+            ],
         };
 
         it('should return 403 if no Authorization header', () =>
@@ -826,18 +836,7 @@ describe('Express app (without Arranger)', () => {
                 .send(requestBody)
                 .expect(200, matchedGenes);
             expect((checkGenesExist as jest.Mock).mock.calls.length).toEqual(1);
-            expect((checkGenesExist as jest.Mock).mock.calls[0][0]).toEqual([
-                'CYB5R1',
-                'TBCA',
-                'TOMM5',
-                'NRXN2',
-                'ENSG00000163462.18',
-                'ENSG00000211592',
-                'ENSG000002137410',
-                'FUT7',
-                'AL139424',
-                'ENSG00000204882.4',
-            ]);
+            expect((checkGenesExist as jest.Mock).mock.calls[0][0]).toEqual(requestBody.genes);
         });
 
         it('should return 500 if Authorization header contains valid token but an error occurs', async () => {
@@ -855,18 +854,7 @@ describe('Express app (without Arranger)', () => {
                 .send(requestBody)
                 .expect(500, { error: 'Internal Server Error' });
             expect((checkGenesExist as jest.Mock).mock.calls.length).toEqual(1);
-            expect((checkGenesExist as jest.Mock).mock.calls[0][0]).toEqual([
-                'CYB5R1',
-                'TBCA',
-                'TOMM5',
-                'NRXN2',
-                'ENSG00000163462.18',
-                'ENSG00000211592',
-                'ENSG000002137410',
-                'FUT7',
-                'AL139424',
-                'ENSG00000204882.4',
-            ]);
+            expect((checkGenesExist as jest.Mock).mock.calls[0][0]).toEqual(requestBody.genes);
         });
     });
 });
