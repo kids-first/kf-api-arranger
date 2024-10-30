@@ -212,14 +212,14 @@ export const checkGenesExist = async (genes: string[]): Promise<MatchedGene[]> =
     const client = EsInstance.getInstance();
 
     const { body } = await client.search({
-        index: esSampleGeneExpIndex,
+        index: esDiffGeneExpIndex,
         body: {
             query: {
                 bool: {
                     should: [
                         {
                             terms: {
-                                symbol: genes,
+                                gene_symbol: genes,
                             },
                         },
                         {
