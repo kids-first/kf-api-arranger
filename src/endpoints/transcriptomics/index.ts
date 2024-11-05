@@ -80,7 +80,7 @@ export const fetchSampleGeneExp = async (ensembl_gene_id: string): Promise<Sampl
                     ensembl_gene_id,
                 },
             },
-            _source: ['sample_id', 'x', 'y', 'age_at_biospecimen_collection_years'],
+            _source: ['sample_id', 'x', 'y', 'age_at_biospecimen_collection_years', 'sex'],
         },
     });
 
@@ -100,6 +100,8 @@ export const fetchSampleGeneExp = async (ensembl_gene_id: string): Promise<Sampl
             sample_id: hit._source.sample_id,
             x: hit._source.x,
             y: hit._source.y,
+            sex: hit._source.sex,
+            age_at_biospecimen_collection_years: hit._source.age_at_biospecimen_collection_years,
         });
 
         // Add point to nT21 or nControl depending on x
