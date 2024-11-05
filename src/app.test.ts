@@ -629,16 +629,26 @@ describe('Express app (without Arranger)', () => {
         it('should return 200 if Authorization header contains valid token and no error occurs', async () => {
             const sampleGeneExp: SampleGeneExpVolcano = {
                 data: [
-                    { sample_id: 'bs-aa000aaa', x: 1, y: 2.4399124042981217 },
+                    {
+                        sample_id: 'bs-aa000aaa',
+                        x: 1,
+                        y: 2.4399124042981217,
+                        age_at_biospecimen_collection_years: 1.6,
+                        sex: 'Female',
+                    },
                     {
                         sample_id: 'bs-bbbb11b1',
                         x: 0,
                         y: 0.90884870449667,
+                        age_at_biospecimen_collection_years: 2.7,
+                        sex: 'Male',
                     },
                     {
                         sample_id: 'bs-ccc22cc2',
                         x: 1,
                         y: 0.909129052666039,
+                        age_at_biospecimen_collection_years: 3.9,
+                        sex: 'Female',
                     },
                 ],
                 ensembl_gene_id: 'ENSG00000272368.2',

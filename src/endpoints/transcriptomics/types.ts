@@ -61,6 +61,8 @@ export type SampleGeneExpPoint = {
     sample_id: string;
     x: number;
     y: number;
+    age_at_biospecimen_collection_years: number;
+    sex: string;
 };
 
 export type SampleGeneExpVolcano = {
