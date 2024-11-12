@@ -1,6 +1,5 @@
 import { Client } from '@elastic/elasticsearch';
-import { Request, Response } from 'express';
-import { NextFunction } from 'express-serve-static-core';
+import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
 import EsInstance from '../../ElasticSearchClientInstance';

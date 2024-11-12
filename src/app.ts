@@ -189,7 +189,9 @@ export default (keycloak: Keycloak, getProject: (projectId: string) => ArrangerP
         }
     });
 
-    app.post('/authorized-studies', keycloak.protect(), computeAuthorizedStudiesForAllFences);
+    app.post('/authorized-studies', keycloak.protect(), async (req, res, next) => {
+        computeAuthorizedStudiesForAllFences(req, res, next);
+    });
 
     app.use(globalErrorLogger, globalErrorHandler);
 
