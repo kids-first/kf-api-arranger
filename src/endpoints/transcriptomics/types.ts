@@ -125,3 +125,7 @@ export type FetchDistinctGenesBySymbolOrEnsemblId = {
         }[];
     };
 };
+
+export type ExportResponse = {
+    url: string;
+};

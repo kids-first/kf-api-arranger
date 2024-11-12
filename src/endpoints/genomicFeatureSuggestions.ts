@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
 import EsInstance from '../ElasticSearchClientInstance';
@@ -13,35 +13,40 @@ export const SUGGESTIONS_TYPES = {
     GENE: 'gene',
 };
 
-export default async (req: Request, res: Response, type: string): Promise<void> => {
-    const prefix = req.params.prefix;
+export default async (req: Request, res: Response, next: NextFunction, type: string): Promise<void> => {
+    try {
+        const prefix = req.params.prefix;
 
-    const client = await EsInstance.getInstance();
+        const client = await EsInstance.getInstance();
 
-    const _index = type === SUGGESTIONS_TYPES.GENE ? indexNameGeneFeatureSuggestion : indexNameVariantFeatureSuggestion;
+        const _index =
+            type === SUGGESTIONS_TYPES.GENE ? indexNameGeneFeatureSuggestion : indexNameVariantFeatureSuggestion;
 
-    const { body } = await client.search({
-        index: _index,
-        body: {
-            suggest: {
-                suggestions: {
-                    prefix,
-                    completion: {
-                        field: 'suggest',
-                        size: maxNOfGenomicFeatureSuggestions,
+        const { body } = await client.search({
+            index: _index,
+            body: {
+                suggest: {
+                    suggestions: {
+                        prefix,
+                        completion: {
+                            field: 'suggest',
+                            size: maxNOfGenomicFeatureSuggestions,
+                        },
                     },
                 },
             },
-        },
-    });
+        });
 
-    const suggestionResponse = body.suggest.suggestions[0];
+        const suggestionResponse = body.suggest.suggestions[0];
 
-    const searchText = suggestionResponse.text;
-    const suggestions = suggestionResponse.options.map(suggestion => suggestion._source);
+        const searchText = suggestionResponse.text;
+        const suggestions = suggestionResponse.options.map(suggestion => suggestion._source);
 
-    res.status(StatusCodes.OK).send({
-        searchText,
-        suggestions,
-    });
+        res.status(StatusCodes.OK).send({
+            searchText,
+            suggestions,
+        });
+    } catch (e) {
+        next(e);
+    }
 };
