@@ -77,6 +77,8 @@ export default (keycloak: Keycloak, getProject: (projectId: string) => ArrangerP
         }
     });
 
+    app.use('/transcriptomics', keycloak.protect(), transcriptomicsRouter);
+
     app.get('/genesFeature/suggestions/:prefix', keycloak.protect(), (req, res, next) =>
         genomicFeatureSuggestions(req, res, next, SUGGESTIONS_TYPES.GENE),
     );
@@ -188,8 +190,6 @@ export default (keycloak: Keycloak, getProject: (projectId: string) => ArrangerP
     });
 
     app.post('/authorized-studies', keycloak.protect(), computeAuthorizedStudiesForAllFences);
-
-    app.use('/transcriptomics', keycloak.protect(), transcriptomicsRouter);
 
     app.use(globalErrorLogger, globalErrorHandler);
 
