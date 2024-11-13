@@ -1,5 +1,5 @@
 import { Client } from '@elastic/elasticsearch';
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
 import EsInstance from '../../ElasticSearchClientInstance';
@@ -68,67 +68,75 @@ export const computeAuthorizedStudiesForFence = async (
     };
 };
 
-export const computeAuthorizedStudiesForAllFences = async (req: Request, res: Response): Promise<Response> => {
-    const body: {
-        gen3: {
-            acl: string[];
-        };
-        dcf: {
-            acl: string[];
-        };
-    } = req.body;
-
-    //===== INPUT Validations
-    const fences = Object.keys(body);
-    const fencesAreProcessable =
-        Array.isArray(fences) && fences.length > 0 && fences.every(f => SUPPORTED_FENCES.includes(f));
-    if (!fencesAreProcessable) {
-        return res.status(StatusCodes.UNPROCESSABLE_ENTITY).send('Unsupported Fence(s) format or value');
-    }
-
-    const MAX_ACL_SIZE = 500;
-    const MAX_ALC_LENGTH_VALUE = 100;
-    const aclAreProcessable = Object.values(body).every(
-        x =>
-            Array.isArray(x.acl) &&
-            x.acl.length <= MAX_ACL_SIZE &&
-            x.acl.every(a => typeof a === 'string' && a.length < MAX_ALC_LENGTH_VALUE),
-    );
-    if (!aclAreProcessable) {
-        return res
-            .status(StatusCodes.UNPROCESSABLE_ENTITY)
-            .send(`Acls must be a list of acl values for each fence and not exceed a certain size`);
-    }
-
-    const state: ResponseResult = Object.fromEntries(
-        Object.entries({
+export const computeAuthorizedStudiesForAllFences = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+): Promise<Response> => {
+    try {
+        const body: {
             gen3: {
-                data: [],
-                error: false,
-            },
+                acl: string[];
+            };
             dcf: {
-                data: [],
-                error: false,
-            },
-        }).filter(([k]) => fences.includes(k)),
-    );
+                acl: string[];
+            };
+        } = req.body;
 
-    const client = EsInstance.getInstance();
-    for (const fence of fences) {
-        try {
-            const { data } = await computeAuthorizedStudiesForFence(client, fence, body[fence].acl);
-            state[fence] = {
-                ...state[fence],
-                data,
-            };
-        } catch (e) {
-            console.error(`Authorized-Studies (${computeAuthorizedStudiesForFence.name}):\n`, e);
-            state[fence] = {
-                ...state[fence],
-                error: true,
-            };
+        //===== INPUT Validations
+        const fences = Object.keys(body);
+        const fencesAreProcessable =
+            Array.isArray(fences) && fences.length > 0 && fences.every(f => SUPPORTED_FENCES.includes(f));
+        if (!fencesAreProcessable) {
+            return res.status(StatusCodes.UNPROCESSABLE_ENTITY).send('Unsupported Fence(s) format or value');
         }
-    }
 
-    return res.send(state);
+        const MAX_ACL_SIZE = 500;
+        const MAX_ALC_LENGTH_VALUE = 100;
+        const aclAreProcessable = Object.values(body).every(
+            x =>
+                Array.isArray(x.acl) &&
+                x.acl.length <= MAX_ACL_SIZE &&
+                x.acl.every(a => typeof a === 'string' && a.length < MAX_ALC_LENGTH_VALUE),
+        );
+        if (!aclAreProcessable) {
+            return res
+                .status(StatusCodes.UNPROCESSABLE_ENTITY)
+                .send(`Acls must be a list of acl values for each fence and not exceed a certain size`);
+        }
+
+        const state: ResponseResult = Object.fromEntries(
+            Object.entries({
+                gen3: {
+                    data: [],
+                    error: false,
+                },
+                dcf: {
+                    data: [],
+                    error: false,
+                },
+            }).filter(([k]) => fences.includes(k)),
+        );
+
+        const client = EsInstance.getInstance();
+        for (const fence of fences) {
+            try {
+                const { data } = await computeAuthorizedStudiesForFence(client, fence, body[fence].acl);
+                state[fence] = {
+                    ...state[fence],
+                    data,
+                };
+            } catch (e) {
+                console.error(`Authorized-Studies (${computeAuthorizedStudiesForFence.name}):\n`, e);
+                state[fence] = {
+                    ...state[fence],
+                    error: true,
+                };
+            }
+        }
+
+        return res.send(state);
+    } catch (e) {
+        next(e);
+    }
 };

@@ -1,4 +1,5 @@
 import EsInstance from '../../ElasticSearchClientInstance';
+import { datalakeS3Url } from '../../env';
 import {
     ES_CHROMOSOME_AGG_SIZE,
     ES_SEARCH_MAX_BUCKETS,
@@ -6,9 +7,11 @@ import {
     esDiffGeneExpIndex,
     esSampleGeneExpIndex,
 } from '../../esUtils';
+import { generatePreSignedUrl } from '../../s3Api';
 import {
     DiffGeneExpPoint,
     DiffGeneExpVolcano,
+    ExportResponse,
     Facets,
     FetchDiffGeneExpResponse,
     FetchDistinctGenesBySymbolOrEnsemblId,
@@ -17,6 +20,9 @@ import {
     SampleGeneExpPoint,
     SampleGeneExpVolcano,
 } from './types';
+
+export const DIFF_GENE_EXP_FILE_KEY = 'transcriptomics/diff_gene_exp/HTP/data.txt';
+export const SAMPLE_GENE_EXP_FILE_KEY = 'transcriptomics/sample_gene_exp/HTP/data.txt';
 
 export const fetchDiffGeneExp = async (): Promise<DiffGeneExpVolcano[]> => {
     const client = EsInstance.getInstance();
@@ -67,6 +73,11 @@ export const fetchDiffGeneExp = async (): Promise<DiffGeneExpVolcano[]> => {
             data: points,
         };
     });
+};
+
+export const exportDiffGeneExp = async (): Promise<ExportResponse> => {
+    const url = await generatePreSignedUrl(datalakeS3Url, DIFF_GENE_EXP_FILE_KEY);
+    return { url };
 };
 
 export const fetchSampleGeneExp = async (ensembl_gene_id: string): Promise<SampleGeneExpVolcano> => {
@@ -140,6 +151,11 @@ export const fetchSampleGeneExp = async (ensembl_gene_id: string): Promise<Sampl
         min_fpkm_value,
         max_fpkm_value,
     };
+};
+
+export const exportSampleGeneExp = async (): Promise<ExportResponse> => {
+    const url = await generatePreSignedUrl(datalakeS3Url, SAMPLE_GENE_EXP_FILE_KEY);
+    return { url };
 };
 
 export const fetchFacets = async (): Promise<Facets> => {

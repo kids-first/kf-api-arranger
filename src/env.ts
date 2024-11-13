@@ -22,3 +22,5 @@ export const userApiURL = process.env.USER_API_URL || 'https://include-users-api
 export const maxSetContentSize: number = Number.parseInt(process.env.MAX_SET_CONTENT_SIZE) || 10000;
 
 export const cacheTTL: number = Number.parseInt(process.env.CACHE_TTL_SEC) || 3600;
+
+export const datalakeS3Url: string = process.env.DATALAKE_S3_URL || 'MISSING_CONFIG';
