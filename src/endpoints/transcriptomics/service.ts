@@ -182,13 +182,14 @@ export const fetchFacets = async (): Promise<Facets> => {
     };
 };
 
-export const checkSampleIdsAndGene = async (sample_ids: string[], ensembl_gene_id?: string): Promise<string[]> => {
+export const checkSampleIdsAndGene = async (sampleIds: string[], ensembl_gene_id?: string): Promise<string[]> => {
     const client = EsInstance.getInstance();
+    const sampleIdsLowerCase = sampleIds.map(id => id.toLowerCase());
 
     const filter: unknown[] = [
         {
             terms: {
-                sample_id: sample_ids,
+                sample_id: sampleIdsLowerCase,
             },
         },
     ];
@@ -214,7 +215,7 @@ export const checkSampleIdsAndGene = async (sample_ids: string[], ensembl_gene_i
                 by_sample: {
                     terms: {
                         field: 'sample_id',
-                        size: sample_ids.length,
+                        size: sampleIds.length,
                     },
                 },
             },
@@ -228,6 +229,7 @@ export const checkSampleIdsAndGene = async (sample_ids: string[], ensembl_gene_i
 
 export const checkGenesExist = async (genes: string[]): Promise<MatchedGene[]> => {
     const client = EsInstance.getInstance();
+    const genesUpperCase = genes.map(gene => gene.toUpperCase());
 
     const { body } = await client.search({
         index: esDiffGeneExpIndex,
@@ -237,12 +239,12 @@ export const checkGenesExist = async (genes: string[]): Promise<MatchedGene[]> =
                     should: [
                         {
                             terms: {
-                                gene_symbol: genes,
+                                gene_symbol: genesUpperCase,
                             },
                         },
                         {
                             terms: {
-                                ensembl_gene_id: genes,
+                                ensembl_gene_id: genesUpperCase,
                             },
                         },
                     ],
