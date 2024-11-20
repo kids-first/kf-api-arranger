@@ -295,6 +295,20 @@
       }
     },
     {
+      "field": "publication_details",
+      "graphqlField": "study",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "publication_details.authors",
+      "graphqlField": "study",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
       "field": "publications",
       "graphqlField": "study",
       "extendedFieldMappingInput": {
