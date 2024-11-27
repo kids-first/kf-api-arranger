@@ -295,14 +295,28 @@
       }
     },
     {
-      "field": "publication_details",
+      "field": "publications_details",
       "graphqlField": "study",
       "extendedFieldMappingInput": {
         "isArray": true
       }
     },
     {
-      "field": "publication_details.authors",
+      "field": "publications_details.authors",
+      "graphqlField": "study",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "publications_details.accessed_date_parts",
+      "graphqlField": "study",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "publications_details.issued_date_parts",
       "graphqlField": "study",
       "extendedFieldMappingInput": {
         "isArray": true
