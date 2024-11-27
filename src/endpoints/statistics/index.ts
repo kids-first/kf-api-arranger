@@ -342,7 +342,19 @@ export const getStudiesStatistics = async (): Promise<Record<string, unknown>> =
         index: esStudyIndex,
         body: {
             size: 500,
-            _source: ['participant_count', 'study_code', 'domain'],
+            _source: [
+                'data_category',
+                'description',
+                'domain',
+                'external_id',
+                'family_count',
+                'file_count',
+                'is_harmonized',
+                'participant_count',
+                'participant_count',
+                'study_code',
+                'study_name',
+            ],
         },
     });
 
