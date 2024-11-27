@@ -351,7 +351,6 @@ export const getStudiesStatistics = async (): Promise<Record<string, unknown>> =
                 'file_count',
                 'is_harmonized',
                 'participant_count',
-                'participant_count',
                 'study_code',
                 'study_name',
             ],
