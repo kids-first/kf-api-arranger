@@ -348,6 +348,7 @@ export const getStudiesStatistics = async (): Promise<Record<string, unknown>> =
                 'domain',
                 'domains',
                 'external_id',
+                'external_ids',
                 'family_count',
                 'file_count',
                 'guid',
