@@ -21,8 +21,8 @@ import {
     SampleGeneExpVolcano,
 } from './types';
 
-export const DIFF_GENE_EXP_FILE_KEY = 'transcriptomics/diff_gene_exp/HTP/data.txt';
-export const SAMPLE_GENE_EXP_FILE_KEY = 'transcriptomics/sample_gene_exp/HTP/data.txt';
+export const DIFF_GENE_EXP_FILE_KEY = 'transcriptomics/diff_gene_exp/HTP/htp-dge-data.csv';
+export const SAMPLE_GENE_EXP_FILE_KEY = 'transcriptomics/sample_gene_exp/HTP/htp-rnaseq-data.csv';
 
 export const fetchDiffGeneExp = async (): Promise<DiffGeneExpVolcano[]> => {
     const client = EsInstance.getInstance();
