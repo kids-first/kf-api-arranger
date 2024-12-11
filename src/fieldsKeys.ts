@@ -6,4 +6,4 @@ export const biospecimenIdKey = 'sample_id';
 export const familyCountKey = 'family_count';
 export const participantKey = 'fhir_id';
 export const participantFileKey = 'files.fhir_id';
-export const participantBiospecimenKey = 'files.biospecimens.fhir_id';
+export const participantBiospecimenKey = 'files.biospecimens.biospecimen_id';
