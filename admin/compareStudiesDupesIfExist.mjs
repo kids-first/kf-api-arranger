@@ -38,6 +38,13 @@ const dupes = all
         };
     }, {});
 
+if (Object.keys(dupes).length === 0) {
+    console.log(`No duplicates found`);
+    process.exit(0);
+}
+
+console.log('Duplicated Studies: ', Object.keys(dupes).join(', '));
+
 const numberComparisons = Object.entries(dupes).reduce((xs, x) => {
     const n = x[1].length;
     return xs + binomialCoefficient(n, 2);
