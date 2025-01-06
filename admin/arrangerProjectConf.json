@@ -48,6 +48,13 @@
       }
     },
     {
+      "field": "dataset_names",
+      "graphqlField": "file",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
       "field": "files",
       "graphqlField": "file",
       "extendedFieldMappingInput": {
@@ -204,42 +211,49 @@
       }
     },
     {
-      "field": "dataset",
+      "field": "datasets",
       "graphqlField": "study",
       "extendedFieldMappingInput": {
         "isArray": true
       }
     },
     {
-      "field": "dataset.access_limitations",
+      "field": "datasets.access_limitations",
       "graphqlField": "study",
       "extendedFieldMappingInput": {
         "isArray": true
       }
     },
     {
-      "field": "dataset.access_requirements",
+      "field": "datasets.access_requirements",
       "graphqlField": "study",
       "extendedFieldMappingInput": {
         "isArray": true
       }
     },
     {
-      "field": "dataset.data_types",
+      "field": "datasets.data_categories",
       "graphqlField": "study",
       "extendedFieldMappingInput": {
         "isArray": true
       }
     },
     {
-      "field": "dataset.expected_data_categories",
+      "field": "datasets.data_types",
       "graphqlField": "study",
       "extendedFieldMappingInput": {
         "isArray": true
       }
     },
     {
-      "field": "dataset.publications",
+      "field": "datasets.expected_data_categories",
+      "graphqlField": "study",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "datasets.publications",
       "graphqlField": "study",
       "extendedFieldMappingInput": {
         "isArray": true
@@ -295,14 +309,14 @@
       }
     },
     {
-      "field": "publications_details",
+      "field": "publications",
       "graphqlField": "study",
       "extendedFieldMappingInput": {
         "isArray": true
       }
     },
     {
-      "field": "publications_details.authors",
+      "field": "publications_details",
       "graphqlField": "study",
       "extendedFieldMappingInput": {
         "isArray": true
@@ -316,14 +330,14 @@
       }
     },
     {
-      "field": "publications_details.issued_date_parts",
+      "field": "publications_details.authors",
       "graphqlField": "study",
       "extendedFieldMappingInput": {
         "isArray": true
       }
     },
     {
-      "field": "publications",
+      "field": "publications_details.issued_date_parts",
       "graphqlField": "study",
       "extendedFieldMappingInput": {
         "isArray": true
