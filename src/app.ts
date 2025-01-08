@@ -18,6 +18,7 @@ import {
 import { CreateSetBody, Set, SetSqon, UpdateSetContentBody, UpdateSetTagBody } from './endpoints/sets/setsTypes';
 import { getStatistics, getStudiesStatistics } from './endpoints/statistics';
 import transcriptomicsRouter from './endpoints/transcriptomics/route';
+import { computeUpset } from './endpoints/upset';
 import { esHost, keycloakURL, userApiURL } from './env';
 import { globalErrorHandler, globalErrorLogger } from './errors';
 import {
@@ -191,6 +192,15 @@ export default (keycloak: Keycloak, getProject: (projectId: string) => ArrangerP
 
     app.post('/authorized-studies', keycloak.protect(), async (req, res, next) => {
         computeAuthorizedStudiesForAllFences(req, res, next);
+    });
+
+    app.post('/upset', keycloak.protect(), async (req, res, next) => {
+        try {
+            const data = await computeUpset(req.body.sqon);
+            res.send(data);
+        } catch (e) {
+            next(e);
+        }
     });
 
     app.use(globalErrorLogger, globalErrorHandler);
