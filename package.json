@@ -38,6 +38,7 @@
   "dependencies": {
     "@arranger/admin": "^2.19.4",
     "@arranger/middleware": "^2.19.4",
+    "@arranger/mapping-utils": "^2.19.4",
     "@arranger/server": "^2.19.4",
     "@aws-sdk/client-s3": "^3.689.0",
     "@aws-sdk/s3-request-presigner": "^3.689.0",
