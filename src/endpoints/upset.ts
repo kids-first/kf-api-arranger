@@ -5,7 +5,7 @@ import EsInstance from '../ElasticSearchClientInstance';
 
 export type UpsetData = {
     name: string;
-    elems: string[];
+    sets: string[];
 }[];
 
 export const countIt = (xs: string[]): Map<string, number> => {
@@ -114,7 +114,7 @@ export const computeUpset = async (
         const pts = ps.reduce((ys, y) => (y.ph.includes(x) ? [...ys, y.patient] : ys), []);
         return {
             name: x,
-            elems: pts,
+            sets: pts,
         };
     });
 
