@@ -196,7 +196,7 @@ export default (keycloak: Keycloak, getProject: (projectId: string) => ArrangerP
 
     app.post('/upset', keycloak.protect(), async (req, res, next) => {
         try {
-            const data = await computeUpset(req.body.sqon);
+            const data = await computeUpset(req.body.sqon, req.body.topN);
             res.send(data);
         } catch (e) {
             next(e);

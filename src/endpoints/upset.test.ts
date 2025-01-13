@@ -263,13 +263,13 @@ describe('Upset', () => {
                 ],
                 op: 'and',
             };
-            const result = await computeUpset(sqon);
+            const result = await computeUpset(sqon, 5);
             expect(result).toEqual({
                 data: [
-                    { name: 'Abnormality of the eye (HP:0000478)', sets: ['pt-223twf8ytr', 'pt-2282xh6dem'] },
-                    { name: 'Seizure (HP:0001250)', sets: ['pt-223twf8ytr'] },
-                    { name: 'Ventricular septal defect (HP:0001629)', sets: ['pt-2282xh6dem'] },
-                    { name: 'Abnormality of the dentition (HP:0000164)', sets: ['pt-2282xh6dem'] },
+                    { name: 'Abnormality of the eye (HP:0000478)', elems: ['pt-223twf8ytr', 'pt-2282xh6dem'] },
+                    { name: 'Seizure (HP:0001250)', elems: ['pt-223twf8ytr'] },
+                    { name: 'Ventricular septal defect (HP:0001629)', elems: ['pt-2282xh6dem'] },
+                    { name: 'Abnormality of the dentition (HP:0000164)', elems: ['pt-2282xh6dem'] },
                 ],
                 participantsCount: 2,
             });
