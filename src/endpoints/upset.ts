@@ -5,7 +5,7 @@ import EsInstance from '../ElasticSearchClientInstance';
 
 export type UpsetData = {
     name: string;
-    sets: string[];
+    elems: string[];
 }[];
 
 export const countIt = (xs: string[]): Map<string, number> => {
@@ -48,9 +48,10 @@ const emptySQON = {
     content: [],
 };
 
-const TOP = 20;
+const DEFAULT_TOP = 10;
 export const computeUpset = async (
     sqon = emptySQON,
+    topMax = DEFAULT_TOP,
 ): Promise<{
     data: UpsetData;
     participantsCount: number;
@@ -108,13 +109,13 @@ export const computeUpset = async (
     const allQueryPhenotypes: string[] = ps.map(x => x.ph).flat();
 
     //countIt is sorted by descending counts
-    const top = topN(countIt(allQueryPhenotypes), TOP);
+    const top = topN(countIt(allQueryPhenotypes), topMax > 0 && topMax <= 25 ? topMax : DEFAULT_TOP);
 
     const data = top.map(x => {
         const pts = ps.reduce((ys, y) => (y.ph.includes(x) ? [...ys, y.patient] : ys), []);
         return {
             name: x,
-            sets: pts,
+            elems: pts,
         };
     });
 
