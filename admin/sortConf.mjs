@@ -1,5 +1,5 @@
-import fs from 'node:fs';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 
 const sortConf = conf => {
     const indices = conf.indices;
@@ -15,7 +15,7 @@ const sortConf = conf => {
             .filter(m => m.graphqlField === x)
             .map(x => x.field)
             .sort()
-            .map(x => ({ ...mutations.find(m => m.field === x) }));
+            .map(y => ({ ...mutations.find(m => m.field === y && m.graphqlField === x) }));
         return [...xs, ...elWithSameGqlField];
     }, []);
 
