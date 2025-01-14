@@ -86,6 +86,9 @@ export default (keycloak: Keycloak, getProject: (projectId: string) => ArrangerP
     app.get('/variantsFeature/suggestions/:prefix', keycloak.protect(), (req, res, next) =>
         genomicFeatureSuggestions(req, res, next, SUGGESTIONS_TYPES.VARIANT),
     );
+    app.get('/variantsSomaticFeature/suggestions/:prefix', keycloak.protect(), (req, res, next) =>
+        genomicFeatureSuggestions(req, res, next, SUGGESTIONS_TYPES.VARIANT_SOMATIC),
+    );
 
     app.get('/statistics', verifyCache(STATISTICS_CACHE_ID), async (_req, res, next) => {
         try {
