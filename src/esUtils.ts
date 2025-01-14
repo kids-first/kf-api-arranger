@@ -5,6 +5,7 @@ export const esStudyIndex = 'study_centric';
 export const esParticipantIndex = 'participant_centric';
 export const esBiospecimenIndex = 'biospecimen_centric';
 export const esVariantIndex = 'variant_centric';
+export const esVariantSomaticIndex = 'variant_somatic_centric';
 export const esDiffGeneExpIndex = 'diff_gene_exp';
 export const esSampleGeneExpIndex = 'sample_gene_exp';
 

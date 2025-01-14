@@ -5,11 +5,13 @@ import EsInstance from '../ElasticSearchClientInstance';
 import {
     indexNameGeneFeatureSuggestion,
     indexNameVariantFeatureSuggestion,
+    indexNameVariantSomaticFeatureSuggestion,
     maxNOfGenomicFeatureSuggestions,
 } from '../env';
 
 export const SUGGESTIONS_TYPES = {
     VARIANT: 'variant',
+    VARIANT_SOMATIC: 'variant_somatic',
     GENE: 'gene',
 };
 
@@ -19,8 +21,17 @@ export default async (req: Request, res: Response, next: NextFunction, type: str
 
         const client = await EsInstance.getInstance();
 
-        const _index =
-            type === SUGGESTIONS_TYPES.GENE ? indexNameGeneFeatureSuggestion : indexNameVariantFeatureSuggestion;
+        const retrieveIndex = () => {
+            switch (type) {
+                case SUGGESTIONS_TYPES.GENE:
+                    return indexNameGeneFeatureSuggestion;
+                case SUGGESTIONS_TYPES.VARIANT:
+                    return indexNameVariantFeatureSuggestion;
+                case SUGGESTIONS_TYPES.VARIANT_SOMATIC:
+                    return indexNameVariantSomaticFeatureSuggestion;
+            }
+        };
+        const _index = retrieveIndex();
 
         const { body } = await client.search({
             index: _index,

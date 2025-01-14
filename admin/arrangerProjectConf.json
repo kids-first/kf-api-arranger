@@ -23,6 +23,10 @@
     {
       "graphqlField": "variants",
       "esIndex": "variant_centric"
+    },
+    {
+      "graphqlField": "variants_somatic",
+      "esIndex": "variant_somatic_centric"
     }
   ],
   "extendedMappingMutations": [
@@ -479,6 +483,125 @@
     {
       "field": "studies.zygosity",
       "graphqlField": "variants",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "clinvar.clin_sig",
+      "graphqlField": "variants_somatic",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "clinvar.conditions",
+      "graphqlField": "variants_somatic",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "clinvar.inheritance",
+      "graphqlField": "variants_somatic",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "clinvar.interpretations",
+      "graphqlField": "variants_somatic",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "gene_external_reference",
+      "graphqlField": "variants_somatic",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "genes",
+      "graphqlField": "variants_somatic",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "genes.alias",
+      "graphqlField": "variants_somatic",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "genes.consequences.consequence",
+      "graphqlField": "variants_somatic",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "genes.consequences.refseq_mrna_id",
+      "graphqlField": "variants_somatic",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "genes.cosmic.tumour_types_germline",
+      "graphqlField": "variants_somatic",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "genes.omim.inheritance",
+      "graphqlField": "variants_somatic",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "genes.omim.inheritance_code",
+      "graphqlField": "variants_somatic",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "genes.orphanet.inheritance",
+      "graphqlField": "variants_somatic",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "genes.spliceai.type",
+      "graphqlField": "variants_somatic",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "studies.participant_ids",
+      "graphqlField": "variants_somatic",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "studies.transmission",
+      "graphqlField": "variants_somatic",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "studies.zygosity",
+      "graphqlField": "variants_somatic",
       "extendedFieldMappingInput": {
         "isArray": true
       }

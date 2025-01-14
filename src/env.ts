@@ -16,6 +16,7 @@ export const maxNOfGenomicFeatureSuggestions = process.env.MAX_NUMBER_OF_GF_SUGG
 
 export const indexNameGeneFeatureSuggestion = process.env.GENES_SUGGESTIONS_INDEX_NAME;
 export const indexNameVariantFeatureSuggestion = process.env.VARIANTS_SUGGESTIONS_INDEX_NAME;
+export const indexNameVariantSomaticFeatureSuggestion = process.env.VARIANTS_SOMATIC_SUGGESTIONS_INDEX_NAME;
 
 export const userApiURL = process.env.USER_API_URL || 'https://include-users-api-qa.373997854230.d3b.io';
 
