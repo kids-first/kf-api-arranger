@@ -26,11 +26,6 @@ const isProjectListedInArranger = async (esClient, projectName) => {
     return !!r?.body;
 };
 
-const sameIndices = (xs, ys) => {
-    const s = new Set(ys);
-    return xs.length === ys.length && xs.every(x => s.has(x));
-};
-
 const ENV = {
     kf: 'kf',
     include: 'include',
@@ -74,7 +69,17 @@ const client = await EsInstance.default.getInstance();
 
 const projectName = projectArg;
 
-const arrangerProjectConf = projectConfig(projectName);
+let arrangerProjectConf = projectConfig(projectName);
+// Hack, remove somatic stuff from the project conf when INCLUDE
+if (projectName === 'include') {
+    arrangerProjectConf = {
+        ...arrangerProjectConf,
+        indices: arrangerProjectConf.indices.filter(x => !x.graphqlField.includes('somatic')),
+        extendedMappingMutations: [
+            ...arrangerProjectConf.extendedMappingMutations.filter(x => !x.graphqlField.includes('somatic')),
+        ],
+    };
+}
 
 const addArrangerProjectWithClient = ArrangerApi.addArrangerProject(client);
 
