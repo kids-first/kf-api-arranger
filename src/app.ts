@@ -212,18 +212,18 @@ export default (keycloak: Keycloak, getProject: (projectId: string) => ArrangerP
 
     app.post('/venn', keycloak.protect(), async (req, res, next) => {
         try {
-            // Convert sqon(s) with set_id if exists to intelligible sqons for ES query translation.
-            const sqons: string[] = [];
-            for (const s of req.body.sqons) {
-                if (sqonContainsSet(s)) {
-                    const accessToken = req.headers.authorization;
-                    const r = await resolveSetsInSqon(s, null, accessToken);
-                    sqons.push(JSON.stringify(r));
-                } else {
-                    sqons.push(s);
+            if ([2, 3].includes(req.body?.sqons?.length)) {
+                // Convert sqon(s) with set_id if exists to intelligible sqon for ES query translation.
+                const sqons: string[] = [];
+                for (const s of req.body.sqons) {
+                    if (sqonContainsSet(s)) {
+                        const accessToken = req.headers.authorization;
+                        const r = await resolveSetsInSqon(s, null, accessToken);
+                        sqons.push(JSON.stringify(r));
+                    } else {
+                        sqons.push(s);
+                    }
                 }
-            }
-            if ([2, 3].includes(sqons.length)) {
                 const data = await venn(sqons);
                 res.send({
                     data,
