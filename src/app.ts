@@ -1,5 +1,6 @@
 import cors from 'cors';
 import express, { Express } from 'express';
+import { StatusCodes } from 'http-status-codes';
 import { Keycloak } from 'keycloak-connect';
 
 import { dependencies, version } from '../package.json';
@@ -31,9 +32,8 @@ import {
 } from './middleware/cache';
 import { injectBodyHttpHeaders } from './middleware/injectBodyHttpHeaders';
 import { resolveSetIdMiddleware } from './middleware/resolveSetIdInSqon';
-import { sqonContainsSet, renameFieldToFieldName } from './sqon/manipulateSqon';
+import { sqonContainsSet } from './sqon/manipulateSqon';
 import { resolveSetsInSqon } from './sqon/resolveSetInSqon';
-import { StatusCodes } from 'http-status-codes';
 
 export default (keycloak: Keycloak, getProject: (projectId: string) => ArrangerProject): Express => {
     const app = express();
