@@ -17,30 +17,29 @@ type Output = {
 
 const builder = SQONBuilder;
 
-const setFormulasDuo = (s1: v3SQON, s2: v3SQON) => [
-    {
-        operation: 'Q₁',
-        count: undefined,
-        sqon: builder.from(s1),
-    },
-    {
-        operation: 'Q₂',
-        count: undefined,
-        sqon: builder.from(s2),
-    },
-    {
-        operation: '(Q₁∩Q₂)',
-        sqon: builder.and([s1, s2]),
-    },
-    {
-        operation: '(Q₁)-(Q₂)',
-        sqon: builder.from(s1).not(builder.from(s2)),
-    },
-    {
-        operation: '(Q₂)-(Q₁)',
-        sqon: builder.from(s2).not(builder.from(s1)),
-    },
-];
+const setFormulasDuo = (s1: v3SQON, s2: v3SQON) =>
+    [
+        {
+            operation: 'Q₁',
+            sqon: builder.from(s1),
+        },
+        {
+            operation: 'Q₂',
+            sqon: builder.from(s2),
+        },
+        {
+            operation: 'Q₁-Q₂',
+            sqon: builder.from(s1).not(builder.from(s2)),
+        },
+        {
+            operation: 'Q₂-Q₁',
+            sqon: builder.from(s2).not(builder.from(s1)),
+        },
+        {
+            operation: 'Q₁∩Q₂',
+            sqon: builder.and([s1, s2]),
+        },
+    ].map(x => ({ ...x, sqon: renameFieldNameToField(x.sqon) }));
 
 const setFormulasTrio = (s1: v3SQON, s2: v3SQON, s3: v3SQON) =>
     [
@@ -57,32 +56,32 @@ const setFormulasTrio = (s1: v3SQON, s2: v3SQON, s3: v3SQON) =>
             sqon: builder.from(s3),
         },
         {
-            operation: '(Q₁∩Q₂∩Q₃)',
-            sqon: builder.and([s1, s2, s3]),
+            operation: 'Q₁-(Q₂∩Q₃)',
+            sqon: builder.from(s1).not(builder.and([s2, s3])),
         },
         {
-            operation: '(Q₁∩Q₂)-(Q₃)',
+            operation: 'Q₂-(Q₁∩Q₃)',
+            sqon: builder.from(s2).not(builder.and([s1, s3])),
+        },
+        {
+            operation: 'Q₃-(Q₁∩Q₂)',
+            sqon: builder.from(s3).not(builder.and([s1, s2])),
+        },
+        {
+            operation: '(Q₁∩Q₂)-Q₃',
             sqon: builder.and([s1, s2]).not(s3),
         },
         {
-            operation: '(Q₂∩Q₃)-(Q₁)',
+            operation: '(Q₂∩Q₃)-Q₁',
             sqon: builder.and([s2, s3]).not(s1),
         },
         {
-            operation: '(Q₁∩Q₃)-(Q₂)',
+            operation: '(Q₁∩Q₃)-Q₂',
             sqon: builder.and([s1, s3]).not(s2),
         },
         {
-            operation: '(Q₁)-(Q₂∩Q₃)',
-            sqon: builder.from(s1).not(builder.or([s2, s3])),
-        },
-        {
-            operation: '(Q₂)-(Q₁∩Q₃)',
-            sqon: builder.from(s2).not(builder.or([s1, s3])),
-        },
-        {
-            operation: '(Q₃)-(Q₁∩Q₂)',
-            sqon: builder.from(s3).not(builder.or([s1, s2])),
+            operation: 'Q₁∩Q₂∩Q₃',
+            sqon: builder.and([s1, s2, s3]),
         },
     ].map(x => ({ ...x, sqon: renameFieldNameToField(x.sqon) }));
 
