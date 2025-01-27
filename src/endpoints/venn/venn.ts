@@ -8,6 +8,7 @@ import { renameFieldNameToField, renameFieldToFieldName } from '../../sqon/manip
 type OutputElement = {
     operation: string;
     count: number;
+    setId?: string;
 };
 
 type Output = {
@@ -16,6 +17,8 @@ type Output = {
 };
 
 const builder = SQONBuilder;
+
+const fromV3BackToV2 = x => ({ ...x, sqon: renameFieldNameToField(x.sqon) });
 
 const setFormulasDuo = (s1: v3SQON, s2: v3SQON) =>
     [
@@ -39,7 +42,7 @@ const setFormulasDuo = (s1: v3SQON, s2: v3SQON) =>
             operation: 'Q₁∩Q₂',
             sqon: builder.and([s1, s2]),
         },
-    ].map(x => ({ ...x, sqon: renameFieldNameToField(x.sqon) }));
+    ].map(fromV3BackToV2);
 
 const setFormulasTrio = (s1: v3SQON, s2: v3SQON, s3: v3SQON) =>
     [
@@ -83,7 +86,7 @@ const setFormulasTrio = (s1: v3SQON, s2: v3SQON, s3: v3SQON) =>
             operation: 'Q₁∩Q₂∩Q₃',
             sqon: builder.and([s1, s2, s3]),
         },
-    ].map(x => ({ ...x, sqon: renameFieldNameToField(x.sqon) }));
+    ].map(fromV3BackToV2);
 
 let nestedFields: string[] = null;
 
@@ -127,8 +130,8 @@ export const venn = async (sqons: string[]): Promise<Output> => {
         count: responses[i].hits.total.value,
     }));
 
-    // Reformat for UI
-    return data.reduce(
+    // Reformatting for UI
+    const tables = data.reduce(
         (xs: Output, x: OutputElement) => {
             if (['Q₁', 'Q₂', 'Q₃'].some(y => y === x.operation)) {
                 return { ...xs, summary: [...xs.summary, x] };
@@ -137,4 +140,9 @@ export const venn = async (sqons: string[]): Promise<Output> => {
         },
         { summary: [], operations: [] },
     );
+
+    return {
+        summary: tables.summary,
+        operations: tables.operations.map((x: OutputElement, i: number) => ({ ...x, setId: `set-${i}` })),
+    };
 };
