@@ -19,6 +19,7 @@ import { CreateSetBody, Set, SetSqon, UpdateSetContentBody, UpdateSetTagBody } f
 import { getStatistics, getStudiesStatistics } from './endpoints/statistics';
 import transcriptomicsRouter from './endpoints/transcriptomics/route';
 import { computeUpset } from './endpoints/upset';
+import { venn } from './endpoints/venn/venn';
 import { esHost, keycloakURL, userApiURL } from './env';
 import { globalErrorHandler, globalErrorLogger } from './errors';
 import {
@@ -30,6 +31,9 @@ import {
 } from './middleware/cache';
 import { injectBodyHttpHeaders } from './middleware/injectBodyHttpHeaders';
 import { resolveSetIdMiddleware } from './middleware/resolveSetIdInSqon';
+import { sqonContainsSet, renameFieldToFieldName } from './sqon/manipulateSqon';
+import { resolveSetsInSqon } from './sqon/resolveSetInSqon';
+import { StatusCodes } from 'http-status-codes';
 
 export default (keycloak: Keycloak, getProject: (projectId: string) => ArrangerProject): Express => {
     const app = express();
@@ -201,6 +205,32 @@ export default (keycloak: Keycloak, getProject: (projectId: string) => ArrangerP
         try {
             const data = await computeUpset(req.body.sqon, req.body.topN);
             res.send(data);
+        } catch (e) {
+            next(e);
+        }
+    });
+
+    app.post('/venn', keycloak.protect(), async (req, res, next) => {
+        try {
+            if ([2, 3].includes(req.body?.sqons?.length)) {
+                // Convert sqon(s) with set_id if exists to intelligible sqon for ES query translation.
+                const sqons: string[] = [];
+                for (const s of req.body.sqons) {
+                    if (sqonContainsSet(s)) {
+                        const accessToken = req.headers.authorization;
+                        const r = await resolveSetsInSqon(s, null, accessToken);
+                        sqons.push(JSON.stringify(r));
+                    } else {
+                        sqons.push(s);
+                    }
+                }
+                const data = await venn(sqons);
+                res.send({
+                    data,
+                });
+            } else {
+                res.status(StatusCodes.UNPROCESSABLE_ENTITY).send('Bad Inputs');
+            }
         } catch (e) {
             next(e);
         }

@@ -1,7 +1,7 @@
-import { getNestedFields } from '@arranger/mapping-utils';
 import { buildQuery } from '@arranger/middleware';
 
 import EsInstance from '../ElasticSearchClientInstance';
+import { getNestedFieldsForIndex } from '../sqon/getNestedFieldsForIndex';
 
 export type UpsetData = {
     name: string;
@@ -60,8 +60,7 @@ export const computeUpset = async (
 
     const needToFetchMapping = !nestedFields || nestedFields.length === 0;
     if (needToFetchMapping) {
-        const rM = await client.indices.getMapping({ index: 'participant_centric' });
-        nestedFields = getNestedFields(Object.values(rM.body || {})[0]?.mappings?.properties);
+        nestedFields = await getNestedFieldsForIndex(client, 'participant_centric');
     }
 
     // assumption: unique participants
