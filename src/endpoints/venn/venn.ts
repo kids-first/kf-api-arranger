@@ -11,8 +11,8 @@ type OutputElement = {
 };
 
 type Output = {
-    basics: OutputElement[];
-    alloys: OutputElement[];
+    summary: OutputElement[];
+    operations: OutputElement[];
 };
 
 const builder = SQONBuilder;
@@ -132,10 +132,10 @@ export const venn = async (sqons: string[]): Promise<Output> => {
     return data.reduce(
         (xs: Output, x: OutputElement) => {
             if (['Q₁', 'Q₂', 'Q₃'].some(y => y === x.operation)) {
-                return { ...xs, basics: [...xs.basics, x] };
+                return { ...xs, summary: [...xs.summary, x] };
             }
-            return { ...xs, alloys: [...xs.alloys, x] };
+            return { ...xs, operations: [...xs.operations, x] };
         },
-        { basics: [], alloys: [] },
+        { summary: [], operations: [] },
     );
 };
