@@ -11,6 +11,9 @@ export const TRANSCRIPTOMICS_SAMPLE_GENE_EXP_EXPORT_URL_CACHE_ID = 'transcriptom
 
 const cache = new NodeCache({ stdTTL: cacheTTL });
 
+// Warning: If used as a handler on a route, it can make the route sends two responses if not used carefully
+// It can create errors such as: "Error [ERR_HTTP_HEADERS_SENT]: Cannot set headers after they are sent to the client"
+/** @deprecated */
 export const verifyCache = (cacheId: string) => (_req: Request, res: Response, next: NextFunction): void => {
     try {
         if (cache.has(cacheId)) {
@@ -28,4 +31,16 @@ export const updateCache = (cacheId: string, data: unknown): void => {
 
 export const flushAllCache = (): void => {
     cache.flushAll();
+};
+
+export const getFromCache = (cacheId: string) => cache.get(cacheId);
+
+export const twineWithCache = async (cacheId: string, fetcher: () => Promise<unknown>) => {
+    const cData = cache.get(cacheId);
+    if (cData) {
+        return cData;
+    }
+    const data = await fetcher();
+    updateCache(cacheId, data);
+    return data;
 };
