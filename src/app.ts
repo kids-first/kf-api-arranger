@@ -27,8 +27,7 @@ import {
     flushAllCache,
     STATISTICS_CACHE_ID,
     STATISTICS_PUBLIC_CACHE_ID,
-    updateCache,
-    verifyCache,
+    twineWithCache,
 } from './middleware/cache';
 import { injectBodyHttpHeaders } from './middleware/injectBodyHttpHeaders';
 import { resolveSetIdMiddleware } from './middleware/resolveSetIdInSqon';
@@ -94,20 +93,18 @@ export default (keycloak: Keycloak, getProject: (projectId: string) => ArrangerP
         genomicFeatureSuggestions(req, res, next, SUGGESTIONS_TYPES.VARIANT_SOMATIC),
     );
 
-    app.get('/statistics', verifyCache(STATISTICS_CACHE_ID), async (_req, res, next) => {
+    app.get('/statistics', async (_req, res, next) => {
         try {
-            const data = await getStatistics();
-            updateCache(STATISTICS_CACHE_ID, data);
+            const data = await twineWithCache(STATISTICS_CACHE_ID, getStatistics);
             res.json(data);
         } catch (e) {
             next(e);
         }
     });
 
-    app.get('/statistics/studies', verifyCache(STATISTICS_PUBLIC_CACHE_ID), async (_req, res, next) => {
+    app.get('/statistics/studies', async (_req, res, next) => {
         try {
-            const data = await getStudiesStatistics();
-            updateCache(STATISTICS_PUBLIC_CACHE_ID, data);
+            const data = await twineWithCache(STATISTICS_PUBLIC_CACHE_ID, getStudiesStatistics);
             res.json(data);
         } catch (e) {
             next(e);

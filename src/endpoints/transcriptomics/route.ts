@@ -4,8 +4,7 @@ import {
     TRANSCRIPTOMICS_DIFF_GENE_EXP_CACHE_ID,
     TRANSCRIPTOMICS_DIFF_GENE_EXP_EXPORT_URL_CACHE_ID,
     TRANSCRIPTOMICS_SAMPLE_GENE_EXP_EXPORT_URL_CACHE_ID,
-    updateCache,
-    verifyCache,
+    twineWithCache,
 } from '../../middleware/cache';
 import { MissingFilterError } from './errors';
 import {
@@ -21,35 +20,23 @@ import {
 // Handles requests made to /transcriptomics
 const transcriptomicsRouter = Router();
 
-transcriptomicsRouter.post(
-    '/diffGeneExp',
-    verifyCache(TRANSCRIPTOMICS_DIFF_GENE_EXP_CACHE_ID),
-    async (_req, res, next) => {
-        try {
-            const data = await fetchDiffGeneExp();
-            updateCache(TRANSCRIPTOMICS_DIFF_GENE_EXP_CACHE_ID, data);
+transcriptomicsRouter.post('/diffGeneExp', async (_req, res, next) => {
+    try {
+        const data = await twineWithCache(TRANSCRIPTOMICS_DIFF_GENE_EXP_CACHE_ID, fetchDiffGeneExp);
+        res.json(data);
+    } catch (e) {
+        next(e);
+    }
+});
 
-            res.json(data);
-        } catch (e) {
-            next(e);
-        }
-    },
-);
-
-transcriptomicsRouter.get(
-    '/diffGeneExp/export',
-    verifyCache(TRANSCRIPTOMICS_DIFF_GENE_EXP_EXPORT_URL_CACHE_ID),
-    async (_req, res, next) => {
-        try {
-            const data = await exportDiffGeneExp();
-            updateCache(TRANSCRIPTOMICS_DIFF_GENE_EXP_EXPORT_URL_CACHE_ID, data);
-
-            res.json(data);
-        } catch (e) {
-            next(e);
-        }
-    },
-);
+transcriptomicsRouter.get('/diffGeneExp/export', async (_req, res, next) => {
+    try {
+        const data = await twineWithCache(TRANSCRIPTOMICS_DIFF_GENE_EXP_EXPORT_URL_CACHE_ID, exportDiffGeneExp);
+        res.json(data);
+    } catch (e) {
+        next(e);
+    }
+});
 
 transcriptomicsRouter.post('/sampleGeneExp', async (req, res, next) => {
     try {
@@ -66,20 +53,14 @@ transcriptomicsRouter.post('/sampleGeneExp', async (req, res, next) => {
     }
 });
 
-transcriptomicsRouter.get(
-    '/sampleGeneExp/export',
-    verifyCache(TRANSCRIPTOMICS_SAMPLE_GENE_EXP_EXPORT_URL_CACHE_ID),
-    async (_req, res, next) => {
-        try {
-            const data = await exportSampleGeneExp();
-            updateCache(TRANSCRIPTOMICS_SAMPLE_GENE_EXP_EXPORT_URL_CACHE_ID, data);
-
-            res.json(data);
-        } catch (e) {
-            next(e);
-        }
-    },
-);
+transcriptomicsRouter.get('/sampleGeneExp/export', async (_req, res, next) => {
+    try {
+        const data = await twineWithCache(TRANSCRIPTOMICS_SAMPLE_GENE_EXP_EXPORT_URL_CACHE_ID, exportSampleGeneExp);
+        res.json(data);
+    } catch (e) {
+        next(e);
+    }
+});
 
 transcriptomicsRouter.post('/facets', async (_req, res, next) => {
     try {
