@@ -1,6 +1,5 @@
-import { SQON as v3SQON } from '@overture-stack/sqon-builder';
-
 import { SetSqon } from '../endpoints/sets/setsTypes';
+import { Sqon } from './types';
 
 export const addSqonToSetSqon = (receivingSqon: SetSqon, donorSqon: SetSqon): SetSqon =>
     ({
@@ -19,16 +18,43 @@ export const removeSqonToSetSqon = (setSqon: SetSqon, sqonToRemove: SetSqon): Se
     } as SetSqon;
 };
 
-const isString = (x: unknown): boolean => typeof x === 'string';
+export const sqonContainsSet = (s: string) => JSON.stringify(s).includes('"set_id:');
 
-const renameFieldCore = (toV3: boolean) => (sqon: v3SQON | string) => {
-    const s = (isString(sqon) ? sqon : JSON.stringify(sqon)) as string;
-    const updated = toV3 ? s.replace(/"field":/g, '"fieldName":') : s.replace(/"fieldName":/g, '"field":');
-    return JSON.parse(updated);
+// Taken as-is from "@overture-stack/sqon-builder": "^1.1.0" but zod Types were removed
+const combine = (op, sqon, content, pivot) => {
+    const output = { op, content: [] };
+    if (sqon.op === op && sqon.pivot === pivot) {
+        // provided sqon has same operation as requested:
+        //   don't add wrapper, insert new content into existing sqon
+        output.content = output.content.concat(sqon.content, content);
+    } else {
+        output.content = output.content.concat(sqon, content);
+    }
+
+    if (pivot !== undefined) {
+        // dont automatically assign pivot: undefined to an operator, it will then appear in every output and that is not desired
+        // optionally assigning pivot only if it has a value avoids this
+
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        output.pivot = pivot;
+    }
+    return output;
 };
 
-export const renameFieldNameToField = renameFieldCore(false);
+const asArray = input => (Array.isArray(input) ? input : [input]);
 
-export const renameFieldToFieldName = renameFieldCore(true);
+export const and = (x: Sqon, xs: Sqon | Sqon[]): Sqon => combine('and', x, xs, undefined);
+export const or = (x: Sqon, xs: Sqon | Sqon[]): Sqon => combine('or', x, xs, undefined);
 
-export const sqonContainsSet = (s: string) => JSON.stringify(s).includes('"set_id:');
+export const not = (x: Sqon, xs: Sqon | Sqon[]): Sqon =>
+    combine(
+        'and',
+        x,
+        {
+            op: 'not',
+            content: asArray(xs),
+            pivot: undefined,
+        },
+        undefined,
+    );
