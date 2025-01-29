@@ -1,9 +1,9 @@
 import { buildQuery } from '@arranger/middleware';
-import { default as SQONBuilder, SQON as v3SQON } from '@overture-stack/sqon-builder';
 
 import EsInstance from '../../ElasticSearchClientInstance';
 import { getNestedFieldsForIndex } from '../../sqon/getNestedFieldsForIndex';
-import { renameFieldNameToField, renameFieldToFieldName } from '../../sqon/manipulateSqon';
+import { and, not } from '../../sqon/manipulateSqon';
+import { Sqon } from '../../sqon/types';
 
 type OutputElement = {
     operation: string;
@@ -16,88 +16,77 @@ type Output = {
     operations: OutputElement[];
 };
 
-const builder = SQONBuilder;
+const setFormulasDuo = (s1: Sqon, s2: Sqon) => [
+    {
+        operation: 'Q₁',
+        sqon: s1,
+    },
+    {
+        operation: 'Q₂',
+        sqon: s2,
+    },
+    {
+        operation: 'Q₁-Q₂',
+        sqon: not(s1, s2),
+    },
+    {
+        operation: 'Q₂-Q₁',
+        sqon: not(s2, s1),
+    },
+    {
+        operation: 'Q₁∩Q₂',
+        sqon: and(s1, [s2]),
+    },
+];
 
-const fromV3BackToV2 = x => ({ ...x, sqon: renameFieldNameToField(x.sqon) });
-
-const setFormulasDuo = (s1: v3SQON, s2: v3SQON) =>
-    [
-        {
-            operation: 'Q₁',
-            sqon: builder.from(s1),
-        },
-        {
-            operation: 'Q₂',
-            sqon: builder.from(s2),
-        },
-        {
-            operation: 'Q₁-Q₂',
-            sqon: builder.from(s1).not(builder.from(s2)),
-        },
-        {
-            operation: 'Q₂-Q₁',
-            sqon: builder.from(s2).not(builder.from(s1)),
-        },
-        {
-            operation: 'Q₁∩Q₂',
-            sqon: builder.and([s1, s2]),
-        },
-    ].map(fromV3BackToV2);
-
-const setFormulasTrio = (s1: v3SQON, s2: v3SQON, s3: v3SQON) =>
-    [
-        {
-            operation: 'Q₁',
-            sqon: builder.from(s1),
-        },
-        {
-            operation: 'Q₂',
-            sqon: builder.from(s2),
-        },
-        {
-            operation: 'Q₃',
-            sqon: builder.from(s3),
-        },
-        {
-            operation: 'Q₁-(Q₂∩Q₃)',
-            sqon: builder.from(s1).not(builder.and([s2, s3])),
-        },
-        {
-            operation: 'Q₂-(Q₁∩Q₃)',
-            sqon: builder.from(s2).not(builder.and([s1, s3])),
-        },
-        {
-            operation: 'Q₃-(Q₁∩Q₂)',
-            sqon: builder.from(s3).not(builder.and([s1, s2])),
-        },
-        {
-            operation: '(Q₁∩Q₂)-Q₃',
-            sqon: builder.and([s1, s2]).not(s3),
-        },
-        {
-            operation: '(Q₂∩Q₃)-Q₁',
-            sqon: builder.and([s2, s3]).not(s1),
-        },
-        {
-            operation: '(Q₁∩Q₃)-Q₂',
-            sqon: builder.and([s1, s3]).not(s2),
-        },
-        {
-            operation: 'Q₁∩Q₂∩Q₃',
-            sqon: builder.and([s1, s2, s3]),
-        },
-    ].map(fromV3BackToV2);
+const setFormulasTrio = (s1: Sqon, s2: Sqon, s3: Sqon) => [
+    {
+        operation: 'Q₁',
+        sqon: s1,
+    },
+    {
+        operation: 'Q₂',
+        sqon: s2,
+    },
+    {
+        operation: 'Q₃',
+        sqon: s3,
+    },
+    {
+        operation: 'Q₁-(Q₂∩Q₃)',
+        sqon: not(s1, and(s2, [s3])),
+    },
+    {
+        operation: 'Q₂-(Q₁∩Q₃)',
+        sqon: not(s2, and(s1, [s3])),
+    },
+    {
+        operation: 'Q₃-(Q₁∩Q₂)',
+        sqon: not(s3, and(s1, [s2])),
+    },
+    {
+        operation: '(Q₁∩Q₂)-Q₃',
+        sqon: not(and(s1, [s2]), s3),
+    },
+    {
+        operation: '(Q₂∩Q₃)-Q₁',
+        sqon: not(and(s2, [s3]), s1),
+    },
+    {
+        operation: '(Q₁∩Q₃)-Q₂',
+        sqon: not(and(s1, [s3]), s2),
+    },
+    {
+        operation: 'Q₁∩Q₂∩Q₃',
+        sqon: and(s1, [s2, s3]),
+    },
+];
 
 let nestedFields: string[] = null;
 
-export const venn = async (sqons: string[]): Promise<Output> => {
-    // (Arranger v2 vs v3): SqonBuilder uses property "fieldName" (v3) but we use "field" (v2)
-    const v3Sqons: v3SQON[] = sqons.map(s => renameFieldToFieldName(s));
-
+export const venn = async (sqons: Sqon[]): Promise<Output> => {
     const setFormulas =
-        sqons.length === 2
-            ? setFormulasDuo(v3Sqons[0], v3Sqons[1])
-            : setFormulasTrio(v3Sqons[0], v3Sqons[1], v3Sqons[2]);
+        sqons.length === 2 ? setFormulasDuo(sqons[0], sqons[1]) : setFormulasTrio(sqons[0], sqons[1], sqons[2]);
 
     const client = EsInstance.getInstance();
     const needToFetchMapping = !nestedFields || nestedFields.length === 0;

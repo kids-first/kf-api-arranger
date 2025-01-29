@@ -33,6 +33,7 @@ import { injectBodyHttpHeaders } from './middleware/injectBodyHttpHeaders';
 import { resolveSetIdMiddleware } from './middleware/resolveSetIdInSqon';
 import { sqonContainsSet } from './sqon/manipulateSqon';
 import { resolveSetsInSqon } from './sqon/resolveSetInSqon';
+import { Sqon } from './sqon/types';
 
 export default (keycloak: Keycloak, getProject: (projectId: string) => ArrangerProject): Express => {
     const app = express();
@@ -211,12 +212,12 @@ export default (keycloak: Keycloak, getProject: (projectId: string) => ArrangerP
         try {
             if ([2, 3].includes(req.body?.sqons?.length)) {
                 // Convert sqon(s) with set_id if exists to intelligible sqon for ES query translation.
-                const sqons: string[] = [];
+                const sqons: Sqon[] = [];
                 for (const s of req.body.sqons) {
                     if (sqonContainsSet(s)) {
                         const accessToken = req.headers.authorization;
                         const r = await resolveSetsInSqon(s, null, accessToken);
-                        sqons.push(JSON.stringify(r));
+                        sqons.push(r);
                     } else {
                         sqons.push(s);
                     }
