@@ -20,20 +20,13 @@ import { CreateSetBody, Set, SetSqon, UpdateSetContentBody, UpdateSetTagBody } f
 import { getStatistics, getStudiesStatistics } from './endpoints/statistics';
 import transcriptomicsRouter from './endpoints/transcriptomics/route';
 import { computeUpset } from './endpoints/upset';
-import { venn } from './endpoints/venn/venn';
+import { reformatVenn, venn } from './endpoints/venn/venn';
 import { esHost, keycloakURL, userApiURL } from './env';
 import { globalErrorHandler, globalErrorLogger } from './errors';
-import {
-    flushAllCache,
-    STATISTICS_CACHE_ID,
-    STATISTICS_PUBLIC_CACHE_ID,
-    twineWithCache,
-} from './middleware/cache';
+import { flushAllCache, STATISTICS_CACHE_ID, STATISTICS_PUBLIC_CACHE_ID, twineWithCache } from './middleware/cache';
 import { injectBodyHttpHeaders } from './middleware/injectBodyHttpHeaders';
 import { resolveSetIdMiddleware } from './middleware/resolveSetIdInSqon';
-import { sqonContainsSet } from './sqon/manipulateSqon';
-import { resolveSetsInSqon } from './sqon/resolveSetInSqon';
-import { Sqon } from './sqon/types';
+import { replaceIdsWithSetId, resolveSetsInAllSqonsWithMapper } from './sqon/resolveSetInSqon';
 
 export default (keycloak: Keycloak, getProject: (projectId: string) => ArrangerProject): Express => {
     const app = express();
@@ -196,7 +189,7 @@ export default (keycloak: Keycloak, getProject: (projectId: string) => ArrangerP
     });
 
     app.post('/authorized-studies', keycloak.protect(), async (req, res, next) => {
-        computeAuthorizedStudiesForAllFences(req, res, next);
+        await computeAuthorizedStudiesForAllFences(req, res, next);
     });
 
     app.post('/upset', keycloak.protect(), async (req, res, next) => {
@@ -210,25 +203,21 @@ export default (keycloak: Keycloak, getProject: (projectId: string) => ArrangerP
 
     app.post('/venn', keycloak.protect(), async (req, res, next) => {
         try {
-            if ([2, 3].includes(req.body?.sqons?.length)) {
-                // Convert sqon(s) with set_id if exists to intelligible sqon for ES query translation.
-                const sqons: Sqon[] = [];
-                for (const s of req.body.sqons) {
-                    if (sqonContainsSet(s)) {
-                        const accessToken = req.headers.authorization;
-                        const r = await resolveSetsInSqon(s, null, accessToken);
-                        sqons.push(r);
-                    } else {
-                        sqons.push(s);
-                    }
-                }
-                const data = await venn(sqons);
-                res.send({
-                    data,
-                });
-            } else {
+            if (![2, 3].includes(req.body?.sqons?.length)) {
                 res.status(StatusCodes.UNPROCESSABLE_ENTITY).send('Bad Inputs');
+                return;
             }
+            // Convert sqon(s) with set_id if exists to intelligible sqon for ES query translation.
+            const { resolvedSqons: sqons, m: mSetItToIds } = await resolveSetsInAllSqonsWithMapper(
+                req.body.sqons,
+                null,
+                req.headers.authorization,
+            );
+            const data1 = await venn(sqons);
+            const data2 = data1.map(x => ({ ...x, sqon: replaceIdsWithSetId(x.sqon, mSetItToIds) }));
+            res.send({
+                data: reformatVenn(data2),
+            });
         } catch (e) {
             next(e);
         }

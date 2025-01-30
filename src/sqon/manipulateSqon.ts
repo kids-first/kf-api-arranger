@@ -18,7 +18,7 @@ export const removeSqonToSetSqon = (setSqon: SetSqon, sqonToRemove: SetSqon): Se
     } as SetSqon;
 };
 
-export const sqonContainsSet = (s: string) => JSON.stringify(s).includes('"set_id:');
+export const sqonContainsSet = (s: Sqon) => JSON.stringify(s).includes('"set_id:');
 
 // Taken as-is from "@overture-stack/sqon-builder": "^1.1.0" but zod Types were removed
 const combine = (op, sqon, content, pivot) => {
