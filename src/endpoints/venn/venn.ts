@@ -5,15 +5,19 @@ import { getNestedFieldsForIndex } from '../../sqon/getNestedFieldsForIndex';
 import { and, not } from '../../sqon/manipulateSqon';
 import { Sqon } from '../../sqon/types';
 
-type OutputElement = {
+type Output = {
     operation: string;
     count: number;
+    sqon: Sqon;
+};
+
+type OutputReformattedElement = Output & {
     setId?: string;
 };
 
-type Output = {
-    summary: OutputElement[];
-    operations: OutputElement[];
+type OutputReformatted = {
+    summary: OutputReformattedElement[];
+    operations: OutputReformattedElement[];
 };
 
 const setFormulasDuo = (s1: Sqon, s2: Sqon) => [
@@ -84,7 +88,7 @@ const setFormulasTrio = (s1: Sqon, s2: Sqon, s3: Sqon) => [
 
 let nestedFields: string[] = null;
 
-export const venn = async (sqons: Sqon[]): Promise<Output> => {
+export const venn = async (sqons: Sqon[]): Promise<Output[]> => {
     const setFormulas =
         sqons.length === 2 ? setFormulasDuo(sqons[0], sqons[1]) : setFormulasTrio(sqons[0], sqons[1], sqons[2]);
 
@@ -114,14 +118,15 @@ export const venn = async (sqons: Sqon[]): Promise<Output> => {
 
     const responses = r.body?.responses || [];
 
-    const data = setFormulas.map((x, i) => ({
+    return setFormulas.map((x, i) => ({
         ...x,
         count: responses[i].hits.total.value,
     }));
+};
 
-    // Reformatting for UI
+export const reformatVenn = (data: Output[]): OutputReformatted => {
     const tables = data.reduce(
-        (xs: Output, x: OutputElement) => {
+        (xs: OutputReformatted, x: OutputReformattedElement) => {
             if (['Q₁', 'Q₂', 'Q₃'].some(y => y === x.operation)) {
                 return { ...xs, summary: [...xs.summary, x] };
             }
@@ -132,6 +137,6 @@ export const venn = async (sqons: Sqon[]): Promise<Output> => {
 
     return {
         summary: tables.summary,
-        operations: tables.operations.map((x: OutputElement, i: number) => ({ ...x, setId: `set-${i}` })),
+        operations: tables.operations.map((x: Output, i: number) => ({ ...x, setId: `set-${i}` })),
     };
 };
