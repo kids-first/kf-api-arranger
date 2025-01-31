@@ -207,16 +207,27 @@ export default (keycloak: Keycloak, getProject: (projectId: string) => ArrangerP
                 res.status(StatusCodes.UNPROCESSABLE_ENTITY).send('Bad Inputs');
                 return;
             }
+
+            if (!req.body?.queryPillSqons || req.body.queryPillSqons.length !== req.body.sqons.length) {
+                res.status(StatusCodes.UNPROCESSABLE_ENTITY).send('Bad Inputs');
+                return;
+            }
+
             // Convert sqon(s) with set_id if exists to intelligible sqon for ES query translation.
             const { resolvedSqons: sqons, m: mSetItToIds } = await resolveSetsInAllSqonsWithMapper(
                 req.body.sqons,
                 null,
                 req.headers.authorization,
             );
-            const data1 = await venn(sqons);
+
+            const index = ['participant', 'file', 'biospecimen'].includes(req.body?.index)
+                ? req.body.index
+                : 'participant';
+
+            const data1 = await venn(sqons, index);
             const data2 = data1.map(x => ({ ...x, sqon: replaceIdsWithSetId(x.sqon, mSetItToIds) }));
             res.send({
-                data: reformatVenn(data2),
+                data: reformatVenn(data2, req.body.queryPillSqons),
             });
         } catch (e) {
             next(e);
