@@ -16,7 +16,7 @@ type OutputReformattedElement = Output & {
 };
 
 type OutputReformatted = {
-    summary: OutputReformattedElement[];
+    summary: (OutputReformattedElement & { queryPillSqon?: Sqon })[];
     operations: OutputReformattedElement[];
 };
 
@@ -86,21 +86,20 @@ const setFormulasTrio = (s1: Sqon, s2: Sqon, s3: Sqon) => [
     },
 ];
 
-let nestedFields: string[] = null;
+//let nestedFields: string[] = null;
 
-export const venn = async (sqons: Sqon[]): Promise<Output[]> => {
+export const venn = async (sqons: Sqon[], index: string): Promise<Output[]> => {
     const setFormulas =
         sqons.length === 2 ? setFormulasDuo(sqons[0], sqons[1]) : setFormulasTrio(sqons[0], sqons[1], sqons[2]);
 
     const client = EsInstance.getInstance();
-    const needToFetchMapping = !nestedFields || nestedFields.length === 0;
-    if (needToFetchMapping) {
-        nestedFields = await getNestedFieldsForIndex(client, 'participant_centric');
-    }
+    const indexName = `${index}_centric`;
+    //const needToFetchMapping = !nestedFields || nestedFields.length === 0;
+    const nestedFields = await getNestedFieldsForIndex(client, indexName);
 
     const mSearchBody = setFormulas
         .map(x => [
-            {},
+            { index: indexName },
             {
                 track_total_hits: true,
                 size: 0,
@@ -124,11 +123,17 @@ export const venn = async (sqons: Sqon[]): Promise<Output[]> => {
     }));
 };
 
-export const reformatVenn = (data: Output[]): OutputReformatted => {
+export const reformatVenn = (data: Output[], queryPillSqons: Sqon[]): OutputReformatted => {
     const tables = data.reduce(
         (xs: OutputReformatted, x: OutputReformattedElement) => {
+            const queryPillSqon = {
+                ['Q₁']: queryPillSqons[0],
+                ['Q₂']: queryPillSqons[1],
+                ['Q₃']: queryPillSqons[2],
+            };
+
             if (['Q₁', 'Q₂', 'Q₃'].some(y => y === x.operation)) {
-                return { ...xs, summary: [...xs.summary, x] };
+                return { ...xs, summary: [...xs.summary, { ...x, queryPillSqon: queryPillSqon[x.operation] }] };
             }
             return { ...xs, operations: [...xs.operations, x] };
         },
