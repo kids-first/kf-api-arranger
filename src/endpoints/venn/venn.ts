@@ -5,15 +5,27 @@ import { getNestedFieldsForIndex } from '../../sqon/getNestedFieldsForIndex';
 import { and, not } from '../../sqon/manipulateSqon';
 import { Sqon } from '../../sqon/types';
 
-type VennOutput = {
+export type VennOutput = {
     operation: string;
     count: number;
     sqon: Sqon;
 };
 
-type VennOutputReformattedElement = VennOutput & {
-    setId?: string;
+type VennEntityOutput = {
+    operation: string;
+    entityCount: number;
+    entitySqon: Sqon;
 };
+
+type VennParticipantOutput = {
+    operation: string;
+    sqon: Sqon;
+};
+
+type VennOutputReformattedElement = VennEntityOutput &
+    VennParticipantOutput & {
+        setId?: string;
+    };
 
 export type VennOutputReformatted = {
     summary: VennOutputReformattedElement[];
@@ -134,7 +146,24 @@ export const venn = async (sqons: Sqon[], index: string, noOpCounts = false): Pr
     }));
 };
 
-export const reformatVenn = (data: VennOutput[]): VennOutputReformatted => {
+export const reformatWhenSpecifiedEntity = (os: VennOutput[]): VennEntityOutput[] =>
+    os.map(o => ({
+        operation: o.operation,
+        entitySqon: o.sqon,
+        entityCount: o.count,
+    }));
+
+const reformatWhenUnspecifiedSqon = (os: VennOutput[]): VennParticipantOutput[] =>
+    os.map(o => ({
+        operation: o.operation,
+        sqon: o.sqon,
+    }));
+
+const mergeOutputs = (xs: VennEntityOutput[], ys: VennParticipantOutput[]) =>
+    // Assumes that lists are of same length as well as "operation" value for same index loop
+    xs.map((x, i) => ({ ...x, ...ys[i] }));
+
+const reformatToTables = (data: VennOutputReformattedElement[]): VennOutputReformatted => {
     const tables = data.reduce(
         (xs: VennOutputReformatted, x: VennOutputReformattedElement) => {
             if (['Q₁', 'Q₂', 'Q₃'].some(y => y === x.operation)) {
@@ -147,6 +176,14 @@ export const reformatVenn = (data: VennOutput[]): VennOutputReformatted => {
 
     return {
         summary: tables.summary,
-        operations: tables.operations.map((x: VennOutput, i: number) => ({ ...x, setId: `set-${i}` })),
+        operations: tables.operations.map((x: VennOutputReformattedElement, i: number) => ({
+            ...x,
+            setId: `set-${i}`,
+        })),
     };
 };
+
+export const reformatVenn = (participantOutputs: VennOutput[], entityOutputs: VennOutput[]): VennOutputReformatted =>
+    reformatToTables(
+        mergeOutputs(reformatWhenSpecifiedEntity(entityOutputs), reformatWhenUnspecifiedSqon(participantOutputs)),
+    );
