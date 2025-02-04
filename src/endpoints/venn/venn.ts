@@ -5,19 +5,19 @@ import { getNestedFieldsForIndex } from '../../sqon/getNestedFieldsForIndex';
 import { and, not } from '../../sqon/manipulateSqon';
 import { Sqon } from '../../sqon/types';
 
-type Output = {
+type VennOutput = {
     operation: string;
     count: number;
     sqon: Sqon;
 };
 
-type OutputReformattedElement = Output & {
+type VennOutputReformattedElement = VennOutput & {
     setId?: string;
 };
 
-type OutputReformatted = {
-    summary: (OutputReformattedElement & { queryPillSqon?: Sqon })[];
-    operations: OutputReformattedElement[];
+export type VennOutputReformatted = {
+    summary: VennOutputReformattedElement[];
+    operations: VennOutputReformattedElement[];
 };
 
 const setFormulasDuo = (s1: Sqon, s2: Sqon) => [
@@ -86,16 +86,27 @@ const setFormulasTrio = (s1: Sqon, s2: Sqon, s3: Sqon) => [
     },
 ];
 
-//let nestedFields: string[] = null;
+const mNestedFields = new Map();
 
-export const venn = async (sqons: Sqon[], index: string): Promise<Output[]> => {
+export const venn = async (sqons: Sqon[], index: string, noOpCounts = false): Promise<VennOutput[]> => {
     const setFormulas =
         sqons.length === 2 ? setFormulasDuo(sqons[0], sqons[1]) : setFormulasTrio(sqons[0], sqons[1], sqons[2]);
 
+    // Only Venn formulas in Sqon speak is needed. Counts are not.
+    if (noOpCounts) {
+        return setFormulas.map(x => ({
+            ...x,
+            count: undefined,
+        }));
+    }
+
     const client = EsInstance.getInstance();
     const indexName = `${index}_centric`;
-    //const needToFetchMapping = !nestedFields || nestedFields.length === 0;
-    const nestedFields = await getNestedFieldsForIndex(client, indexName);
+    if (!mNestedFields.has(index)) {
+        const fields = await getNestedFieldsForIndex(client, indexName);
+        mNestedFields.set(indexName, fields);
+    }
+    const nestedFields = mNestedFields.get(indexName);
 
     const mSearchBody = setFormulas
         .map(x => [
@@ -119,21 +130,15 @@ export const venn = async (sqons: Sqon[], index: string): Promise<Output[]> => {
 
     return setFormulas.map((x, i) => ({
         ...x,
-        count: responses[i].hits.total.value,
+        count: responses[i]?.hits?.total?.value,
     }));
 };
 
-export const reformatVenn = (data: Output[], queryPillSqons: Sqon[]): OutputReformatted => {
+export const reformatVenn = (data: VennOutput[]): VennOutputReformatted => {
     const tables = data.reduce(
-        (xs: OutputReformatted, x: OutputReformattedElement) => {
-            const queryPillSqon = {
-                ['Q₁']: queryPillSqons[0],
-                ['Q₂']: queryPillSqons[1],
-                ['Q₃']: queryPillSqons[2],
-            };
-
+        (xs: VennOutputReformatted, x: VennOutputReformattedElement) => {
             if (['Q₁', 'Q₂', 'Q₃'].some(y => y === x.operation)) {
-                return { ...xs, summary: [...xs.summary, { ...x, queryPillSqon: queryPillSqon[x.operation] }] };
+                return { ...xs, summary: [...xs.summary, x] };
             }
             return { ...xs, operations: [...xs.operations, x] };
         },
@@ -142,6 +147,6 @@ export const reformatVenn = (data: Output[], queryPillSqons: Sqon[]): OutputRefo
 
     return {
         summary: tables.summary,
-        operations: tables.operations.map((x: Output, i: number) => ({ ...x, setId: `set-${i}` })),
+        operations: tables.operations.map((x: VennOutput, i: number) => ({ ...x, setId: `set-${i}` })),
     };
 };

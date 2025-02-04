@@ -20,7 +20,7 @@ import { CreateSetBody, Set, SetSqon, UpdateSetContentBody, UpdateSetTagBody } f
 import { getStatistics, getStudiesStatistics } from './endpoints/statistics';
 import transcriptomicsRouter from './endpoints/transcriptomics/route';
 import { computeUpset } from './endpoints/upset';
-import { reformatVenn, venn } from './endpoints/venn/venn';
+import { reformatVenn, venn, VennOutputReformatted } from './endpoints/venn/venn';
 import { esHost, keycloakURL, userApiURL } from './env';
 import { globalErrorHandler, globalErrorLogger } from './errors';
 import { flushAllCache, STATISTICS_CACHE_ID, STATISTICS_PUBLIC_CACHE_ID, twineWithCache } from './middleware/cache';
@@ -203,31 +203,35 @@ export default (keycloak: Keycloak, getProject: (projectId: string) => ArrangerP
 
     app.post('/venn', keycloak.protect(), async (req, res, next) => {
         try {
-            if (![2, 3].includes(req.body?.sqons?.length)) {
+            if (![2, 3].includes(req.body?.sqons?.length) || ![2, 3].includes(req.body?.entityCentricSqons?.length)) {
                 res.status(StatusCodes.UNPROCESSABLE_ENTITY).send('Bad Inputs');
                 return;
             }
 
-            if (!req.body?.queryPillSqons || req.body.queryPillSqons.length !== req.body.sqons.length) {
-                res.status(StatusCodes.UNPROCESSABLE_ENTITY).send('Bad Inputs');
-                return;
+            const data: VennOutputReformatted[] = [];
+            for (const [rawSqons, rawIndex, noOpCounts] of [
+                [req.body.sqons, 'participant', true],
+                [req.body.entityCentricSqons, req.body?.index, false],
+            ]) {
+                // Convert sqon(s) with set_id if exists to intelligible sqon for ES query translation.
+                const { resolvedSqons: sqons, m: mSetItToIds } = await resolveSetsInAllSqonsWithMapper(
+                    rawSqons,
+                    null,
+                    req.headers.authorization,
+                );
+
+                const index = ['participant', 'file', 'biospecimen'].includes(rawIndex) ? rawIndex : 'participant';
+
+                const datum1 = await venn(sqons, index, noOpCounts);
+                const datum2 = datum1.map(x => ({ ...x, sqon: replaceIdsWithSetId(x.sqon, mSetItToIds) }));
+                data.push(reformatVenn(datum2));
             }
 
-            // Convert sqon(s) with set_id if exists to intelligible sqon for ES query translation.
-            const { resolvedSqons: sqons, m: mSetItToIds } = await resolveSetsInAllSqonsWithMapper(
-                req.body.sqons,
-                null,
-                req.headers.authorization,
-            );
-
-            const index = ['participant', 'file', 'biospecimen'].includes(req.body?.index)
-                ? req.body.index
-                : 'participant';
-
-            const data1 = await venn(sqons, index);
-            const data2 = data1.map(x => ({ ...x, sqon: replaceIdsWithSetId(x.sqon, mSetItToIds) }));
             res.send({
-                data: reformatVenn(data2, req.body.queryPillSqons),
+                data: {
+                    participantCentric: data[0],
+                    entityCentric: data[1],
+                },
             });
         } catch (e) {
             next(e);
