@@ -209,7 +209,8 @@ export default (keycloak: Keycloak, getProject: (projectId: string) => ArrangerP
             const rawEntitySqons = req.body?.entitySqons;
 
             if (!lengthOk(rawSqons) || !lengthOk(rawEntitySqons)) {
-                return res.status(StatusCodes.UNPROCESSABLE_ENTITY).send('Bad Inputs');
+                res.status(StatusCodes.UNPROCESSABLE_ENTITY).send('Bad Inputs');
+                return;
             }
 
             const data: VennOutput[][] = [];
