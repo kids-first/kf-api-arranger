@@ -20,13 +20,14 @@ import { CreateSetBody, Set, SetSqon, UpdateSetContentBody, UpdateSetTagBody } f
 import { getStatistics, getStudiesStatistics } from './endpoints/statistics';
 import transcriptomicsRouter from './endpoints/transcriptomics/route';
 import { computeUpset } from './endpoints/upset';
-import { reformatVenn, venn, VennOutputReformatted } from './endpoints/venn/venn';
+import { reformatVenn, venn, VennOutput } from './endpoints/venn/venn';
 import { esHost, keycloakURL, userApiURL } from './env';
 import { globalErrorHandler, globalErrorLogger } from './errors';
 import { flushAllCache, STATISTICS_CACHE_ID, STATISTICS_PUBLIC_CACHE_ID, twineWithCache } from './middleware/cache';
 import { injectBodyHttpHeaders } from './middleware/injectBodyHttpHeaders';
 import { resolveSetIdMiddleware } from './middleware/resolveSetIdInSqon';
 import { replaceIdsWithSetId, resolveSetsInAllSqonsWithMapper } from './sqon/resolveSetInSqon';
+import { Sqon } from './sqon/types';
 
 export default (keycloak: Keycloak, getProject: (projectId: string) => ArrangerProject): Express => {
     const app = express();
@@ -202,20 +203,24 @@ export default (keycloak: Keycloak, getProject: (projectId: string) => ArrangerP
     });
 
     app.post('/venn', keycloak.protect(), async (req, res, next) => {
+        const lengthOk = (l: Sqon[]) => [2, 3].includes(l.length);
         try {
-            if (![2, 3].includes(req.body?.sqons?.length) || ![2, 3].includes(req.body?.entityCentricSqons?.length)) {
+            const rawSqons = req.body?.sqons;
+            const rawEntitySqons = req.body?.entitySqons;
+
+            if (!lengthOk(rawSqons) || !lengthOk(rawEntitySqons)) {
                 res.status(StatusCodes.UNPROCESSABLE_ENTITY).send('Bad Inputs');
                 return;
             }
 
-            const data: VennOutputReformatted[] = [];
-            for (const [rawSqons, rawIndex, noOpCounts] of [
-                [req.body.sqons, 'participant', true],
-                [req.body.entityCentricSqons, req.body?.index, false],
+            const data: VennOutput[][] = [];
+            for (const [inputSqons, rawIndex, noOpCounts] of [
+                [rawSqons, 'participant', true],
+                [rawEntitySqons, req.body?.index, false],
             ]) {
                 // Convert sqon(s) with set_id if exists to intelligible sqon for ES query translation.
                 const { resolvedSqons: sqons, m: mSetItToIds } = await resolveSetsInAllSqonsWithMapper(
-                    rawSqons,
+                    inputSqons,
                     null,
                     req.headers.authorization,
                 );
@@ -224,14 +229,12 @@ export default (keycloak: Keycloak, getProject: (projectId: string) => ArrangerP
 
                 const datum1 = await venn(sqons, index, noOpCounts);
                 const datum2 = datum1.map(x => ({ ...x, sqon: replaceIdsWithSetId(x.sqon, mSetItToIds) }));
-                data.push(reformatVenn(datum2));
+                data.push(datum2);
             }
-
+            const indexOfParticipantEntity = 0;
+            const indexOfEntity = 1;
             res.send({
-                data: {
-                    participantCentric: data[0],
-                    entityCentric: data[1],
-                },
+                data: reformatVenn(data[indexOfParticipantEntity], data[indexOfEntity]),
             });
         } catch (e) {
             next(e);
