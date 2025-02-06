@@ -17,18 +17,12 @@ type VennEntityOutput = {
     entitySqon: Sqon;
 };
 
-type VennParticipantOutput = {
-    operation: string;
-    sqon: Sqon;
+type VennOutputReformattedElement = VennEntityOutput & {
+    setId?: string;
 };
 
-type VennOutputReformattedElement = VennEntityOutput &
-    VennParticipantOutput & {
-        setId?: string;
-    };
-
 export type VennOutputReformatted = {
-    summary: VennOutputReformattedElement[];
+    summary: (VennOutputReformattedElement & { qbSqon: Sqon })[];
     operations: VennOutputReformattedElement[];
 };
 
@@ -100,17 +94,9 @@ const setFormulasTrio = (s1: Sqon, s2: Sqon, s3: Sqon) => [
 
 const mNestedFields = new Map();
 
-export const venn = async (sqons: Sqon[], index: string, noOpCounts = false): Promise<VennOutput[]> => {
+export const venn = async (sqons: Sqon[], index: string): Promise<VennOutput[]> => {
     const setFormulas =
         sqons.length === 2 ? setFormulasDuo(sqons[0], sqons[1]) : setFormulasTrio(sqons[0], sqons[1], sqons[2]);
-
-    // Only Venn formulas in Sqon speak is needed. Counts are not.
-    if (noOpCounts) {
-        return setFormulas.map(x => ({
-            ...x,
-            count: undefined,
-        }));
-    }
 
     const client = EsInstance.getInstance();
     const indexName = `${index}_centric`;
@@ -153,21 +139,16 @@ export const reformatWhenSpecifiedEntity = (os: VennOutput[]): VennEntityOutput[
         entityCount: o.count,
     }));
 
-const reformatWhenUnspecifiedSqon = (os: VennOutput[]): VennParticipantOutput[] =>
-    os.map(o => ({
-        operation: o.operation,
-        sqon: o.sqon,
-    }));
-
-const mergeOutputs = (xs: VennEntityOutput[], ys: VennParticipantOutput[]) =>
-    // Assumes that lists are of same length as well as "operation" value for same index loop
-    xs.map((x, i) => ({ ...x, ...ys[i] }));
-
-const reformatToTables = (data: VennOutputReformattedElement[]): VennOutputReformatted => {
+const reformatToTables = (data: VennOutputReformattedElement[], qbSqons: Sqon[]): VennOutputReformatted => {
+    const opToQbSqon = {
+        ['Q₁']: qbSqons[0],
+        ['Q₂']: qbSqons[1],
+        ['Q₃']: qbSqons[2],
+    };
     const tables = data.reduce(
         (xs: VennOutputReformatted, x: VennOutputReformattedElement) => {
             if (['Q₁', 'Q₂', 'Q₃'].some(y => y === x.operation)) {
-                return { ...xs, summary: [...xs.summary, x] };
+                return { ...xs, summary: [...xs.summary, { ...x, qbSqon: opToQbSqon[x.operation] }] };
             }
             return { ...xs, operations: [...xs.operations, x] };
         },
@@ -183,7 +164,5 @@ const reformatToTables = (data: VennOutputReformattedElement[]): VennOutputRefor
     };
 };
 
-export const reformatVenn = (participantOutputs: VennOutput[], entityOutputs: VennOutput[]): VennOutputReformatted =>
-    reformatToTables(
-        mergeOutputs(reformatWhenSpecifiedEntity(entityOutputs), reformatWhenUnspecifiedSqon(participantOutputs)),
-    );
+export const reformatVenn = (outputs: VennOutput[], qbSqons: Sqon[]): VennOutputReformatted =>
+    reformatToTables(reformatWhenSpecifiedEntity(outputs), qbSqons);
