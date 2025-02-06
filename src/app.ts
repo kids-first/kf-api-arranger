@@ -205,36 +205,29 @@ export default (keycloak: Keycloak, getProject: (projectId: string) => ArrangerP
     app.post('/venn', keycloak.protect(), async (req, res, next) => {
         const lengthOk = (l: Sqon[]) => [2, 3].includes(l.length);
         try {
-            const rawSqons = req.body?.sqons;
+            const qbSqons = req.body?.qbSqons;
             const rawEntitySqons = req.body?.entitySqons;
 
-            if (!lengthOk(rawSqons) || !lengthOk(rawEntitySqons)) {
+            if (!lengthOk(qbSqons) || !lengthOk(rawEntitySqons)) {
                 res.status(StatusCodes.UNPROCESSABLE_ENTITY).send('Bad Inputs');
                 return;
             }
 
-            const data: VennOutput[][] = [];
-            for (const [inputSqons, rawIndex, noOpCounts] of [
-                [rawSqons, 'participant', true],
-                [rawEntitySqons, req.body?.index, false],
-            ]) {
-                // Convert sqon(s) with set_id if exists to intelligible sqon for ES query translation.
-                const { resolvedSqons: sqons, m: mSetItToIds } = await resolveSetsInAllSqonsWithMapper(
-                    inputSqons,
-                    null,
-                    req.headers.authorization,
-                );
+            const { resolvedSqons: sqons, m: mSetItToIds } = await resolveSetsInAllSqonsWithMapper(
+                rawEntitySqons,
+                null,
+                req.headers.authorization,
+            );
 
-                const index = ['participant', 'file', 'biospecimen'].includes(rawIndex) ? rawIndex : 'participant';
+            const index = ['participant', 'file', 'biospecimen'].includes(req.body?.index)
+                ? req.body?.index
+                : 'participant';
 
-                const datum1 = await venn(sqons, index, noOpCounts);
-                const datum2 = datum1.map(x => ({ ...x, sqon: replaceIdsWithSetId(x.sqon, mSetItToIds) }));
-                data.push(datum2);
-            }
-            const indexOfParticipantEntity = 0;
-            const indexOfEntity = 1;
+            const datum1 = await venn(sqons, index);
+            const datum2 = datum1.map(x => ({ ...x, sqon: replaceIdsWithSetId(x.sqon, mSetItToIds) }));
+
             res.send({
-                data: reformatVenn(data[indexOfParticipantEntity], data[indexOfEntity]),
+                data: reformatVenn(datum2, qbSqons),
             });
         } catch (e) {
             next(e);
