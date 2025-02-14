@@ -113,6 +113,7 @@ describe('Set management', () => {
                 riffType: RIFF_TYPE_SET,
                 setType: type,
             },
+            is_invisible: false,
         };
 
         beforeEach(() => {

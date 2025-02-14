@@ -21,6 +21,7 @@ export type UserSet = {
     sharedpublicly: boolean;
     creation_date: Date;
     updated_date: Date;
+    is_invisible?: boolean;
 };
 
 export const getSharedSet = async (accessToken: string, setId: string): Promise<UserSet> => {
