@@ -9,6 +9,7 @@ export type CreateUpdateBody = {
     alias: string;
     content: Content;
     sharedPublicly: boolean;
+    is_invisible?: boolean;
 };
 
 export type Content = {
@@ -27,6 +28,7 @@ export type CreateSetBody = {
     idField: string;
     sort: Sort[];
     tag: string;
+    is_invisible?: boolean;
 };
 
 export type UpdateSetTagBody = {

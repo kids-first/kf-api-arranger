@@ -42,7 +42,7 @@ export const createSet = async (
     userId: string,
     getProject: (projectId: string) => ArrangerProject,
 ): Promise<Set> => {
-    const { sqon, sort, projectId, type, idField, tag } = requestBody;
+    const { sqon, sort, projectId, type, idField, tag, is_invisible } = requestBody;
     const sqonAfterReplace = await resolveSetsInSqon(sqon, userId, accessToken);
     const ids = await searchSqon(sqonAfterReplace, projectId, type, sort, idField, getProject);
 
@@ -52,6 +52,7 @@ export const createSet = async (
         alias: tag,
         sharedPublicly: false,
         content: { ids: truncatedIds, riffType: RIFF_TYPE_SET, setType: type, sqon, sort, idField },
+        is_invisible: is_invisible ?? false,
     };
 
     if (!payload.alias || !payload.content.ids) {
