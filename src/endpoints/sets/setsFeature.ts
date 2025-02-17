@@ -130,6 +130,7 @@ const mapUserResultToSet = (output: UserSet): Set => ({
     updated_date: output.updated_date,
     setType: output.content.setType,
     created_date: output.creation_date,
+    is_invisible: output.is_invisible,
 });
 
 const truncateIds = (ids: string[]): string[] => {

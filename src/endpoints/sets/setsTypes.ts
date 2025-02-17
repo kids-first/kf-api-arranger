@@ -56,4 +56,5 @@ export type Set = {
     setType: string;
     updated_date: Date;
     created_date: Date;
+    is_invisible: boolean;
 };
