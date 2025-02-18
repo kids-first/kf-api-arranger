@@ -59,6 +59,7 @@ describe('Set management', () => {
         setType: userSet.content.setType,
         created_date: userSet.creation_date,
         updated_date: userSet.updated_date,
+        is_invisible: userSet.is_invisible,
     };
 
     describe('Get user sets using Users-API', () => {
