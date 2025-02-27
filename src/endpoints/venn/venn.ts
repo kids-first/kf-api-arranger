@@ -2,7 +2,7 @@ import { buildQuery } from '@arranger/middleware';
 
 import EsInstance from '../../ElasticSearchClientInstance';
 import { getNestedFieldsForIndex } from '../../sqon/getNestedFieldsForIndex';
-import { and, not } from '../../sqon/manipulateSqon';
+import { and, not, or } from '../../sqon/manipulateSqon';
 import { Sqon } from '../../sqon/types';
 
 export type VennOutput = {
@@ -63,16 +63,16 @@ const setFormulasTrio = (s1: Sqon, s2: Sqon, s3: Sqon) => [
         sqon: s3,
     },
     {
-        operation: 'Q₁-(Q₂∩Q₃)',
-        sqon: not(s1, and(s2, [s3])),
+        operation: 'Q₁-(Q₂∪Q₃)',
+        sqon: not(s1, or(s2, [s3])),
     },
     {
-        operation: 'Q₂-(Q₁∩Q₃)',
-        sqon: not(s2, and(s1, [s3])),
+        operation: 'Q₂-(Q₁∪Q₃)',
+        sqon: not(s2, or(s1, [s3])),
     },
     {
-        operation: 'Q₃-(Q₁∩Q₂)',
-        sqon: not(s3, and(s1, [s2])),
+        operation: 'Q₃-(Q₁∪Q₂)',
+        sqon: not(s3, or(s1, [s2])),
     },
     {
         operation: '(Q₁∩Q₂)-Q₃',
