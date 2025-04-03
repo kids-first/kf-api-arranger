@@ -219,7 +219,7 @@ export default (keycloak: Keycloak, getProject: (projectId: string) => ArrangerP
                 req.headers.authorization,
             );
 
-            const index = ['participant', 'file', 'biospecimen'].includes(req.body?.index)
+            const index = ['participant', 'file', 'biospecimen', 'variant'].includes(req.body?.index)
                 ? req.body?.index
                 : 'participant';
 
