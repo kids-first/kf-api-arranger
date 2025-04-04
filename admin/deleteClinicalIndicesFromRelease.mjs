@@ -56,7 +56,8 @@ assert(Array.isArray(releaseClinicalIndices) && releaseClinicalIndices.length > 
 
 // Extra check. Might not be needed, but cheap to test.
 const hasOnlyClinicalIndices = releaseClinicalIndices.every(r => {
-    const indexPrefix = r.split('_')[0];
+    const rawIndexPrefix = r.split('_')[0];
+    const indexPrefix = rawIndexPrefix === 'specimen' ? 'specimen_tree' : rawIndexPrefix;
     return ['gene', 'variant'].some(prefix => !r.startsWith(prefix)) && INDEX_CLINICAL_CATEGORIES.includes(indexPrefix);
 });
 assert(
@@ -76,7 +77,7 @@ assert(rAllAliases.statusCode === 200);
 const allAliases = rAllAliases.body;
 const clinicalAliases = allAliases.filter(cbKeepClinicalIndicesOnly);
 
-const isAliased = clinicalAliases.some(x => x.index.includes(releaseTag));
+const isAliased = clinicalAliases.some(x => x.index.endsWith(releaseTag));
 assert(!isAliased, `${releaseTag} is aliased`);
 
 const displayIndicesQuestion = () =>
