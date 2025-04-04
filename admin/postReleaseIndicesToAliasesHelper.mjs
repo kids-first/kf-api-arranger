@@ -81,7 +81,13 @@ const displayIndicesQuestion = () =>
     });
 await displayIndicesQuestion();
 
-const INDICES_PREFIXES = ['biospecimen_centric', 'participant_centric', 'study_centric', 'file_centric'];
+const INDICES_PREFIXES = [
+    'biospecimen_centric',
+    'participant_centric',
+    'study_centric',
+    'file_centric',
+    'specimen_tree_centric',
+];
 
 const actions = releaseIndices.reduce((xs, x) => {
     const prefix = INDICES_PREFIXES.find(p => x.startsWith(p));

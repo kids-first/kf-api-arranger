@@ -27,6 +27,10 @@
         {
             "graphqlField": "variants_somatic",
             "esIndex": "variant_somatic_centric"
+        },
+        {
+            "graphqlField": "biospecimen_trees",
+            "esIndex": "specimen_tree_centric"
         }
     ],
     "extendedMappingMutations": [
