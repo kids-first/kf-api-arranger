@@ -47,7 +47,7 @@ if (catIndicesResponse.statusCode !== 200) {
     process.exit(1);
 }
 
-const INDEX_CLINICAL_CATEGORIES = ['file', 'participant', 'study', 'biospecimen'];
+const INDEX_CLINICAL_CATEGORIES = ['file', 'participant', 'study', 'biospecimen', 'specimen_tree'];
 const releaseClinicalIndices = catIndicesResponse.body
     .map(x => x.index)
     .filter(x => INDEX_CLINICAL_CATEGORIES.some(c => x.includes(c)))

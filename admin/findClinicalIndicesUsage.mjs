@@ -48,13 +48,19 @@ const formatTableContent = (l, standardRePattern = true) =>
         .reduce((xs, x) => (xs.some(y => y[0] === x[0] && y[2] === x[2]) ? xs : [...xs, x]), [])
         .map(x => ({ release: x[0], creation_date: x[1], transcriptomics: x[2] }));
 
+const extractEntities = l => [...new Set(l.map(x => x.index.split('_centric')[0]))].map(x => `${x}_centric`);
+
 const clinicalIndicesNotAliased = clinicalIndices.filter(x => clinicalAliases.every(a => a.index !== x.index));
 const unaliasedClinicalIndicesWithCreationDate = formatTableContent(clinicalIndicesNotAliased);
 
 console.log(`===== Not Aliased (pattern:re_*)`);
-unaliasedClinicalIndicesWithCreationDate.length
-    ? console.table(unaliasedClinicalIndicesWithCreationDate)
-    : console.log('None');
+if (unaliasedClinicalIndicesWithCreationDate.length) {
+    console.table(unaliasedClinicalIndicesWithCreationDate);
+    console.log('Entities Involved: ');
+    console.log(extractEntities(clinicalIndicesNotAliased));
+} else {
+    console.log('None');
+}
 
 console.log(`===== Aliased (pattern:re_*)`);
 const clinicalIndicesAliased = clinicalIndices.filter(x => clinicalAliases.some(a => a.index === x.index));
@@ -68,13 +74,22 @@ const showIfOnlyCbtn = re => {
 };
 
 //======
-
 const aliasedClinicalIndicesWithCreationDate = formatTableContent(clinicalIndicesAliased);
-aliasedClinicalIndicesWithCreationDate.length
-    ? console.table(aliasedClinicalIndicesWithCreationDate.map(x => ({ ...x, release: showIfOnlyCbtn(x.release) })))
-    : console.log('None');
+if (aliasedClinicalIndicesWithCreationDate.length) {
+    console.table(aliasedClinicalIndicesWithCreationDate.map(x => ({ ...x, release: showIfOnlyCbtn(x.release) })));
+    console.log('Entities Involved: ');
+    console.log(extractEntities(clinicalIndicesAliased));
+} else {
+    console.log('None');
+}
 
 console.log(`===== Others (Clinical)`);
 const othersClinical = formatTableContent(clinicalIndices, false);
 
-othersClinical.length ? console.table(othersClinical) : console.log('None');
+if (othersClinical.length) {
+    console.table(othersClinical);
+    console.log('Entities Involved: ');
+    console.log(extractEntities(clinicalIndices));
+} else {
+    console.log('None');
+}
