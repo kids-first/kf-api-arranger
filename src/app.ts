@@ -20,13 +20,13 @@ import { CreateSetBody, Set, SetSqon, UpdateSetContentBody, UpdateSetTagBody } f
 import { getStatistics, getStudiesStatistics } from './endpoints/statistics';
 import transcriptomicsRouter from './endpoints/transcriptomics/route';
 import { computeUpset } from './endpoints/upset';
-import { reformatVenn, venn, VennOutput } from './endpoints/venn/venn';
+import { reformatVenn, venn } from './endpoints/venn/venn';
 import { esHost, keycloakURL, userApiURL } from './env';
 import { globalErrorHandler, globalErrorLogger } from './errors';
 import { flushAllCache, STATISTICS_CACHE_ID, STATISTICS_PUBLIC_CACHE_ID, twineWithCache } from './middleware/cache';
 import { injectBodyHttpHeaders } from './middleware/injectBodyHttpHeaders';
 import { resolveSetIdMiddleware } from './middleware/resolveSetIdInSqon';
-import { replaceIdsWithSetId, resolveSetsInAllSqonsWithMapper } from './sqon/resolveSetInSqon';
+import { replaceIdsWithSetId, resolveSetsInAllSqonsWithMapper, resolveSetsInSqon } from './sqon/resolveSetInSqon';
 import { Sqon } from './sqon/types';
 
 export default (keycloak: Keycloak, getProject: (projectId: string) => ArrangerProject): Express => {
@@ -195,7 +195,8 @@ export default (keycloak: Keycloak, getProject: (projectId: string) => ArrangerP
 
     app.post('/upset', keycloak.protect(), async (req, res, next) => {
         try {
-            const data = await computeUpset(req.body.sqon, req.body.topN);
+            const sqon = await resolveSetsInSqon(req.body.sqon, null, req.headers.authorization);
+            const data = await computeUpset(sqon, req.body.topN);
             res.send(data);
         } catch (e) {
             next(e);
