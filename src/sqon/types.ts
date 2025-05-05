@@ -1,6 +1,7 @@
+export type Content = any;
 //A poor' s man sqon type.
 export type Sqon = {
     op: string;
-    content: any;
+    content: Content;
     [key: string]: any;
 };

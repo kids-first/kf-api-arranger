@@ -6,7 +6,7 @@ import { ArrangerProject } from '../arrangerUtils';
 import { throwErrorsFromGqlQueryIfExist } from '../errors';
 import { ES_SEARCH_MAX_BUCKETS } from '../esUtils';
 import { idKey } from '../fieldsKeys';
-import { replaceSetByIds } from '../sqon/setSqon';
+import { resolveSetIds } from '../sqon/setSqon';
 import { SetSqon } from './sets/setsTypes';
 
 const extractPsIds = (resp): string[] => (resp?.data?.participant?.hits?.edges || []).map(edge => edge.node[idKey]);
@@ -105,7 +105,7 @@ export const getPhenotypesNodes = async (
     aggregations_filter_themselves: boolean,
     accessToken: string,
 ) => {
-    const newSqon = await replaceSetByIds(sqon, accessToken);
+    const newSqon = await resolveSetIds(sqon, accessToken);
 
     const participantIds = await getParticipantIds(newSqon as SetSqon, projectId, getProject);
 
