@@ -127,13 +127,17 @@ export const deleteUserSet = async (accessToken: string, setId: string): Promise
 export const postSetsTags = async (setIds: string[], accessToken: string): Promise<SetIdToTag[]> => {
     const uri = `${userApiURL}/user-sets/aliases`;
 
+    const bodyPayload = {
+        setIds: setIds,
+    };
+
     const response = await fetch(encodeURI(uri), {
         method: 'post',
         headers: {
             Authorization: accessToken,
             'Content-Type': 'application/json',
         },
-        body: `"setIds": ${JSON.stringify(setIds)}`,
+        body: JSON.stringify(bodyPayload),
     });
 
     const body = await response.json();
