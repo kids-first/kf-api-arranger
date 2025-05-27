@@ -58,3 +58,8 @@ export type Set = {
     created_date: Date;
     is_invisible: boolean;
 };
+
+export type SetIdToTag = {
+    setId: string;
+    alias: string;
+};

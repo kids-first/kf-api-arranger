@@ -28,6 +28,7 @@ import { injectBodyHttpHeaders } from './middleware/injectBodyHttpHeaders';
 import { resolveSetIdMiddleware } from './middleware/resolveSetIdInSqon';
 import { replaceIdsWithSetId, resolveSetsInAllSqonsWithMapper, resolveSetsInSqon } from './sqon/resolveSetInSqon';
 import { Sqon } from './sqon/types';
+import { resolveQueriesSetAliases } from './sqon/setSqon';
 
 export default (keycloak: Keycloak, getProject: (projectId: string) => ArrangerProject): Express => {
     const app = express();
@@ -162,6 +163,25 @@ export default (keycloak: Keycloak, getProject: (projectId: string) => ArrangerP
             const deletedResult = await deleteSet(accessToken, setId);
 
             res.send(deletedResult);
+        } catch (e) {
+            next(e);
+        }
+    });
+
+    app.post('/sets/aliases', keycloak.protect(), async (req, res, next) => {
+        const isPlainObject = (input: unknown) => Object.prototype.toString.call(input) === '[object Object]';
+        try {
+            const queries = req.body?.queries;
+            if (!queries || !Array.isArray(queries) || queries.some(q => !isPlainObject(q))) {
+                res.status(StatusCodes.UNPROCESSABLE_ENTITY).send('Bad Inputs');
+                return;
+            }
+
+            const setIdsToTags = await resolveQueriesSetAliases(queries, req.headers.authorization);
+
+            res.send({
+                data: setIdsToTags,
+            });
         } catch (e) {
             next(e);
         }
