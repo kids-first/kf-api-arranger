@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 
-import { CreateUpdateBody, SetSqon, Sort } from '../endpoints/sets/setsTypes';
+import { CreateUpdateBody, SetIdToTag, SetSqon, Sort } from '../endpoints/sets/setsTypes';
 import { userApiURL } from '../env';
 import { UserApiError } from './userApiError';
 
@@ -122,4 +122,29 @@ export const deleteUserSet = async (accessToken: string, setId: string): Promise
     }
 
     throw new UserApiError(response.status, response.body);
+};
+
+export const postSetsTags = async (setIds: string[], accessToken: string): Promise<SetIdToTag[]> => {
+    const uri = `${userApiURL}/user-sets/aliases`;
+
+    const bodyPayload = {
+        setIds: setIds,
+    };
+
+    const response = await fetch(encodeURI(uri), {
+        method: 'post',
+        headers: {
+            Authorization: accessToken,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(bodyPayload),
+    });
+
+    const body = await response.json();
+
+    if (response.status === 200) {
+        return body;
+    }
+
+    throw new UserApiError(response.status, body);
 };

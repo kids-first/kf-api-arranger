@@ -1,5 +1,6 @@
-import { getUserSets } from '../userApi/userApiClient';
-import { resolveSetIds } from './setSqon';
+import { getUserSets, postSetsTags } from '../userApi/userApiClient';
+import { resolveSetIds, resolveQueriesSetAliases } from './setSqon';
+import { Sqon } from './types';
 
 jest.mock('../userApi/userApiClient');
 
@@ -109,5 +110,84 @@ describe(`resolveSetIds`, () => {
         expect(result.content.length).toEqual(2);
         expect(JSON.stringify(result)).not.toContain('set_id:');
         expect((getUserSets as jest.Mock).mock.calls.length).toEqual(1);
+    });
+});
+
+describe(`resolveQueriesSetAliases`, () => {
+    beforeEach(() => {
+        (postSetsTags as jest.Mock).mockReset();
+    });
+
+    it('should return an empty if no set_id is detected', async () => {
+        const queries = [
+            {
+                content: [
+                    {
+                        content: {
+                            field: 'files.data_category',
+                            index: 'file',
+                            value: ['Genomics'],
+                        },
+                        op: 'in',
+                    },
+                ],
+                op: 'and',
+            },
+        ];
+        const result = await resolveQueriesSetAliases(queries, 'access_token');
+        expect(result).toEqual([]);
+    });
+
+    it('should find the tags for the set_ids present in the queries', async () => {
+        const sampleSetIdsToTags = [
+            {
+                setId: 'set_id:459b87ae-1910-4b52-bfcb-bb50062f40db',
+                alias: 'Cypress_B',
+            },
+            {
+                setId: 'set_id:f2ba2794-b486-4169-b91b-7e10a932f0e7',
+                alias: 'Q1 union Q2 - 1165',
+            },
+        ];
+        (postSetsTags as jest.Mock).mockImplementation(() => sampleSetIdsToTags);
+
+        const queries: Sqon[] = [
+            {
+                id: '879e19f8-0998-4dab-b949-94096d4e02fe',
+                op: 'and',
+                content: [
+                    {
+                        op: 'in',
+                        content: {
+                            field: 'participant_facet_ids.participant_fhir_id_1',
+                            index: 'participant',
+                            value: ['set_id:459b87ae-1910-4b52-bfcb-bb50062f40db'],
+                        },
+                    },
+                ],
+            },
+            {
+                content: [
+                    {
+                        content: {
+                            field: 'participant_facet_ids.participant_fhir_id_1',
+                            index: 'participant',
+                            value: ['set_id:f2ba2794-b486-4169-b91b-7e10a932f0e7'],
+                        },
+                        op: 'in',
+                    },
+                ],
+                id: 'f1b6b4ea-ef51-4a80-8a30-19abebb3eadb',
+                op: 'and',
+            },
+        ];
+
+        const result = await resolveQueriesSetAliases(queries, 'access_token');
+
+        expect(result.length).toEqual(2);
+        expect(result.sort((a, b) => a.setId.localeCompare(b.setId))).toEqual(
+            sampleSetIdsToTags.sort((a, b) => a.setId.localeCompare(b.setId)),
+        );
+        expect((postSetsTags as jest.Mock).mock.calls.length).toEqual(1);
     });
 });
