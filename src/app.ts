@@ -29,6 +29,7 @@ import { resolveSetIdMiddleware } from './middleware/resolveSetIdInSqon';
 import { replaceIdsWithSetId, resolveSetsInAllSqonsWithMapper, resolveSetsInSqon } from './sqon/resolveSetInSqon';
 import { Sqon } from './sqon/types';
 import { resolveQueriesSetAliases } from './sqon/setSqon';
+import { getPublicGraphs, getPublicStudy } from './endpoints/publicStudy/publicStudy';
 
 export default (keycloak: Keycloak, getProject: (projectId: string) => ArrangerProject): Express => {
     const app = express();
@@ -250,6 +251,34 @@ export default (keycloak: Keycloak, getProject: (projectId: string) => ArrangerP
             res.send({
                 data: reformatVenn(datum2, qbSqons),
             });
+        } catch (e) {
+            next(e);
+        }
+    });
+
+    app.get('/public-study/study/:code', async (req, res, next) => {
+        try {
+            const code = req.params.code;
+            if (!code || typeof code !== 'string') {
+                res.status(StatusCodes.UNPROCESSABLE_ENTITY).send('Bad Inputs');
+                return;
+            }
+            const study = await getPublicStudy(req.params.code);
+            res.send(study || {});
+        } catch (e) {
+            next(e);
+        }
+    });
+
+    app.get('/public-study/graphs/:code', async (req, res, next) => {
+        try {
+            const code = req.params.code;
+            if (!code || typeof code !== 'string') {
+                res.status(StatusCodes.UNPROCESSABLE_ENTITY).send('Bad Inputs');
+                return;
+            }
+            const study = await getPublicGraphs(req.params.code);
+            res.send(study || {});
         } catch (e) {
             next(e);
         }

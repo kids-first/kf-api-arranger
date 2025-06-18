@@ -184,6 +184,13 @@
             }
         },
         {
+            "field": "person.links",
+            "graphqlField": "participant",
+            "extendedFieldMappingInput": {
+                "isArray": true
+            }
+        },
+        {
             "field": "contacts",
             "graphqlField": "study",
             "extendedFieldMappingInput": {
