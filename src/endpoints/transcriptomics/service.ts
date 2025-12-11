@@ -45,6 +45,15 @@ export const fetchDiffGeneExp = async (): Promise<DiffGeneExpVolcano[]> => {
                                 docs: {
                                     top_hits: {
                                         size: 1,
+                                        _source: [
+                                            'chromosome',
+                                            'ensembl_gene_id',
+                                            'fold_change',
+                                            'gene_symbol',
+                                            'padj',
+                                            'x',
+                                            'y',
+                                        ],
                                     },
                                 },
                             },
@@ -59,15 +68,18 @@ export const fetchDiffGeneExp = async (): Promise<DiffGeneExpVolcano[]> => {
     const diffGeneExpByCategory: FetchDiffGeneExpResponse = body?.aggregations;
 
     return diffGeneExpByCategory.by_category.buckets.map(categoryBucket => {
-        const points: DiffGeneExpPoint[] = categoryBucket.by_id.buckets.map(exp => ({
-            gene_symbol: exp.docs.hits.hits[0]._source.gene_symbol,
-            x: exp.docs.hits.hits[0]._source.x,
-            y: exp.docs.hits.hits[0]._source.y,
-            chromosome: exp.docs.hits.hits[0]._source.chromosome,
-            ensembl_gene_id: exp.docs.hits.hits[0]._source.ensembl_gene_id,
-            padj: exp.docs.hits.hits[0]._source.padj,
-            fold_change: exp.docs.hits.hits[0]._source.fold_change,
-        }));
+        const points: DiffGeneExpPoint[] = categoryBucket.by_id.buckets.map(exp => {
+            const src = exp.docs.hits.hits[0]._source;
+            return {
+                gene_symbol: src.gene_symbol,
+                x: src.x,
+                y: src.y,
+                chromosome: src.chromosome,
+                ensembl_gene_id: src.ensembl_gene_id,
+                padj: src.padj,
+                fold_change: src.fold_change,
+            };
+        });
         return {
             id: categoryBucket.key,
             data: points,
