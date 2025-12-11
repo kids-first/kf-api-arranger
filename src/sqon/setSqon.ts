@@ -1,12 +1,15 @@
-import { participantBiospecimenKey, participantFileKey, participantKey } from '../fieldsKeys';
+import { SetIdToTag } from '../endpoints/sets/setsTypes';
 import { getUserSets, postSetsTags } from '../userApi/userApiClient';
 import { Content, Sqon } from './types';
-import { SetIdToTag } from '../endpoints/sets/setsTypes';
 
-const getPathToParticipantId = (type: string) => {
-    if (type === 'biospecimen') {
+const participantKey = 'fhir_id';
+const participantFileKey = 'files.fhir_id';
+const participantBiospecimenKey = 'files.biospecimens.biospecimen_id';
+
+const getPathToParticipantCentricFieldFromSetType = (setType: string) => {
+    if (setType === 'biospecimen') {
         return participantBiospecimenKey;
-    } else if (type === 'file') {
+    } else if (setType === 'file') {
         return participantFileKey;
     } else {
         return participantKey;
@@ -77,19 +80,23 @@ export const resolveSetIds = async (sqon: Sqon, accessToken: string): Promise<Sq
 
     const userSets = await getUserSets(accessToken);
 
-    const setToIds: Map<string, string[]> = new Map(
-        userSets.filter(x => setIds.has(x.id)).map(x => [`set_id:${x.id}`, x.content.ids]),
+    const setToIds: Map<string, { ids: string[]; setType: string }> = new Map(
+        userSets
+            .filter(x => setIds.has(x.id))
+            .map(x => [`set_id:${x.id}`, { ids: x.content.ids, setType: x.content.setType }]),
     );
 
     const injectIds = (content: Content): Content => {
         const setId = content.value[0];
-        const ids = setToIds.get(setId);
+        const ids = setToIds.get(setId)?.ids;
+        const setType = setToIds.get(setId)?.setType;
         return {
             ...content,
-            value: [...ids],
-            field: getPathToParticipantId(content.field),
+            value: ids,
+            field: getPathToParticipantCentricFieldFromSetType(setType),
         };
     };
+
     traverseWithMutationAtSetId(clone, injectIds);
 
     return clone;

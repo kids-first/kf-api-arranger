@@ -1,9 +1,9 @@
-FROM node:20-alpine3.18 AS build
+FROM node:25-alpine3.2 AS build
 WORKDIR /app
 COPY . .
 RUN npm ci && npm run cleanAndBuild
 
-FROM node:20-alpine3.18 AS prod-image
+FROM node:25-alpine3.2 AS prod-image
 WORKDIR /app
 COPY --from=build ./app/dist ./dist
 COPY package* ./

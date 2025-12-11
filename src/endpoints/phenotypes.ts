@@ -5,9 +5,10 @@ import { runProjectQuery } from '../arrangerUtils';
 import { ArrangerProject } from '../arrangerUtils';
 import { throwErrorsFromGqlQueryIfExist } from '../errors';
 import { ES_SEARCH_MAX_BUCKETS } from '../esUtils';
-import { idKey } from '../fieldsKeys';
 import { resolveSetIds } from '../sqon/setSqon';
 import { SetSqon } from './sets/setsTypes';
+
+export const idKey = 'fhir_id';
 
 const extractPsIds = (resp): string[] => (resp?.data?.participant?.hits?.edges || []).map(edge => edge.node[idKey]);
 

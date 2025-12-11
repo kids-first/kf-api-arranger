@@ -3,7 +3,6 @@ import filesize from 'filesize';
 
 import EsInstance from '../../ElasticSearchClientInstance';
 import { esBiospecimenIndex, esFileIndex, esParticipantIndex, esStudyIndex, esVariantIndex } from '../../esUtils';
-import { biospecimenIdKey, familyCountKey, fileIdKey, participantIdKey, studyIdKey } from '../../fieldsKeys';
 import { isInclude } from '../../projectUtils';
 
 export type Diagnosis = {
@@ -32,7 +31,7 @@ const fetchFileStats = async (client: Client): Promise<number> => {
     const { body } = await client.search({
         index: esFileIndex,
         body: {
-            aggs: { types_count: { value_count: { field: fileIdKey } } },
+            aggs: { types_count: { value_count: { field: 'file_id' } } },
         },
         size: 0,
     });
@@ -54,7 +53,7 @@ const fetchStudyStats = async (client: Client): Promise<number> => {
     const { body } = await client.search({
         index: esStudyIndex,
         body: {
-            aggs: { types_count: { value_count: { field: studyIdKey } } },
+            aggs: { types_count: { value_count: { field: 'study_id' } } },
         },
         size: 0,
     });
@@ -65,7 +64,7 @@ const fetchParticipantStats = async (client: Client): Promise<number> => {
     const { body } = await client.search({
         index: esParticipantIndex,
         body: {
-            aggs: { types_count: { value_count: { field: participantIdKey } } },
+            aggs: { types_count: { value_count: { field: 'participant_id' } } },
         },
         size: 0,
     });
@@ -76,7 +75,7 @@ const fetchFamilyStats = async (client: Client): Promise<number> => {
     const { body } = await client.search({
         index: esStudyIndex,
         body: {
-            aggs: { types_count: { sum: { field: familyCountKey } } },
+            aggs: { types_count: { sum: { field: 'family_count' } } },
         },
         size: 0,
     });
@@ -87,7 +86,7 @@ const fetchBiospecimenStats = async (client: Client): Promise<number> => {
     const { body } = await client.search({
         index: esBiospecimenIndex,
         body: {
-            aggs: { types_count: { value_count: { field: biospecimenIdKey } } },
+            aggs: { types_count: { value_count: { field: 'sample_id' } } },
         },
         size: 0,
     });
