@@ -282,6 +282,13 @@
       }
     },
     {
+      "field": "datasets.non_explorable_drs_items",
+      "graphqlField": "study",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
       "field": "datasets.expected_data_categories",
       "graphqlField": "study",
       "extendedFieldMappingInput": {
@@ -430,6 +437,13 @@
     },
     {
       "field": "study_meta_categories",
+      "graphqlField": "study",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "study_websites",
       "graphqlField": "study",
       "extendedFieldMappingInput": {
         "isArray": true
