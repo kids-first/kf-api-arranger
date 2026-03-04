@@ -212,6 +212,34 @@
       }
     },
     {
+      "field": "clinical_trials",
+      "graphqlField": "study",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "clinical_trials.intervention_types",
+      "graphqlField": "study",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "clinical_trials.primary_outcome_measures",
+      "graphqlField": "study",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "clinical_trials.secondary_outcome_measures",
+      "graphqlField": "study",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
       "field": "contacts",
       "graphqlField": "study",
       "extendedFieldMappingInput": {
@@ -282,14 +310,14 @@
       }
     },
     {
-      "field": "datasets.non_explorable_drs_items",
+      "field": "datasets.expected_data_categories",
       "graphqlField": "study",
       "extendedFieldMappingInput": {
         "isArray": true
       }
     },
     {
-      "field": "datasets.expected_data_categories",
+      "field": "datasets.non_explorable_drs_items",
       "graphqlField": "study",
       "extendedFieldMappingInput": {
         "isArray": true
