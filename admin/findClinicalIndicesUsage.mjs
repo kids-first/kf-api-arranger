@@ -36,13 +36,12 @@ const formatTableContent = (l, standardRePattern = true) =>
         .sort((a, b) => b['creation.date'] - a['creation.date'])
         .map(x => {
             const release = standardRePattern
-                ? 're_' + x.index.split('re_')[1]
+                ? 're_' + x.index.split('_re_')[1]
                 : x.index
                       .split('sd_')[1]
                       .split('_')
                       .slice(1)
                       .join('_');
-
             return [release, x['creation.date.string'], isIndexNameFromTranscriptomics(x.index)];
         })
         .reduce((xs, x) => (xs.some(y => y[0] === x[0] && y[2] === x[2]) ? xs : [...xs, x]), [])
