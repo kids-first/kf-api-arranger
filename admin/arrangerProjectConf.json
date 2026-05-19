@@ -219,7 +219,21 @@
       }
     },
     {
+      "field": "clinical_trials.arms_information",
+      "graphqlField": "study",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
       "field": "clinical_trials.intervention_types",
+      "graphqlField": "study",
+      "extendedFieldMappingInput": {
+        "isArray": true
+      }
+    },
+    {
+      "field": "clinical_trials.interventions",
       "graphqlField": "study",
       "extendedFieldMappingInput": {
         "isArray": true
