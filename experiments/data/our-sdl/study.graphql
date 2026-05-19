@@ -1,0 +1,98 @@
+interface Node {
+  id: ID!
+}
+
+type Query {
+  node: studyNode
+}
+
+type studyClinical_trials {
+  _placeholder: String
+}
+
+type studyContacts {
+  _placeholder: String
+}
+
+type studyData_types {
+  _placeholder: String
+}
+
+type studyDatasets {
+  _placeholder: String
+}
+
+type studyDoi {
+  _placeholder: String
+}
+
+type studyExperimental_strategies {
+  _placeholder: String
+}
+
+type studyNode implements Node {
+  id: ID!
+  score: Int
+  acknowledgement: String
+  attribution: String
+  biobank_contact: String
+  biobank_request_link: String
+  biospecimen_count: Float
+  citation_statement: String
+  controlled_access: [String]
+  data_category: [String]
+  data_sources: [String]
+  date_collection_end_year: String
+  date_collection_start_year: String
+  description: String
+  domain: String
+  domains: [String]
+  expected_data_categories: [String]
+  expected_number_participants: Float
+  experimental_strategy: String
+  external_id: String
+  external_ids: [String]
+  family_count: Float
+  family_data: Boolean
+  fhir_id: String
+  file_count: Float
+  guid: String
+  institutions: [String]
+  investigator_id: String
+  investigator_names: [String]
+  is_guid_mapped: Boolean
+  is_harmonized: Boolean
+  note: String
+  part_lifespan_stages: [String]
+  participant_count: Float
+  program: String
+  publications: [String]
+  release_id: String
+  search_text: String
+  selection_criteria: [String]
+  status: String
+  study_code: String
+  study_designs: [String]
+  study_id: String
+  study_meta_categories: [String]
+  study_name: String
+  study_websites: [String]
+  version: String
+  website: String
+  clinical_trials: studyClinical_trials
+  contacts: studyContacts
+  data_types: studyData_types
+  datasets: studyDatasets
+  doi: studyDoi
+  experimental_strategies: studyExperimental_strategies
+  publications_details: studyPublications_details
+  raw_data_files: studyRaw_data_files
+}
+
+type studyPublications_details {
+  _placeholder: String
+}
+
+type studyRaw_data_files {
+  _placeholder: String
+}
