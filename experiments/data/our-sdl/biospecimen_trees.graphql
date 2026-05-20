@@ -1,0 +1,17 @@
+type biospecimen_treesNode implements Node {
+  id: ID!
+  score: Int
+  collection_fhir_id: String
+  fhir_id: String
+  sample_id: String
+  study_id: String
+  tree_str: String
+}
+
+interface Node {
+  id: ID!
+}
+
+type Query {
+  node: biospecimen_treesNode
+}
