@@ -1,0 +1,25 @@
+# Single-node Elasticsearch 7.17.0 for slice-S dev.
+# Version matches dev/docker-compose.yml in the repo root, which itself
+# matches kf-api-arranger prod (we're stuck on ES 7 until the server layer
+# is ours — per kf-api-arranger memory).
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.0
+    container_name: server-v2-es
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - "9200:9200"
+    volumes:
+      - es-data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health | grep -qE '\"status\":\"(green|yellow)\"'"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+volumes:
+  es-data:

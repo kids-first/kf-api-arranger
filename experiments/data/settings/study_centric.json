@@ -1,0 +1,17 @@
+{
+    "study_centric_htp_re_20260515_1": {
+        "settings": {
+            "index": {
+                "analysis": {
+                    "normalizer": {
+                        "custom_normalizer": {
+                            "filter": "lowercase",
+                            "type": "custom",
+                            "char_filter": []
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

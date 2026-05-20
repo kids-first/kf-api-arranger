@@ -9,3 +9,7 @@ node_modules
 dev/es_data/*
 *.env-dev
 venv
+
+# AGPL reference checkouts — DO NOT commit
+arranger-main/
+arranger-2.19.2/
