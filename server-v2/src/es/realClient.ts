@@ -26,6 +26,7 @@ export function createRealEsClient(host: string = process.env.ES_HOST ?? DEFAULT
                     sort: params.sort,
                     search_after: params.search_after,
                     track_total_hits: params.track_total_hits,
+                    aggs: params.aggregations,
                 },
             });
             return res.body as EsSearchResponse<TSource>;

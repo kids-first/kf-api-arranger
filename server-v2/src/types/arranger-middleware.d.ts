@@ -1,11 +1,29 @@
 // Minimal type declarations for @arranger/middleware.
-// The upstream package ships no types. We only declare the surface area
-// slice S uses; widen as we wire more functions.
+// The upstream package ships no types. We declare the surface area server-v2
+// uses; widen as more functions are consumed.
 
 declare module '@arranger/middleware' {
-    export function buildQuery(args: { nestedFields: string[]; filters: unknown }): Record<string, unknown>;
-    export function buildAggregations(args: unknown): Record<string, unknown>;
-    export function flattenAggregations(input: unknown): Record<string, unknown>;
+    import type { FieldsTree } from 'graphql-fields';
+
+    export function buildQuery(args: {
+        nestedFields: string[];
+        filters: unknown;
+    }): Record<string, unknown>;
+
+    export function buildAggregations(args: {
+        sqon: unknown;
+        graphqlFields: FieldsTree;
+        nestedFields: string[];
+        aggregationsFilterThemselves?: boolean;
+        query?: Record<string, unknown>;
+    }): Record<string, unknown>;
+
+    export function flattenAggregations(args: {
+        aggregations: Record<string, unknown>;
+        includeMissing?: boolean;
+    }): Record<string, unknown>;
+
     export function esToSafeJsInt(n: unknown): number;
+
     export const CONSTANTS: Record<string, string>;
 }

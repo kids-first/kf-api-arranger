@@ -46,12 +46,33 @@ console.log();
 console.log(`Node block char-by-char identical? ${arrangerNode === oursNode}`);
 console.log();
 
-const wrappers = ['Node', `${entityName}Edge`, `${entityName}Connection`, entityName, 'Root'];
+const wrappers = [
+    'Node',
+    `${entityName}Edge`,
+    `${entityName}Connection`,
+    entityName,
+    'Root',
+    'Stats',
+    'Bucket',
+    'NumericAggregations',
+    'Aggregations',
+    `${entityName}Aggregations`,
+];
 console.log('--- wrapper types emitted ---');
 for (const t of wrappers) {
     const block = tryExtractTypeBlock(oursSdl, t);
     if (block) {
-        console.log(`\n${block}`);
+        if (t === `${entityName}Aggregations`) {
+            const lines = block.split('\n');
+            const fieldLines = lines.length - 2; // strip header + closing brace
+            console.log(`\n${t}: ${fieldLines} fields  (first 5 + last 2 shown)`);
+            const body = lines.slice(1, -1);
+            for (const l of body.slice(0, 5)) console.log(l);
+            if (body.length > 7) console.log('  ...');
+            for (const l of body.slice(-2)) console.log(l);
+        } else {
+            console.log(`\n${block}`);
+        }
     } else {
         console.log(`MISSING: ${t}`);
     }

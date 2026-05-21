@@ -21,6 +21,7 @@
         "@elastic/elasticsearch": "^7.17.14",
         "@graphql-tools/schema": "^10.0.33",
         "graphql": "^16.9.0",
+        "graphql-fields": "^2.0.3",
         "graphql-type-json": "^0.3.2"
     },
     "devDependencies": {

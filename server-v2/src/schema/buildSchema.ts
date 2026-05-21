@@ -7,12 +7,14 @@
 // scope decision in session 3.
 
 import {
+    GraphQLBoolean,
     GraphQLInt,
     GraphQLList,
     GraphQLNonNull,
     GraphQLObjectType,
     GraphQLSchema,
 } from 'graphql';
+import { buildAggsType } from './buildAggsType.js';
 import { buildNodeInterface, buildNodeType } from './buildNodeType.js';
 import { GraphQLJSON } from './jsonScalar.js';
 import type { ExtendedMap, FieldTree } from './types.js';
@@ -28,6 +30,7 @@ export function buildSchema(args: BuildSchemaArgs): GraphQLSchema {
 
     const nodeInterface = buildNodeInterface();
     const nodeType = buildNodeType({ tree, extendedMap, entityName, nodeInterface });
+    const aggsType = buildAggsType(tree, entityName);
 
     const edgeType = new GraphQLObjectType({
         name: `${entityName}Edge`,
@@ -53,6 +56,14 @@ export function buildSchema(args: BuildSchemaArgs): GraphQLSchema {
                 args: {
                     filters: { type: GraphQLJSON },
                     first: { type: GraphQLInt },
+                },
+            },
+            aggregations: {
+                type: aggsType,
+                args: {
+                    filters: { type: GraphQLJSON },
+                    include_missing: { type: GraphQLBoolean },
+                    aggregations_filter_themselves: { type: GraphQLBoolean },
                 },
             },
         }),

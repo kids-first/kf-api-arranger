@@ -14,6 +14,7 @@ export type EsSearchResponse<TSource = Record<string, unknown>> = {
         total: { value: number; relation: 'eq' | 'gte' };
         hits: EsHit<TSource>[];
     };
+    aggregations?: Record<string, unknown>;
 };
 
 export type EsSearchParams = {
@@ -23,6 +24,7 @@ export type EsSearchParams = {
     sort?: unknown;
     search_after?: unknown[];
     track_total_hits?: boolean;
+    aggregations?: Record<string, unknown>;
 };
 
 export interface EsClient {
