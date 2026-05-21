@@ -25,10 +25,15 @@ type AggsArgs = {
     aggregations_filter_themselves?: boolean;
 };
 
-// arranger's normalizeFilters short-circuits on falsy input but crashes on
-// `{}` (it tries to stringify the empty SQON for an error message via
-// `String.concat`, hitting "Cannot convert object to primitive value").
-// Coerce empty/malformed SQONs to undefined at the boundary.
+// arranger's `normalizeFilters` short-circuits on falsy input (returns the
+// filter as-is) but crashes on an empty `{}` SQON: it lacks an `op` field,
+// hits the "Must specify op" error branch, and the error-message stringify
+// path throws "Cannot convert object to primitive value" before the Error
+// itself is constructed. Symptom is a TypeError with a confusing stack.
+// Root cause is the missing-op SQON; the stringify failure is a side effect
+// of how the Babel-transpiled middleware builds that error message.
+// Coerce empty/missing SQONs to undefined at the boundary so we hit the
+// falsy short-circuit cleanly.
 function normalizeSqonInput(filters: unknown): unknown {
     if (filters == null) return undefined;
     if (typeof filters === 'object' && Object.keys(filters as object).length === 0) {

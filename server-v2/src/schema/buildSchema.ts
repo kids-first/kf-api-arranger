@@ -1,10 +1,12 @@
 // Orchestrator: assembles the full GraphQLSchema for one entity.
-// Slice-S scope: just enough to make the read-path query
-//   { <entity> { hits(filters, first) { total, edges { node { ... } } } } }
-// run. Fields not exercised by the slice (mapping, extended, aggsState,
-// columnsState, matchBoxState, aggregations) are intentionally omitted —
-// see experiments/schemaGen/README.md "What's NOT done" + the C-narrow
-// scope decision in session 3.
+//
+// Slice S (read path): `{ <entity> { hits(filters, first) { total, edges { node { ... } } } } }`
+// Slice T (aggregations): `{ <entity> { aggregations(filters, include_missing, aggregations_filter_themselves) { ... } } }`
+//
+// Fields not exercised by these slices (mapping, extended, aggsState,
+// columnsState, matchBoxState) are intentionally omitted — see
+// experiments/schemaGen/README.md "What's NOT done" + the C-narrow scope
+// decision in session 3.
 
 import {
     GraphQLBoolean,

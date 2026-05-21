@@ -7,8 +7,11 @@
 // Verifies:
 //   1. Generated <entity>Node block is byte-identical to arranger's reference
 //      SDL (the regression test for the sessions 1+2 result).
-//   2. New wrapper types (<entity>, <entity>Connection, <entity>Edge, Root)
+//   2. Slice-S wrapper types (<entity>, <entity>Connection, <entity>Edge, Root)
 //      are well-formed and parse-printable.
+//   3. Slice-T aggregation types (Stats, Bucket, NumericAggregations,
+//      Aggregations, <entity>Aggregations) are emitted; the per-entity agg
+//      type is summarized with field count + first/last entries.
 
 import fs from 'node:fs';
 import { printSchema } from 'graphql';
