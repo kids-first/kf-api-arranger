@@ -20,6 +20,7 @@
 import { Client } from '@elastic/elasticsearch';
 import type {
     EsClient,
+    EsMappingResponse,
     EsSearchParams,
     EsSearchResponse,
 } from './client.js';
@@ -52,6 +53,10 @@ export function createRealEsClient(host?: string): EsClient {
                 },
             });
             return res.body as EsSearchResponse<TSource>;
+        },
+        async getMapping(index: string): Promise<EsMappingResponse> {
+            const res = await client.indices.getMapping({ index });
+            return res.body as EsMappingResponse;
         },
     };
 }

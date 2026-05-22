@@ -1,18 +1,27 @@
-// server-v2 entry: loads N entity schemas, attaches resolvers, starts Apollo.
-// Slice X (multi-entity) — one process serves all entities under one Root.
+// server-v2 entry: loads N entity schemas from real ES, attaches resolvers,
+// starts Apollo. Slice X (multi-entity) — one process serves all entities
+// under one Root.
+//
+// Boot sequence:
+//   1. requireEsHost via pingCluster() — fail fast if ES_HOST unset/unreachable.
+//   2. Build the EsClient.
+//   3. Fetch project docs (1 call) + all mappings (N parallel) from ES.
+//   4. Compose entity GraphQL types from the in-memory data.
+//   5. Build schema, attach resolvers, start Apollo standalone on :4000.
+//
+// File-mode `loadEntity` (schema/index.ts) still exists — it backs __check__.ts
+// against the committed arranger-projects fixture.
 
 import { ApolloServer } from '@apollo/server';
 import { startStandaloneServer } from '@apollo/server/standalone';
 import { addResolversToSchema } from '@graphql-tools/schema';
-import { buildSchema, loadEntity, type EntityModule } from './schema/index.js';
+import { buildSchema, type EntityModule } from './schema/index.js';
+import { loadAllEntitiesFromEs } from './schema/esLoaders.js';
 import { createResolvers, type ServerContext } from './resolvers.js';
 import { createRealEsClient, pingCluster } from './es/realClient.js';
 
-const REPO_ROOT = '..'; // server-v2 sibling to experiments/
-
 // The 7 entity ES indices that include-portal-ui queries against. Each one
-// needs a matching mapping JSON at experiments/data/mappings/<index>.json
-// and an _id-matching entry in the arranger-projects fixture.
+// must have a matching _id in the arranger-projects-<PROJECT_ID> doc.
 const ES_INDICES = [
     'biospecimen_centric',
     'file_centric',
@@ -23,16 +32,15 @@ const ES_INDICES = [
     'variant_centric',
 ] as const;
 
+// `arranger-projects-<PROJECT_ID>` is where per-entity config (extended +
+// columns-state) lives. Hardcoded for now — INCLUDE is the only project.
+const PROJECT_ID = 'include';
+
 const status = await pingCluster();
 console.log(`ES cluster status: ${status}`);
 
-const entities: EntityModule[] = ES_INDICES.map(esIndex =>
-    loadEntity({
-        mappingPath: `${REPO_ROOT}/experiments/data/mappings/${esIndex}.json`,
-        projectsPath: `${REPO_ROOT}/experiments/data/arranger-projects/include.json`,
-        esIndex,
-    }),
-);
+const es = createRealEsClient();
+const entities: EntityModule[] = await loadAllEntitiesFromEs(es, PROJECT_ID, ES_INDICES);
 
 for (const e of entities) {
     console.log(`  ${e.esIndex} → ${e.entityName}  (${e.nestedFields.length} nested fields)`);
@@ -51,7 +59,6 @@ const schema = addResolversToSchema({
     }))),
 });
 
-const es = createRealEsClient();
 const server = new ApolloServer<ServerContext>({ schema });
 
 const { url } = await startStandaloneServer(server, {

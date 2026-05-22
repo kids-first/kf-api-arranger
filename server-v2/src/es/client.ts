@@ -28,8 +28,21 @@ export type EsSearchParams = {
     aggregations?: Record<string, unknown>;
 };
 
+// ES _mapping response shape. For aliases that fan out to multiple backing
+// indices (production pattern: <index>_<study>_<release>), ES returns one
+// entry per backing index — all share the same logical mapping for our
+// per-study/per-release sharding scheme, so the caller picks any one.
+export type EsMappingResponse = {
+    [indexName: string]: {
+        mappings: {
+            properties: Record<string, unknown>;
+        };
+    };
+};
+
 export interface EsClient {
     search<TSource = Record<string, unknown>>(
         params: EsSearchParams,
     ): Promise<EsSearchResponse<TSource>>;
+    getMapping(index: string): Promise<EsMappingResponse>;
 }

@@ -24,11 +24,17 @@ declare module '@elastic/elasticsearch' {
 
     type ClusterHealthBody = { status: 'green' | 'yellow' | 'red' };
 
+    type GetMappingParams = { index: string };
+    type GetMappingBody = Record<string, { mappings: { properties: Record<string, unknown> } }>;
+
     export class Client {
         constructor(opts: ClientOptions);
         search<TBody = SearchResponseBody>(params: SearchParams): Promise<Response<TBody>>;
         cluster: {
             health(): Promise<Response<ClusterHealthBody>>;
+        };
+        indices: {
+            getMapping(params: GetMappingParams): Promise<Response<GetMappingBody>>;
         };
     }
 }

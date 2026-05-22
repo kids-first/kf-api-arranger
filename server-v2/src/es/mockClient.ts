@@ -1,8 +1,12 @@
-// In-memory mock ES client for slice S step D.
-// Returns 3 hardcoded study hits; ignores query/filters/sort.
-// Replaced by the real @elastic/elasticsearch client in step E.
+// In-memory mock ES client from slice S step D. Replaced by the real
+// @elastic/elasticsearch client in step E and unused since. Kept around as
+// a fallback for offline iteration; if it bit-rots further, just delete.
+//
+// NB: `getMapping` is a throw-stub — the mock predates ES-mode loading and
+// has no fixture data to return. Adding one would require co-locating a
+// mapping JSON per mock entity, which is what the real client does anyway.
 
-import type { EsClient, EsSearchParams, EsSearchResponse } from './client.js';
+import type { EsClient, EsMappingResponse, EsSearchParams, EsSearchResponse } from './client.js';
 
 type StudySource = {
     study_id: string;
@@ -33,6 +37,9 @@ export function createMockEsClient(): EsClient {
                     hits,
                 },
             };
+        },
+        async getMapping(_index: string): Promise<EsMappingResponse> {
+            throw new Error('mockClient.getMapping is not implemented — use createRealEsClient for ES-mode loading.');
         },
     };
 }
