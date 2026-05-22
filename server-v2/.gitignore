@@ -1,2 +1,8 @@
 dist/
 node_modules/
+ # scrap exploration test tooling — removed at cut-over
+  scripts/smoke.mjs
+  scripts/cases.mjs
+  scripts/fetch-baselines.mjs
+  scripts/diff-real.mjs
+  scripts/baselines.json
