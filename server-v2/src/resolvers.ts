@@ -9,6 +9,9 @@
 // Slice X (multi-entity, 2026-05-22): one createResolvers call handles all
 // N entities; each entity's resolvers close over its own esIndex +
 // nestedFields + extendedEntries + columnsState. ServerContext is just { es }.
+// Slice Y (added 2026-05-22): hits() supports sort/offset/searchAfter args
+// matching arranger's signature; buildEsSort handles missing-defaults +
+// nested-path detection.
 
 import { buildAggregations, buildQuery, flattenAggregations } from '@arranger/middleware';
 import type { IResolvers } from '@graphql-tools/utils';
@@ -48,6 +51,10 @@ type HitsArgs = {
 // For each sort entry: compute deepest nested-field prefix on the sort field
 // so ES knows to apply nested sorting; supply a `missing` default based on
 // order direction if not provided.
+// NB: the prefix check below uses `indexOf(nf) === 0` verbatim from arranger.
+// That's technically loose (would treat `genes_extra` as starting with
+// `genes` if both were nested), but we keep it for byte-parity. Tighten to
+// `fld === nf || fld.startsWith(nf + '.')` if that bug ever bites.
 function buildEsSort(sortInputs: SortInput[], nestedFields: string[]): unknown[] {
     return sortInputs.map(({ field, order, missing }) => {
         const fld = field ?? '';

@@ -96,6 +96,311 @@ export const CASES = [
         ignore: [],
     },
 
+    // Real frontend payload — biospecimen. Exercises:
+    //  - SQON `op: 'all'` (must-all-values branch in buildQuery)
+    //  - Nested filter through an object container (participant.mondo.name —
+    //    participant is an object on biospecimen, mondo is nested under it)
+    //  - Extra FE-side cruft (`remoteComponent` field on the SQON leaf)
+    //    that arranger's buildQuery silently ignores
+    //  - Sort on a scalar field (sample_id asc) with single-key searchAfter
+    //  - Mix of scalars + object child (study, participant) + nested (files)
+    {
+        name: 'FE: searchBiospecimen (sqon op:all, nested-thru-object, sort)',
+        query: {
+            operationName: 'searchBiospecimen',
+            variables: {
+                first: 50,
+                offset: 0,
+                sqon: {
+                    op: 'and',
+                    content: [{
+                        op: 'all',
+                        content: {
+                            field: 'participant.mondo.name',
+                            index: 'participant',
+                            remoteComponent: {
+                                id: 'mondoTree',
+                                props: { visible: true, field: 'mondo' },
+                            },
+                            value: ['human disease (MONDO:0700096)'],
+                        },
+                    }],
+                },
+                sort: [{ field: 'sample_id', order: 'asc' }],
+            },
+            query: `query searchBiospecimen($sqon: JSON, $first: Int, $offset: Int, $sort: [Sort], $searchAfter: JSON) {
+                biospecimen {
+                    hits(filters: $sqon, first: $first, offset: $offset, sort: $sort, searchAfter: $searchAfter) {
+                        total
+                        edges {
+                            searchAfter
+                            node {
+                                id fhir_id container_id status
+                                sample_id external_sample_id sample_type
+                                parent_sample_id parent_sample_type
+                                collection_sample_id collection_sample_type collection_fhir_id
+                                age_at_biospecimen_collection laboratory_procedure
+                                volume volume_unit biospecimen_storage
+                                study_id
+                                study { study_code study_id study_name }
+                                nb_files
+                                participant { participant_id }
+                                files { hits { total } }
+                            }
+                        }
+                    }
+                }
+            }`,
+        },
+        ignore: [],
+    },
+
+    // Real frontend payload — SQON `op: 'not-in'` (must_not ES branch),
+    // anonymous query (no operationName), aggregation on a *object-child*
+    // path (study.study_code → result key `study__study_code` with dot→__
+    // rewrite), and `include_missing: false`.
+    {
+        name: 'FE: anonymous participant hits+aggs (sqon op:not-in, object-child agg)',
+        query: {
+            variables: {
+                sqon: {
+                    op: 'and',
+                    content: [{
+                        op: 'not-in',
+                        content: {
+                            field: 'study.study_code',
+                            index: 'participant',
+                            value: ['HTP'],
+                        },
+                    }],
+                },
+            },
+            query: `query ($sqon: JSON) {
+                participant {
+                    hits(filters: $sqon) { total }
+                    aggregations(filters: $sqon, aggregations_filter_themselves: true, include_missing: false) {
+                        study__study_code { buckets { key doc_count } }
+                    }
+                }
+            }`,
+        },
+        ignore: [],
+    },
+
+    // Real frontend payload — combined hits + aggregations under one
+    // operation (Apollo fires both ES calls in parallel). Also exercises
+    // `aggregations_filter_themselves: true` (the facet-picker branch in
+    // slice T) and SQON on a nested-field child path (files.file_id, where
+    // files is nested on participant).
+    {
+        name: 'FE: AggregationDemographicInfo (hits+aggs combined, aggregations_filter_themselves)',
+        query: {
+            operationName: 'AggregationDemographicInfo',
+            variables: {
+                sqon: {
+                    op: 'and',
+                    content: [{
+                        op: 'in',
+                        content: {
+                            field: 'files.file_id',
+                            index: 'file',
+                            value: ['HTP.001149dc-4fe5-4479-b846-4e4b23aef309.single.vqsr.filtered.vep_105.vcf.gz'],
+                        },
+                    }],
+                },
+            },
+            query: `query AggregationDemographicInfo($sqon: JSON) {
+                participant {
+                    hits(filters: $sqon) { total }
+                    aggregations(filters: $sqon, aggregations_filter_themselves: true) {
+                        sex { buckets { key doc_count } }
+                        ethnicity { buckets { key doc_count } }
+                        race { buckets { key doc_count } }
+                    }
+                }
+            }`,
+        },
+        ignore: [],
+    },
+
+    // Real frontend payload — SQON with `op: 'between'` (numeric range).
+    // Exercises a different `@arranger/middleware.buildQuery` branch than the
+    // `in`-only cases we've covered.
+    {
+        name: 'FE: getVariantsCount (sqon op:between)',
+        query: {
+            operationName: 'getVariantsCount',
+            variables: {
+                sqon: {
+                    op: 'and',
+                    content: [{
+                        op: 'between',
+                        content: {
+                            field: 'start',
+                            index: 'variants',
+                            value: [100000, 1000000],
+                        },
+                    }],
+                },
+            },
+            query: `query getVariantsCount($sqon: JSON) {
+                variants {
+                    hits(filters: $sqon) {
+                        total
+                    }
+                }
+            }`,
+        },
+        ignore: [],
+    },
+
+    // Real frontend payload — single file lookup by file_id. Exercises
+    // nested-within-nested (file → participants → biospecimens), nested-with-
+    // object-child (participants.node.study is an object, not nested),
+    // arrays-of-scalars (dataset_names), and shallow object containers
+    // (hashes, study at file level).
+    {
+        name: 'FE: getFileEntity (sqon + nested-within-nested + object-in-nested)',
+        query: {
+            operationName: 'getFileEntity',
+            variables: {
+                sqon: {
+                    op: 'and',
+                    content: [{
+                        op: 'in',
+                        content: {
+                            field: 'file_id',
+                            value: 'HTP.001149dc-4fe5-4479-b846-4e4b23aef309.single.vqsr.filtered.vep_105.vcf.gz',
+                            index: 'file',
+                        },
+                    }],
+                },
+            },
+            query: `query getFileEntity($sqon: JSON) {
+                file {
+                    hits(filters: $sqon) {
+                        edges {
+                            node {
+                                id
+                                access_urls
+                                participants {
+                                    hits {
+                                        total
+                                        edges {
+                                            node {
+                                                biospecimens {
+                                                    hits {
+                                                        total
+                                                        edges {
+                                                            node {
+                                                                sample_id
+                                                                sample_type
+                                                                collection_sample_id
+                                                                collection_sample_type
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                                down_syndrome_status
+                                                participant_id
+                                                study { study_code external_id }
+                                                study_id
+                                            }
+                                        }
+                                    }
+                                }
+                                controlled_access
+                                data_category
+                                data_type
+                                dataset_names
+                                file_id
+                                file_name
+                                file_format
+                                hashes { etag }
+                                nb_biospecimens
+                                nb_participants
+                                sequencing_experiment {
+                                    hits { edges { node { experiment_strategy } } }
+                                }
+                                size
+                                study { external_id study_code study_id study_name }
+                            }
+                        }
+                    }
+                }
+            }`,
+        },
+        ignore: [],
+    },
+
+    // Real frontend payload — minimal count query with SQON filter on a
+    // NESTED-field child path (mondo.name → ES needs `nested` query wrap
+    // on path "mondo"). Tests buildQuery's nested-field detection.
+    {
+        name: 'FE: getParticipantCount (sqon on nested-field child)',
+        query: {
+            operationName: 'getParticipantCount',
+            variables: {
+                sqon: {
+                    op: 'and',
+                    content: [{
+                        op: 'in',
+                        content: {
+                            field: 'mondo.name',
+                            value: 'complete trisomy 21 (MONDO:0700030)',
+                            index: 'participant',
+                        },
+                    }],
+                },
+            },
+            query: `query getParticipantCount($sqon: JSON) {
+                participant {
+                    hits(filters: $sqon) {
+                        total
+                    }
+                }
+            }`,
+        },
+        ignore: [],
+    },
+
+    // Real frontend payload — biospecimen_trees with SQON filter on a flat
+    // scalar (collection_fhir_id). `tree_str` is an opaque stringified-JSON
+    // blob (keyword type) — server-v2 passes through unchanged.
+    {
+        name: 'FE: getHierarchicalBiospecimen (sqon + flat scalars + opaque tree_str)',
+        query: {
+            operationName: 'getHierarchicalBiospecimen',
+            variables: {
+                first: 100,
+                offset: 0,
+                sqon: {
+                    op: 'and',
+                    content: [{
+                        op: 'in',
+                        content: { field: 'collection_fhir_id', value: ['bs-2zbedhefdn'] },
+                    }],
+                },
+            },
+            query: `query getHierarchicalBiospecimen($sqon: JSON, $first: Int, $offset: Int, $sort: [Sort]) {
+                biospecimen_trees {
+                    hits(filters: $sqon, first: $first, offset: $offset, sort: $sort) {
+                        total
+                        edges {
+                            node {
+                                fhir_id
+                                tree_str
+                                sample_id
+                                collection_fhir_id
+                            }
+                        }
+                    }
+                }
+            }`,
+        },
+        ignore: [],
+    },
+
     // Real frontend payload — exercises sort + sqon + searchAfter on hits()
     // plus deep nested traversal (variants → genes → consequences/hpo/omim/...).
     {

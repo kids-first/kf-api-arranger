@@ -1,7 +1,7 @@
 // Real Elasticsearch client adapter. Wraps @elastic/elasticsearch v7
-// (matching the local ES 7.17.0 server). Strips v7's response wrapper
-// (`{ body, statusCode, ... }`) so the EsClient interface is identical
-// between mock and real.
+// (talks to KF QA's OpenSearch backend — see pinned-version note below).
+// Strips v7's response wrapper (`{ body, statusCode, ... }`) so the
+// EsClient interface is identical between mock and real.
 //
 // IMPORTANT — pinned to @elastic/elasticsearch@7.13.0 (exact). The KF QA
 // backend runs OpenSearch (forked from ES 7.10), and @elastic/elasticsearch
