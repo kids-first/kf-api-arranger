@@ -14,6 +14,8 @@
 //      type is summarized with field count + first/last entries.
 //   4. Slice-U entity-metadata types (ColumnSort, Column, ColumnState,
 //      ColumnsState) are emitted.
+//   5. Slice-V sub-Connection families are emitted for nested fields
+//      (spot-checks one shallow + one deep example).
 
 import fs from 'node:fs';
 import { printSchema } from 'graphql';
@@ -66,6 +68,12 @@ const wrappers = [
     'Column',
     'ColumnState',
     'ColumnsState',
+    // Slice V — sub-Connection spot-checks (study-specific)
+    `${entityName}Contacts`,
+    `${entityName}ContactsConnection`,
+    `${entityName}ContactsEdge`,
+    `${entityName}ContactsNode`,
+    `${entityName}DatasetsPublications_detailsAuthors`,
 ];
 console.log('--- wrapper types emitted ---');
 for (const t of wrappers) {

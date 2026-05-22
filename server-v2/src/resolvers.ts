@@ -56,6 +56,43 @@ function normalizeSqonInput(filters: unknown): unknown {
     return filters;
 }
 
+// Slice V — port of arranger-2.19.2/modules/mapping-utils/src/resolveHits.js
+// `resolveNested` (lines 86-133). Walks an ES `_source` object and, for any
+// field whose full dotted path is in `nestedFields`, replaces its value with
+// the Connection-shaped `{ hits: { edges: [{ node }], total } }` payload
+// that Apollo's default field resolvers can pick across for sub-Connection
+// queries (`contacts { hits { edges { node { ... } } } }`). Non-nested
+// values are walked through unchanged (objects recurse to find nested
+// descendants; scalars pass through). The `isArray` scalar-wrap branch from
+// arranger is omitted for now — add if real data needs it.
+function resolveNested(value: unknown, nestedFields: string[], parent = ''): unknown {
+    if (value == null || typeof value !== 'object') return value;
+    if (Array.isArray(value)) {
+        return value.map(item => resolveNested(item, nestedFields, parent));
+    }
+    const out: Record<string, unknown> = {};
+    for (const [field, child] of Object.entries(value as Record<string, unknown>)) {
+        const fullPath = parent ? `${parent}.${field}` : field;
+        if (nestedFields.includes(fullPath)) {
+            const arr = Array.isArray(child) ? child : child == null ? [] : [child];
+            out[field] = {
+                hits: {
+                    edges: arr.map(item => ({
+                        node: {
+                            ...(item as Record<string, unknown>),
+                            ...(resolveNested(item, nestedFields, fullPath) as Record<string, unknown>),
+                        },
+                    })),
+                    total: arr.length,
+                },
+            };
+        } else {
+            out[field] = resolveNested(child, nestedFields, fullPath);
+        }
+    }
+    return out;
+}
+
 export function createResolvers(
     args: CreateResolversArgs,
 ): IResolvers<unknown, ServerContext> {
@@ -85,7 +122,11 @@ export function createResolvers(
                     total: res.hits.total.value,
                     edges: res.hits.hits.map(h => ({
                         searchAfter: h.sort,
-                        node: { id: h._id, score: null, ...h._source },
+                        node: {
+                            ...(resolveNested(h._source, nestedFields) as Record<string, unknown>),
+                            id: h._id,
+                            score: null,
+                        },
                     })),
                 };
             },
