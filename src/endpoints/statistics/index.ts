@@ -1,9 +1,9 @@
 import { Client } from '@elastic/elasticsearch';
 import filesize from 'filesize';
 
-import EsInstance from '../../ElasticSearchClientInstance';
-import { esBiospecimenIndex, esFileIndex, esParticipantIndex, esStudyIndex, esVariantIndex } from '../../esUtils';
-import { isInclude } from '../../projectUtils';
+import EsInstance from '../../ElasticSearchClientInstance.js';
+import { esBiospecimenIndex, esFileIndex, esParticipantIndex, esStudyIndex, esVariantIndex } from '../../esUtils.js';
+import { isInclude } from '../../projectUtils.js';
 
 export type Diagnosis = {
     mondo_id: string;

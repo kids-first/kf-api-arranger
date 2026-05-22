@@ -1,6 +1,6 @@
-import EsInstance from '../../ElasticSearchClientInstance';
-import { datalakeS3Url } from '../../env';
-import { generatePreSignedUrl } from '../../s3Api';
+import EsInstance from '../../ElasticSearchClientInstance.js';
+import { datalakeS3Url } from '../../env.js';
+import { generatePreSignedUrl } from '../../s3Api/index.js';
 import {
     checkGenesExist,
     checkSampleIdsAndGene,
@@ -11,8 +11,8 @@ import {
     fetchFacets,
     fetchSampleGeneExp,
     SAMPLE_GENE_EXP_FILE_KEY,
-} from './service';
-import { DiffGeneExpVolcano, Facets, MatchedGene, SampleGeneExpVolcano } from './types';
+} from './service.js';
+import { DiffGeneExpVolcano, Facets, MatchedGene, SampleGeneExpVolcano } from './types.js';
 
 jest.mock('../../s3Api');
 jest.mock('../../ElasticSearchClientInstance');

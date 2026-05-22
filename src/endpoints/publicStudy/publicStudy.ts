@@ -1,4 +1,4 @@
-import EsInstance from '../../ElasticSearchClientInstance';
+import EsInstance from '../../ElasticSearchClientInstance.js';
 
 type RData = {
     [index: string]: any;

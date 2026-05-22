@@ -1,4 +1,4 @@
-import { keycloakClient, keycloakRealm, keycloakURL } from './env';
+import { keycloakClient, keycloakRealm, keycloakURL } from './env.js';
 
 const keycloakConfig = {
     realm: keycloakRealm,

@@ -2,9 +2,9 @@ import { Client } from '@elastic/elasticsearch';
 import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
-import EsInstance from '../../ElasticSearchClientInstance';
-import { multiSearchFilesAccessCounts, searchAggregatedAuthorizedStudiesForFence } from './searchers';
-import { AuthStudiesData, ResponseResult, SearchBucket, StudyDataGlobal, StudyDataSpecific } from './types';
+import EsInstance from '../../ElasticSearchClientInstance.js';
+import { multiSearchFilesAccessCounts, searchAggregatedAuthorizedStudiesForFence } from './searchers.js';
+import { AuthStudiesData, ResponseResult, SearchBucket, StudyDataGlobal, StudyDataSpecific } from './types.js';
 
 const SUPPORTED_FENCES = ['gen3', 'dcf'];
 

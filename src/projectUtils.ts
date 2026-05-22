@@ -1,4 +1,4 @@
-import { keycloakRealm } from './env';
+import { keycloakRealm } from './env.js';
 
 const KF_REALM = 'kidsfirstdrc';
 const INCLUDE_REALM = 'includedcc';

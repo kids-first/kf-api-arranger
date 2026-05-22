@@ -1,6 +1,6 @@
-import { computeAuthorizedStudiesForFence } from './computeAuthorizedStudies';
-import { multiSearchFilesAccessCounts, searchAggregatedAuthorizedStudiesForFence } from './searchers';
-import { AuthStudiesData } from './types';
+import { computeAuthorizedStudiesForFence } from './computeAuthorizedStudies.js';
+import { multiSearchFilesAccessCounts, searchAggregatedAuthorizedStudiesForFence } from './searchers.js';
+import { AuthStudiesData } from './types.js';
 
 jest.mock('./searchers');
 jest.mock('../../ElasticSearchClientInstance', () => jest.fn());

@@ -1,8 +1,8 @@
-import { ArrangerProject } from '../../arrangerUtils';
-import { resolveSetsInSqon } from '../../sqon/resolveSetInSqon';
-import { searchSqon } from '../../sqon/searchSqon';
-import { deleteUserSet, getUserSets, postUserSet, putUserSet, UserSet } from '../../userApi/userApiClient';
-import { createSet, deleteSet, getSets, SubActionTypes, updateSetContent, updateSetTag } from './setsFeature';
+import { ArrangerProject } from '../../arrangerUtils.js';
+import { resolveSetsInSqon } from '../../sqon/resolveSetInSqon.js';
+import { searchSqon } from '../../sqon/searchSqon.js';
+import { deleteUserSet, getUserSets, postUserSet, putUserSet, UserSet } from '../../userApi/userApiClient.js';
+import { createSet, deleteSet, getSets, SubActionTypes, updateSetContent, updateSetTag } from './setsFeature.js';
 import {
     CreateSetBody,
     CreateUpdateBody,
@@ -11,7 +11,7 @@ import {
     Sort,
     UpdateSetContentBody,
     UpdateSetTagBody,
-} from './setsTypes';
+} from './setsTypes.js';
 
 jest.mock('../../sqon/resolveSetInSqon');
 jest.mock('../../sqon/searchSqon');

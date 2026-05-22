@@ -1,6 +1,6 @@
-import EsInstance from '../../ElasticSearchClientInstance';
-import { getNestedFieldsForIndex } from '../../sqon/getNestedFieldsForIndex';
-import { venn } from './venn';
+import EsInstance from '../../ElasticSearchClientInstance.js';
+import { getNestedFieldsForIndex } from '../../sqon/getNestedFieldsForIndex.js';
+import { venn } from './venn.js';
 
 jest.mock('../../ElasticSearchClientInstance');
 jest.mock('../../sqon/getNestedFieldsForIndex');

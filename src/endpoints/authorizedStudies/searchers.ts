@@ -1,7 +1,7 @@
 import { Client } from '@elastic/elasticsearch';
 
-import { ES_SEARCH_MAX_HITS, esFileIndex } from '../../esUtils';
-import { FileAccessCountsResponse, SearchBucket } from './types';
+import { ES_SEARCH_MAX_HITS, esFileIndex } from '../../esUtils.js';
+import { FileAccessCountsResponse, SearchBucket } from './types.js';
 
 export const searchAggregatedAuthorizedStudiesForFence = async (
     client: Client,

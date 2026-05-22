@@ -2,10 +2,10 @@ import { Express } from 'express';
 import Keycloak from 'keycloak-connect';
 import request from 'supertest';
 
-import { fakeKeycloakClient, fakeKeycloakRealm, fakeKeycloakUrl, getToken, publicKey } from '../test/authTestUtils';
-import buildApp from './app';
-import { ArrangerProject } from './arrangerUtils';
-import { SetNotFoundError } from './endpoints/sets/setError';
+import { fakeKeycloakClient, fakeKeycloakRealm, fakeKeycloakUrl, getToken, publicKey } from '../test/authTestUtils.js';
+import buildApp from './app.js';
+import { ArrangerProject } from './arrangerUtils.js';
+import { SetNotFoundError } from './endpoints/sets/setError.js';
 import {
     createSet,
     deleteSet,
@@ -13,11 +13,11 @@ import {
     SubActionTypes,
     updateSetContent,
     updateSetTag,
-} from './endpoints/sets/setsFeature';
-import { Set, UpdateSetContentBody, UpdateSetTagBody } from './endpoints/sets/setsTypes';
-import { getStatistics, getStudiesStatistics, Statistics } from './endpoints/statistics';
-import { flushAllCache } from './middleware/cache';
-import { UserApiError } from './userApi/userApiError';
+} from './endpoints/sets/setsFeature.js';
+import { Set, UpdateSetContentBody, UpdateSetTagBody } from './endpoints/sets/setsTypes.js';
+import { getStatistics, getStudiesStatistics, Statistics } from './endpoints/statistics/index.js';
+import { flushAllCache } from './middleware/cache.js';
+import { UserApiError } from './userApi/userApiError.js';
 
 jest.mock('./endpoints/sets/setsFeature');
 jest.mock('./endpoints/statistics');

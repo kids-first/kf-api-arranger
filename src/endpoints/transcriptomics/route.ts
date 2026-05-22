@@ -5,8 +5,8 @@ import {
     TRANSCRIPTOMICS_DIFF_GENE_EXP_EXPORT_URL_CACHE_ID,
     TRANSCRIPTOMICS_SAMPLE_GENE_EXP_EXPORT_URL_CACHE_ID,
     twineWithCache,
-} from '../../middleware/cache';
-import { MissingFilterError } from './errors';
+} from '../../middleware/cache.js';
+import { MissingFilterError } from './errors.js';
 import {
     checkGenesExist,
     checkSampleIdsAndGene,
@@ -15,7 +15,7 @@ import {
     fetchDiffGeneExp,
     fetchFacets,
     fetchSampleGeneExp,
-} from './service';
+} from './service.js';
 
 // Handles requests made to /transcriptomics
 const transcriptomicsRouter = Router();

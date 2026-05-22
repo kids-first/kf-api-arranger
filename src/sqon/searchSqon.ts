@@ -1,9 +1,10 @@
 import { graphql } from 'graphql';
-import { get } from 'lodash';
+import _lodash from 'lodash';
+const { get } = _lodash;
 
-import { ArrangerProject } from '../arrangerUtils';
-import { SetSqon, Sort } from '../endpoints/sets/setsTypes';
-import { maxSetContentSize } from '../env';
+import { ArrangerProject } from '../arrangerUtils.js';
+import { SetSqon, Sort } from '../endpoints/sets/setsTypes.js';
+import { maxSetContentSize } from '../env.js';
 
 export const searchSqon = async (
     sqon: SetSqon,

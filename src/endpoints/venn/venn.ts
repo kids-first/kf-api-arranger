@@ -1,9 +1,9 @@
 import { buildQuery } from '@arranger/middleware';
 
-import EsInstance from '../../ElasticSearchClientInstance';
-import { getNestedFieldsForIndex } from '../../sqon/getNestedFieldsForIndex';
-import { and, not, or } from '../../sqon/manipulateSqon';
-import { Sqon } from '../../sqon/types';
+import EsInstance from '../../ElasticSearchClientInstance.js';
+import { getNestedFieldsForIndex } from '../../sqon/getNestedFieldsForIndex.js';
+import { and, not, or } from '../../sqon/manipulateSqon.js';
+import { Sqon } from '../../sqon/types.js';
 
 export type VennOutput = {
     operation: string;

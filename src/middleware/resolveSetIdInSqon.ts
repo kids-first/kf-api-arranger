@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 
-import { SetSqon, Sort } from '../endpoints/sets/setsTypes';
-import { resolveSetsInSqon } from '../sqon/resolveSetInSqon';
+import { SetSqon, Sort } from '../endpoints/sets/setsTypes.js';
+import { resolveSetsInSqon } from '../sqon/resolveSetInSqon.js';
 
 type File = {
     fileName: string;

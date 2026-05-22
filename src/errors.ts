@@ -2,8 +2,8 @@ import { NextFunction, Request, Response } from 'express';
 import { ExecutionResult } from 'graphql/execution/execute';
 import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 
-import { SetNotFoundError } from './endpoints/sets/setError';
-import { MissingFilterError } from './endpoints/transcriptomics/errors';
+import { SetNotFoundError } from './endpoints/sets/setError.js';
+import { MissingFilterError } from './endpoints/transcriptomics/errors.js';
 
 export const globalErrorHandler = (err: unknown, _req: Request, res: Response, _next: NextFunction): void => {
     if (err instanceof SetNotFoundError) {

@@ -8,10 +8,10 @@ import {
     fakeKeycloakUrl,
     getToken,
     publicKey,
-} from '../../../test/authTestUtils';
-import buildApp from '../../app';
-import { ArrangerProject } from '../../arrangerUtils';
-import { flushAllCache } from '../../middleware/cache';
+} from '../../../test/authTestUtils.js';
+import buildApp from '../../app.js';
+import { ArrangerProject } from '../../arrangerUtils.js';
+import { flushAllCache } from '../../middleware/cache.js';
 import {
     checkGenesExist,
     checkSampleIdsAndGene,
@@ -20,8 +20,8 @@ import {
     fetchDiffGeneExp,
     fetchFacets,
     fetchSampleGeneExp,
-} from './service';
-import { DiffGeneExpVolcano, Facets as TranscriptomicsFacets, SampleGeneExpVolcano } from './types';
+} from './service.js';
+import { DiffGeneExpVolcano, Facets as TranscriptomicsFacets, SampleGeneExpVolcano } from './types.js';
 
 jest.mock('./service');
 

@@ -1,8 +1,8 @@
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 import { generatePreSignedUrl } from '.';
-import { S3Error } from './errors';
-import S3ClientInstance from './S3ClientInstance';
+import { S3Error } from './errors.js';
+import S3ClientInstance from './S3ClientInstance.js';
 
 jest.mock('./S3ClientInstance');
 jest.mock('@aws-sdk/s3-request-presigner');

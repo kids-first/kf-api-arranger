@@ -1,9 +1,11 @@
-import { Dictionary, flattenDeep, get, isArray, zipObject } from 'lodash';
+import type { Dictionary } from 'lodash';
+import _lodash from 'lodash';
+const { flattenDeep, get, isArray, zipObject } = _lodash;
 
-import { SetSqon } from '../endpoints/sets/setsTypes';
-import { getSharedSet, getUserSets, UserSet } from '../userApi/userApiClient';
-import { sqonContainsSet } from './manipulateSqon';
-import { Sqon } from './types';
+import { SetSqon } from '../endpoints/sets/setsTypes.js';
+import { getSharedSet, getUserSets, UserSet } from '../userApi/userApiClient.js';
+import { sqonContainsSet } from './manipulateSqon.js';
+import { Sqon } from './types.js';
 
 const getSetIdsFromSqon = (sqon: SetSqon, collection = []) =>
     (isArray(sqon.content)

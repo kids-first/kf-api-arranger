@@ -1,6 +1,6 @@
-import { getUserSets, postSetsTags } from '../userApi/userApiClient';
-import { resolveSetIds, resolveQueriesSetAliases } from './setSqon';
-import { Sqon } from './types';
+import { getUserSets, postSetsTags } from '../userApi/userApiClient.js';
+import { resolveSetIds, resolveQueriesSetAliases } from './setSqon.js';
+import { Sqon } from './types.js';
 
 jest.mock('../userApi/userApiClient');
 

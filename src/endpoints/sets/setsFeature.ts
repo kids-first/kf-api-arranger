@@ -1,12 +1,13 @@
-import { difference, dropRight, union } from 'lodash';
+import _lodash from 'lodash';
+const { difference, dropRight, union } = _lodash;
 
-import { ArrangerProject } from '../../arrangerUtils';
-import { maxSetContentSize } from '../../env';
-import { addSqonToSetSqon, removeSqonToSetSqon } from '../../sqon/manipulateSqon';
-import { resolveSetsInSqon } from '../../sqon/resolveSetInSqon';
-import { searchSqon } from '../../sqon/searchSqon';
-import { deleteUserSet, getUserSets, postUserSet, putUserSet, UserSet } from '../../userApi/userApiClient';
-import { SetNotFoundError } from './setError';
+import { ArrangerProject } from '../../arrangerUtils.js';
+import { maxSetContentSize } from '../../env.js';
+import { addSqonToSetSqon, removeSqonToSetSqon } from '../../sqon/manipulateSqon.js';
+import { resolveSetsInSqon } from '../../sqon/resolveSetInSqon.js';
+import { searchSqon } from '../../sqon/searchSqon.js';
+import { deleteUserSet, getUserSets, postUserSet, putUserSet, UserSet } from '../../userApi/userApiClient.js';
+import { SetNotFoundError } from './setError.js';
 import {
     CreateSetBody,
     CreateUpdateBody,
@@ -14,7 +15,7 @@ import {
     Set,
     UpdateSetContentBody,
     UpdateSetTagBody,
-} from './setsTypes';
+} from './setsTypes.js';
 
 export const SubActionTypes = {
     RENAME_TAG: 'RENAME_TAG',

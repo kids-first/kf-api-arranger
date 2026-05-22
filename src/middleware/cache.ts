@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import NodeCache from 'node-cache';
 
-import { cacheTTL } from '../env';
+import { cacheTTL } from '../env.js';
 
 export const STATISTICS_CACHE_ID = 'statistics';
 export const STATISTICS_PUBLIC_CACHE_ID = 'statistics_studies';

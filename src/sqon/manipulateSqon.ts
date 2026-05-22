@@ -1,5 +1,5 @@
-import { SetSqon } from '../endpoints/sets/setsTypes';
-import { Sqon } from './types';
+import { SetSqon } from '../endpoints/sets/setsTypes.js';
+import { Sqon } from './types.js';
 
 export const addSqonToSetSqon = (receivingSqon: SetSqon, donorSqon: SetSqon): SetSqon =>
     ({

@@ -1,5 +1,5 @@
-import EsInstance from '../ElasticSearchClientInstance';
-import { buildSteps, computeUpset, countIt, topN } from './upset';
+import EsInstance from '../ElasticSearchClientInstance.js';
+import { buildSteps, computeUpset, countIt, topN } from './upset.js';
 
 jest.mock('../ElasticSearchClientInstance');
 

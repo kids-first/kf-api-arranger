@@ -1,8 +1,8 @@
 import fetch from 'node-fetch';
 
-import { CreateUpdateBody, SetIdToTag, SetSqon, Sort } from '../endpoints/sets/setsTypes';
-import { userApiURL } from '../env';
-import { UserApiError } from './userApiError';
+import { CreateUpdateBody, SetIdToTag, SetSqon, Sort } from '../endpoints/sets/setsTypes.js';
+import { userApiURL } from '../env.js';
+import { UserApiError } from './userApiError.js';
 
 export type UserSetContent = {
     setType: string;

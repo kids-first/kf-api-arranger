@@ -1,6 +1,6 @@
-import { SetIdToTag } from '../endpoints/sets/setsTypes';
-import { getUserSets, postSetsTags } from '../userApi/userApiClient';
-import { Content, Sqon } from './types';
+import { SetIdToTag } from '../endpoints/sets/setsTypes.js';
+import { getUserSets, postSetsTags } from '../userApi/userApiClient.js';
+import { Content, Sqon } from './types.js';
 
 const participantKey = 'fhir_id';
 const participantFileKey = 'files.fhir_id';

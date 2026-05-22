@@ -1,13 +1,13 @@
-import EsInstance from '../../ElasticSearchClientInstance';
-import { datalakeS3Url } from '../../env';
+import EsInstance from '../../ElasticSearchClientInstance.js';
+import { datalakeS3Url } from '../../env.js';
 import {
     ES_CHROMOSOME_AGG_SIZE,
     ES_SEARCH_MAX_BUCKETS,
     ES_SEARCH_MAX_HITS,
     esDiffGeneExpIndex,
     esSampleGeneExpIndex,
-} from '../../esUtils';
-import { generatePreSignedUrl } from '../../s3Api';
+} from '../../esUtils.js';
+import { generatePreSignedUrl } from '../../s3Api/index.js';
 import {
     DiffGeneExpPoint,
     DiffGeneExpVolcano,
@@ -19,7 +19,7 @@ import {
     MatchedGene,
     SampleGeneExpPoint,
     SampleGeneExpVolcano,
-} from './types';
+} from './types.js';
 
 export const DIFF_GENE_EXP_FILE_KEY = 'transcriptomics/diff_gene_exp/HTP/htp-dge-data.csv';
 export const SAMPLE_GENE_EXP_FILE_KEY = 'transcriptomics/sample_gene_exp/HTP/htp-rnaseq-data.csv';

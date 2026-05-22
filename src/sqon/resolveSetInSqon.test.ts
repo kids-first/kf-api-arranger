@@ -1,6 +1,6 @@
-import { RIFF_TYPE_SET } from '../endpoints/sets/setsTypes';
-import { getSharedSet, getUserSets, UserSet } from '../userApi/userApiClient';
-import { retrieveSetsFromUsers } from './resolveSetInSqon';
+import { RIFF_TYPE_SET } from '../endpoints/sets/setsTypes.js';
+import { getSharedSet, getUserSets, UserSet } from '../userApi/userApiClient.js';
+import { retrieveSetsFromUsers } from './resolveSetInSqon.js';
 
 jest.mock('../userApi/userApiClient');
 

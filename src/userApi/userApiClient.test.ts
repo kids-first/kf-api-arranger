@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 
-import { CreateUpdateBody } from '../endpoints/sets/setsTypes';
+import { CreateUpdateBody } from '../endpoints/sets/setsTypes.js';
 import {
     deleteUserSet,
     getSharedSet,
@@ -9,8 +9,8 @@ import {
     putUserSet,
     UserSet,
     UserSetContent,
-} from './userApiClient';
-import { UserApiError } from './userApiError';
+} from './userApiClient.js';
+import { UserApiError } from './userApiError.js';
 
 jest.mock('node-fetch');
 

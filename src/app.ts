@@ -3,11 +3,11 @@ import express, { Express } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { Keycloak } from 'keycloak-connect';
 
-import { dependencies, version } from '../package.json';
-import { ArrangerProject } from './arrangerUtils';
-import { computeAuthorizedStudiesForAllFences } from './endpoints/authorizedStudies/computeAuthorizedStudies';
-import genomicFeatureSuggestions, { SUGGESTIONS_TYPES } from './endpoints/genomicFeatureSuggestions';
-import { getPhenotypesNodes } from './endpoints/phenotypes';
+import pkg from '../package.json' with { type: 'json' };
+import { ArrangerProject } from './arrangerUtils.js';
+import { computeAuthorizedStudiesForAllFences } from './endpoints/authorizedStudies/computeAuthorizedStudies.js';
+import genomicFeatureSuggestions, { SUGGESTIONS_TYPES } from './endpoints/genomicFeatureSuggestions.js';
+import { getPhenotypesNodes } from './endpoints/phenotypes.js';
 import {
     createSet,
     deleteSet,
@@ -15,21 +15,23 @@ import {
     SubActionTypes,
     updateSetContent,
     updateSetTag,
-} from './endpoints/sets/setsFeature';
-import { CreateSetBody, Set, SetSqon, UpdateSetContentBody, UpdateSetTagBody } from './endpoints/sets/setsTypes';
-import { getStatistics, getStudiesStatistics } from './endpoints/statistics';
-import transcriptomicsRouter from './endpoints/transcriptomics/route';
-import { computeUpset } from './endpoints/upset';
-import { reformatVenn, venn } from './endpoints/venn/venn';
-import { esHost, keycloakURL, userApiURL } from './env';
-import { globalErrorHandler, globalErrorLogger } from './errors';
-import { flushAllCache, STATISTICS_CACHE_ID, STATISTICS_PUBLIC_CACHE_ID, twineWithCache } from './middleware/cache';
-import { injectBodyHttpHeaders } from './middleware/injectBodyHttpHeaders';
-import { resolveSetIdMiddleware } from './middleware/resolveSetIdInSqon';
-import { replaceIdsWithSetId, resolveSetsInAllSqonsWithMapper, resolveSetsInSqon } from './sqon/resolveSetInSqon';
-import { Sqon } from './sqon/types';
-import { resolveQueriesSetAliases } from './sqon/setSqon';
-import { getPublicGraphs, getPublicStudy } from './endpoints/publicStudy/publicStudy';
+} from './endpoints/sets/setsFeature.js';
+import { CreateSetBody, Set, SetSqon, UpdateSetContentBody, UpdateSetTagBody } from './endpoints/sets/setsTypes.js';
+import { getStatistics, getStudiesStatistics } from './endpoints/statistics/index.js';
+import transcriptomicsRouter from './endpoints/transcriptomics/route.js';
+import { computeUpset } from './endpoints/upset.js';
+import { reformatVenn, venn } from './endpoints/venn/venn.js';
+import { esHost, keycloakURL, userApiURL } from './env.js';
+import { globalErrorHandler, globalErrorLogger } from './errors.js';
+import { flushAllCache, STATISTICS_CACHE_ID, STATISTICS_PUBLIC_CACHE_ID, twineWithCache } from './middleware/cache.js';
+import { injectBodyHttpHeaders } from './middleware/injectBodyHttpHeaders.js';
+import { resolveSetIdMiddleware } from './middleware/resolveSetIdInSqon.js';
+import { replaceIdsWithSetId, resolveSetsInAllSqonsWithMapper, resolveSetsInSqon } from './sqon/resolveSetInSqon.js';
+import { Sqon } from './sqon/types.js';
+import { resolveQueriesSetAliases } from './sqon/setSqon.js';
+import { getPublicGraphs, getPublicStudy } from './endpoints/publicStudy/publicStudy.js';
+
+const { dependencies, version } = pkg;
 
 export default (keycloak: Keycloak, getProject: (projectId: string) => ArrangerProject): Express => {
     const app = express();
@@ -136,7 +138,7 @@ export default (keycloak: Keycloak, getProject: (projectId: string) => ArrangerP
             const requestBody: UpdateSetTagBody | UpdateSetContentBody = req.body;
             const accessToken = req.headers.authorization;
             const userId = req['kauth']?.grant?.access_token?.content?.sub;
-            const setId: string = req.params.setId;
+            const setId = req.params.setId as string;
             let updatedSet: Set;
 
             if (requestBody.subAction === SubActionTypes.RENAME_TAG) {
@@ -159,7 +161,7 @@ export default (keycloak: Keycloak, getProject: (projectId: string) => ArrangerP
     app.delete('/sets/:setId', keycloak.protect(), async (req, res, next) => {
         try {
             const accessToken = req.headers.authorization;
-            const setId: string = req.params.setId;
+            const setId = req.params.setId as string;
 
             const deletedResult = await deleteSet(accessToken, setId);
 

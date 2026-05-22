@@ -1,12 +1,13 @@
 import { ExecutionResult } from 'graphql/execution/execute';
-import { get } from 'lodash';
+import _lodash from 'lodash';
+const { get } = _lodash;
 
-import { runProjectQuery } from '../arrangerUtils';
-import { ArrangerProject } from '../arrangerUtils';
-import { throwErrorsFromGqlQueryIfExist } from '../errors';
-import { ES_SEARCH_MAX_BUCKETS } from '../esUtils';
-import { resolveSetIds } from '../sqon/setSqon';
-import { SetSqon } from './sets/setsTypes';
+import { runProjectQuery } from '../arrangerUtils.js';
+import { ArrangerProject } from '../arrangerUtils.js';
+import { throwErrorsFromGqlQueryIfExist } from '../errors.js';
+import { ES_SEARCH_MAX_BUCKETS } from '../esUtils.js';
+import { resolveSetIds } from '../sqon/setSqon.js';
+import { SetSqon } from './sets/setsTypes.js';
 
 export const idKey = 'fhir_id';
 
@@ -31,7 +32,9 @@ const getParticipantIds = async (
         `,
         variables: { sqon },
     });
-    const psCount = countRes?.data?.participant?.hits?.total ?? 0;
+    // Cast: ExecutionResult.data is `Record<string, unknown>` in graphql 16,
+    // and we don't statically type the query shape here. Route is deferred during cut-over.
+    const psCount = (countRes?.data as any)?.participant?.hits?.total ?? 0;
     if (psCount === 0) {
         return [];
     }

@@ -1,7 +1,7 @@
 import { buildQuery } from '@arranger/middleware';
 
-import EsInstance from '../ElasticSearchClientInstance';
-import { getNestedFieldsForIndex } from '../sqon/getNestedFieldsForIndex';
+import EsInstance from '../ElasticSearchClientInstance.js';
+import { getNestedFieldsForIndex } from '../sqon/getNestedFieldsForIndex.js';
 
 export type UpsetData = {
     name: string;

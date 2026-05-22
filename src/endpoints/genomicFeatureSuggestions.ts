@@ -1,13 +1,13 @@
 import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
-import EsInstance from '../ElasticSearchClientInstance';
+import EsInstance from '../ElasticSearchClientInstance.js';
 import {
     indexNameGeneFeatureSuggestion,
     indexNameVariantFeatureSuggestion,
     indexNameVariantSomaticFeatureSuggestion,
     maxNOfGenomicFeatureSuggestions,
-} from '../env';
+} from '../env.js';
 
 export const SUGGESTIONS_TYPES = {
     VARIANT: 'variant',
