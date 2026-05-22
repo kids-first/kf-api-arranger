@@ -36,6 +36,7 @@ import type {
 import { gqlScalarFor } from './typeMappings.js';
 import { GraphQLJSON } from './jsonScalar.js';
 import { ColumnsStateType } from './stateTypes.js';
+import { SortInputType } from './sortTypes.js';
 import type { ExtendedMap, FieldNode } from './types.js';
 
 const capFirst = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1);
@@ -172,6 +173,9 @@ export function buildConnectionFamily(args: BuildConnectionFamilyArgs): Connecti
                     args: {
                         filters: { type: GraphQLJSON },
                         first: { type: GraphQLInt },
+                        offset: { type: GraphQLInt },
+                        sort: { type: new GraphQLList(SortInputType) },
+                        searchAfter: { type: GraphQLJSON },
                     },
                 },
             };

@@ -29,10 +29,42 @@ export type EntityResolverConfig = {
     columnsState: unknown;
 };
 
+type SortInput = {
+    field?: string;
+    order?: string;
+    missing?: string;
+};
+
 type HitsArgs = {
     filters?: unknown;
     first?: number;
+    offset?: number;
+    sort?: SortInput[];
+    searchAfter?: unknown[];
 };
+
+// Port of arranger's body.sort construction
+// (arranger-2.19.2/modules/mapping-utils/src/resolveHits.js:208-230).
+// For each sort entry: compute deepest nested-field prefix on the sort field
+// so ES knows to apply nested sorting; supply a `missing` default based on
+// order direction if not provided.
+function buildEsSort(sortInputs: SortInput[], nestedFields: string[]): unknown[] {
+    return sortInputs.map(({ field, order, missing }) => {
+        const fld = field ?? '';
+        const nestedPath = nestedFields
+            .filter(nf => fld.indexOf(nf) === 0)
+            .reduce((deepest, p) => (deepest.length > p.length ? deepest : p), '');
+        return {
+            [fld]: {
+                missing: missing
+                    ? missing === 'first' ? '_first' : '_last'
+                    : order === 'asc' ? '_first' : '_last',
+                order,
+                ...(nestedPath.length ? { nested: { path: nestedPath } } : {}),
+            },
+        };
+    });
+}
 
 type AggsArgs = {
     filters?: unknown;
@@ -116,10 +148,14 @@ export function createResolvers(entities: EntityResolverConfig[]): IResolvers<un
                 const sqon = normalizeSqonInput(args.filters);
                 const built = buildQuery({ nestedFields, filters: sqon });
                 const query = Object.keys(built).length > 0 ? built : { match_all: {} };
+                const esSort = args.sort?.length ? buildEsSort(args.sort, nestedFields) : undefined;
                 const res = await ctx.es.search<Record<string, unknown>>({
                     index: esIndex,
                     size: args.first ?? 10,
+                    from: args.offset,
                     query,
+                    sort: esSort,
+                    search_after: args.searchAfter as unknown[] | undefined,
                     track_total_hits: true,
                 });
                 return {

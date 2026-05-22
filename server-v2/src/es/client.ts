@@ -20,6 +20,7 @@ export type EsSearchResponse<TSource = Record<string, unknown>> = {
 export type EsSearchParams = {
     index: string;
     size?: number;
+    from?: number;
     query?: unknown;
     sort?: unknown;
     search_after?: unknown[];
