@@ -31,21 +31,19 @@ const ES_INDICES = [
     'variant_centric',
 ] as const;
 
-// `arranger-projects-<PROJECT_ID>` is where per-entity config (extended +
-// columns-state) lives. Hardcoded for now — INCLUDE is the only project.
-const PROJECT_ID = 'include';
-
 export type GraphqlServerHandle = {
     server: ApolloServer<ServerContext>;
     context: ServerContext;
 };
 
-export async function buildGraphqlServer(): Promise<GraphqlServerHandle> {
+// `arranger-projects-<projectId>` is where per-entity config (extended +
+// columns-state) lives. Caller supplies the projectId from env.
+export async function buildGraphqlServer(projectId: string): Promise<GraphqlServerHandle> {
     const status = await pingCluster();
     console.log(`ES cluster status: ${status}`);
 
     const es = createRealEsClient();
-    const entities: EntityModule[] = await loadAllEntitiesFromEs(es, PROJECT_ID, ES_INDICES);
+    const entities: EntityModule[] = await loadAllEntitiesFromEs(es, projectId, ES_INDICES);
 
     for (const e of entities) {
         console.log(`  ${e.esIndex} → ${e.entityName}  (${e.nestedFields.length} nested fields)`);

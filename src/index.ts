@@ -5,7 +5,7 @@ import Keycloak from 'keycloak-connect';
 
 import buildApp from './app.js';
 import { ArrangerProject } from './arrangerUtils.js';
-import { port } from './env.js';
+import { port, projectId } from './env.js';
 import { buildGraphqlServer } from './graphql/server.js';
 import keycloakConfig from './keycloak.js';
 
@@ -48,14 +48,13 @@ k.grantManager.validateGrant = grant =>
     });
 
 const app = buildApp(keycloak, getProject);
-const { server: apollo, context } = await buildGraphqlServer();
+const { server: apollo, context } = await buildGraphqlServer(projectId);
 
-// Mount Apollo at /<project>/graphql. The `project` URL param is currently
-// ignored — server-v2 serves one merged schema for all entities — but we
-// keep the existing FE-facing URL contract.
+// Mount Apollo at /${projectId}/graphql — single project per deployment,
+// driven entirely by the PROJECT_ID env var (default 'include').
 // TODO re-enable keycloak.protect() once auth flow is validated end-to-end.
 app.use(
-    '/:project/graphql',
+    `/${projectId}/graphql`,
     express.json({ limit: '50mb' }),
     expressMiddleware(apollo, { context: async () => context }),
 );
