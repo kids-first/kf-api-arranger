@@ -2,12 +2,15 @@
 // Slice S: Root.<entity> + <entity>.hits.
 // Slice T (added 2026-05-21): <entity>.aggregations via
 // @arranger/middleware.buildAggregations + flattenAggregations.
+// Slice U (added 2026-05-22): <entity>.extended + <entity>.columnsState,
+// both read from the per-entity config loaded once at startup.
 
 import { buildAggregations, buildQuery, flattenAggregations } from '@arranger/middleware';
 import type { IResolvers } from '@graphql-tools/utils';
 import type { GraphQLResolveInfo } from 'graphql';
 import graphqlFields from 'graphql-fields';
 import type { EsClient } from './es/client.js';
+import type { ExtendedEntry } from './schema/types.js';
 
 export type ServerContext = {
     es: EsClient;
@@ -23,6 +26,17 @@ type AggsArgs = {
     filters?: unknown;
     include_missing?: boolean;
     aggregations_filter_themselves?: boolean;
+};
+
+type ExtendedArgs = {
+    fields?: string[];
+};
+
+export type CreateResolversArgs = {
+    entityName: string;
+    nestedFields: string[];
+    extendedEntries: ExtendedEntry[];
+    columnsState: unknown;
 };
 
 // arranger's `normalizeFilters` short-circuits on falsy input (returns the
@@ -43,14 +57,20 @@ function normalizeSqonInput(filters: unknown): unknown {
 }
 
 export function createResolvers(
-    entityName: string,
-    nestedFields: string[],
+    args: CreateResolversArgs,
 ): IResolvers<unknown, ServerContext> {
+    const { entityName, nestedFields, extendedEntries, columnsState } = args;
     return {
         Root: {
             [entityName]: () => ({}),
         },
         [entityName]: {
+            extended(_parent: unknown, { fields }: ExtendedArgs) {
+                return fields ? extendedEntries.filter(e => fields.includes(e.field)) : extendedEntries;
+            },
+            columnsState() {
+                return columnsState;
+            },
             async hits(_parent: unknown, args: HitsArgs, ctx: ServerContext) {
                 const sqon = normalizeSqonInput(args.filters);
                 const built = buildQuery({ nestedFields, filters: sqon });

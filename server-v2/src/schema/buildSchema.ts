@@ -2,11 +2,11 @@
 //
 // Slice S (read path): `{ <entity> { hits(filters, first) { total, edges { node { ... } } } } }`
 // Slice T (aggregations): `{ <entity> { aggregations(filters, include_missing, aggregations_filter_themselves) { ... } } }`
+// Slice U (entity metadata): `extended(fields: [String]): JSON`, `columnsState: ColumnsState`.
 //
-// Fields not exercised by these slices (mapping, extended, aggsState,
-// columnsState, matchBoxState) are intentionally omitted — see
-// experiments/schemaGen/README.md "What's NOT done" + the C-narrow scope
-// decision in session 3.
+// Frontend audit (2026-05-22) confirmed the other arranger entity-level
+// fields (mapping, aggsState, matchBoxState) are not queried by
+// include-portal-ui, so they remain omitted.
 
 import {
     GraphQLBoolean,
@@ -15,10 +15,12 @@ import {
     GraphQLNonNull,
     GraphQLObjectType,
     GraphQLSchema,
+    GraphQLString,
 } from 'graphql';
 import { buildAggsType } from './buildAggsType.js';
 import { buildNodeInterface, buildNodeType } from './buildNodeType.js';
 import { GraphQLJSON } from './jsonScalar.js';
+import { ColumnsStateType } from './stateTypes.js';
 import type { ExtendedMap, FieldTree } from './types.js';
 
 type BuildSchemaArgs = {
@@ -68,6 +70,13 @@ export function buildSchema(args: BuildSchemaArgs): GraphQLSchema {
                     aggregations_filter_themselves: { type: GraphQLBoolean },
                 },
             },
+            extended: {
+                type: GraphQLJSON,
+                args: {
+                    fields: { type: new GraphQLList(GraphQLString) },
+                },
+            },
+            columnsState: { type: ColumnsStateType },
         }),
     });
 

@@ -7,7 +7,7 @@ import type { GraphQLSchema } from 'graphql';
 import { buildFieldTree } from './fieldTree.js';
 import { loadExtendedMapping } from './extendedMapping.js';
 import { buildSchema } from './buildSchema.js';
-import type { ExtendedMap, FieldTree } from './types.js';
+import type { ExtendedEntry, ExtendedMap, FieldTree } from './types.js';
 
 type LoadSchemaArgs = {
     mappingPath: string;
@@ -20,14 +20,19 @@ type LoadSchemaResult = {
     entityName: string;
     tree: FieldTree;
     extendedMap: ExtendedMap;
+    extendedEntries: ExtendedEntry[];
+    columnsState: unknown;
 };
 
 export function loadSchema(args: LoadSchemaArgs): LoadSchemaResult {
     const mapping = JSON.parse(fs.readFileSync(args.mappingPath, 'utf8'));
     const tree = buildFieldTree(mapping);
-    const { map: extendedMap, entityName } = loadExtendedMapping(args.projectsPath, args.esIndex);
+    const { map: extendedMap, entries: extendedEntries, columnsState, entityName } = loadExtendedMapping(
+        args.projectsPath,
+        args.esIndex,
+    );
     const schema = buildSchema({ tree, extendedMap, entityName });
-    return { schema, entityName, tree, extendedMap };
+    return { schema, entityName, tree, extendedMap, extendedEntries, columnsState };
 }
 
 export type { LoadSchemaArgs, LoadSchemaResult };

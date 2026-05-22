@@ -14,7 +14,7 @@ const ES_INDEX = 'study_centric';
 const status = await pingCluster();
 console.log(`ES cluster status: ${status}`);
 
-const { schema: rawSchema, entityName, tree } = loadSchema({
+const { schema: rawSchema, entityName, tree, extendedEntries, columnsState } = loadSchema({
     mappingPath: `${REPO_ROOT}/experiments/data/mappings/${ES_INDEX}.json`,
     projectsPath: `${REPO_ROOT}/experiments/data/arranger-projects/include.json`,
     esIndex: ES_INDEX,
@@ -25,7 +25,7 @@ console.log(`nested fields (${nestedFields.length}): ${nestedFields.slice(0, 5).
 
 const schema = addResolversToSchema({
     schema: rawSchema,
-    resolvers: createResolvers(entityName, nestedFields),
+    resolvers: createResolvers({ entityName, nestedFields, extendedEntries, columnsState }),
 });
 
 const es = createRealEsClient();

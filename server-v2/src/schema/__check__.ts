@@ -12,6 +12,8 @@
 //   3. Slice-T aggregation types (Stats, Bucket, NumericAggregations,
 //      Aggregations, <entity>Aggregations) are emitted; the per-entity agg
 //      type is summarized with field count + first/last entries.
+//   4. Slice-U entity-metadata types (ColumnSort, Column, ColumnState,
+//      ColumnsState) are emitted.
 
 import fs from 'node:fs';
 import { printSchema } from 'graphql';
@@ -60,6 +62,10 @@ const wrappers = [
     'NumericAggregations',
     'Aggregations',
     `${entityName}Aggregations`,
+    'ColumnSort',
+    'Column',
+    'ColumnState',
+    'ColumnsState',
 ];
 console.log('--- wrapper types emitted ---');
 for (const t of wrappers) {
