@@ -4,6 +4,11 @@
 // @arranger/middleware.buildAggregations + flattenAggregations.
 // Slice U (added 2026-05-22): <entity>.extended + <entity>.columnsState,
 // both read from the per-entity config loaded once at startup.
+// Slice V (added 2026-05-22): nested fields pre-shaped into Connection
+// payload via resolveNested.
+// Slice X (multi-entity, 2026-05-22): one createResolvers call handles all
+// N entities; each entity's resolvers close over its own esIndex +
+// nestedFields + extendedEntries + columnsState. ServerContext is just { es }.
 
 import { buildAggregations, buildQuery, flattenAggregations } from '@arranger/middleware';
 import type { IResolvers } from '@graphql-tools/utils';
@@ -14,7 +19,14 @@ import type { ExtendedEntry } from './schema/types.js';
 
 export type ServerContext = {
     es: EsClient;
+};
+
+export type EntityResolverConfig = {
+    entityName: string;
     esIndex: string;
+    nestedFields: string[];
+    extendedEntries: ExtendedEntry[];
+    columnsState: unknown;
 };
 
 type HitsArgs = {
@@ -30,13 +42,6 @@ type AggsArgs = {
 
 type ExtendedArgs = {
     fields?: string[];
-};
-
-export type CreateResolversArgs = {
-    entityName: string;
-    nestedFields: string[];
-    extendedEntries: ExtendedEntry[];
-    columnsState: unknown;
 };
 
 // arranger's `normalizeFilters` short-circuits on falsy input (returns the
@@ -93,15 +98,14 @@ function resolveNested(value: unknown, nestedFields: string[], parent = ''): unk
     return out;
 }
 
-export function createResolvers(
-    args: CreateResolversArgs,
-): IResolvers<unknown, ServerContext> {
-    const { entityName, nestedFields, extendedEntries, columnsState } = args;
-    return {
-        Root: {
-            [entityName]: () => ({}),
-        },
-        [entityName]: {
+export function createResolvers(entities: EntityResolverConfig[]): IResolvers<unknown, ServerContext> {
+    const root: Record<string, () => unknown> = {};
+    const result: IResolvers<unknown, ServerContext> = { Root: root };
+
+    for (const entity of entities) {
+        const { entityName, esIndex, nestedFields, extendedEntries, columnsState } = entity;
+        root[entityName] = () => ({});
+        result[entityName] = {
             extended(_parent: unknown, { fields }: ExtendedArgs) {
                 return fields ? extendedEntries.filter(e => fields.includes(e.field)) : extendedEntries;
             },
@@ -113,7 +117,7 @@ export function createResolvers(
                 const built = buildQuery({ nestedFields, filters: sqon });
                 const query = Object.keys(built).length > 0 ? built : { match_all: {} };
                 const res = await ctx.es.search<Record<string, unknown>>({
-                    index: ctx.esIndex,
+                    index: esIndex,
                     size: args.first ?? 10,
                     query,
                     track_total_hits: true,
@@ -148,7 +152,7 @@ export function createResolvers(
                     query,
                 });
                 const res = await ctx.es.search({
-                    index: ctx.esIndex,
+                    index: esIndex,
                     size: 0,
                     query,
                     aggregations,
@@ -166,6 +170,8 @@ export function createResolvers(
                     Object.entries(flat).map(([k, v]) => [k.replace(/\./g, '__'), v]),
                 );
             },
-        },
-    };
+        };
+    }
+
+    return result;
 }

@@ -40,26 +40,27 @@ import type { ExtendedMap, FieldNode } from './types.js';
 
 const capFirst = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1);
 
-export function buildNodeInterface(): GraphQLInterfaceType {
-    return new GraphQLInterfaceType({
-        name: 'Node',
-        fields: { id: { type: new GraphQLNonNull(GraphQLID) } },
-    });
-}
+// Shared across all entities — multi-entity schemas need a single Node
+// interface instance so the schema validator doesn't see N copies. The slice-V
+// factory `buildNodeInterface()` was per-call; multi-entity refactor (slice X)
+// flipped it to a module-level singleton.
+export const NodeInterface = new GraphQLInterfaceType({
+    name: 'Node',
+    fields: { id: { type: new GraphQLNonNull(GraphQLID) } },
+});
 
 type BuildFieldMapArgs = {
     fields: FieldNode[];
     extendedMap: ExtendedMap;
     parentName: string;
     parentPath: string; // dotted path for extendedMap lookup (empty at entity root)
-    nodeInterface: GraphQLInterfaceType;
 };
 
 // Recursive walker — emits the field map for either a Node type (entity-level
 // or sub-Connection Node) or an object container. Order matches arranger:
 // scalars first alphabetically, then nested/object fields alphabetically.
 function buildFieldMap(args: BuildFieldMapArgs): GraphQLFieldConfigMap<unknown, unknown> {
-    const { fields, extendedMap, parentName, parentPath, nodeInterface } = args;
+    const { fields, extendedMap, parentName, parentPath } = args;
     const ordered = fields
         .filter(f => f.kind !== 'unsupported')
         .slice()
@@ -73,7 +74,7 @@ function buildFieldMap(args: BuildFieldMapArgs): GraphQLFieldConfigMap<unknown, 
     const out: GraphQLFieldConfigMap<unknown, unknown> = {};
     for (const f of ordered) {
         const childPath = parentPath ? `${parentPath}.${f.name}` : f.name;
-        out[f.name] = { type: gqlTypeForChild(f, extendedMap, parentName, childPath, nodeInterface) };
+        out[f.name] = { type: gqlTypeForChild(f, extendedMap, parentName, childPath) };
     }
     return out;
 }
@@ -83,7 +84,6 @@ function gqlTypeForChild(
     extendedMap: ExtendedMap,
     parentName: string,
     fieldPath: string,
-    nodeInterface: GraphQLInterfaceType,
 ): GraphQLOutputType {
     if (field.kind === 'scalar') {
         const base = gqlScalarFor(field.esType);
@@ -97,7 +97,6 @@ function gqlTypeForChild(
             extendedMap,
             parentName: subName,
             parentPath: fieldPath,
-            nodeInterface,
         });
         return new GraphQLObjectType({
             name: subName,
@@ -110,11 +109,9 @@ function gqlTypeForChild(
             extendedMap,
             parentName: subName,
             parentPath: fieldPath,
-            nodeInterface,
         });
         const family = buildConnectionFamily({
             name: subName,
-            nodeInterface,
             fieldMap: childFieldMap,
         });
         return family.wrapperType;
@@ -124,7 +121,6 @@ function gqlTypeForChild(
 
 type BuildConnectionFamilyArgs = {
     name: string;
-    nodeInterface: GraphQLInterfaceType;
     fieldMap: GraphQLFieldConfigMap<unknown, unknown>;
     // Entity-level only — controls which slice-T/U features the wrapper exposes.
     aggsType?: GraphQLObjectType;
@@ -139,11 +135,11 @@ export type ConnectionFamily = {
 };
 
 export function buildConnectionFamily(args: BuildConnectionFamilyArgs): ConnectionFamily {
-    const { name, nodeInterface, fieldMap, aggsType, includeEntityMetadata } = args;
+    const { name, fieldMap, aggsType, includeEntityMetadata } = args;
 
     const nodeType = new GraphQLObjectType({
         name: `${name}Node`,
-        interfaces: [nodeInterface],
+        interfaces: [NodeInterface],
         fields: () => ({
             id: { type: new GraphQLNonNull(GraphQLID) },
             score: { type: GraphQLInt },
@@ -211,21 +207,18 @@ type BuildEntityTypeArgs = {
     fields: FieldNode[];
     extendedMap: ExtendedMap;
     aggsType: GraphQLObjectType;
-    nodeInterface: GraphQLInterfaceType;
 };
 
 export function buildEntityType(args: BuildEntityTypeArgs): GraphQLObjectType {
-    const { entityName, fields, extendedMap, aggsType, nodeInterface } = args;
+    const { entityName, fields, extendedMap, aggsType } = args;
     const fieldMap = buildFieldMap({
         fields,
         extendedMap,
         parentName: entityName,
         parentPath: '',
-        nodeInterface,
     });
     const family = buildConnectionFamily({
         name: entityName,
-        nodeInterface,
         fieldMap,
         aggsType,
         includeEntityMetadata: true,

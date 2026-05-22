@@ -19,7 +19,7 @@
 
 import fs from 'node:fs';
 import { printSchema } from 'graphql';
-import { loadSchema } from './index.js';
+import { buildSchema, loadEntity } from './index.js';
 
 const REPO_ROOT = '..'; // when running from server-v2/
 
@@ -30,11 +30,13 @@ if (!esIndex) {
     process.exit(1);
 }
 
-const { schema, entityName } = loadSchema({
+const entity = loadEntity({
     mappingPath: `${REPO_ROOT}/experiments/data/mappings/${esIndex}.json`,
     projectsPath: `${REPO_ROOT}/experiments/data/arranger-projects/include.json`,
     esIndex,
 });
+const { entityName } = entity;
+const schema = buildSchema([entity]);
 
 const oursSdl = printSchema(schema);
 
