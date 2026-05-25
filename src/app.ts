@@ -216,7 +216,11 @@ export default (keycloak: Keycloak, runInternalQuery: RunInternalQuery): Express
     });
 
     app.post('/authorized-studies', keycloak.protect(), async (req, res, next) => {
-        await computeAuthorizedStudiesForAllFences(req, res, next);
+        try {
+            await computeAuthorizedStudiesForAllFences(req, res, next);
+        } catch (e) {
+            next(e);
+        }
     });
 
     app.post('/upset', keycloak.protect(), async (req, res, next) => {

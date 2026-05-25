@@ -11,6 +11,10 @@ export const globalErrorHandler = (err: unknown, _req: Request, res: Response, _
     } else if (err instanceof Error) {
         res.status(500).json({ error: 'Internal Server Error' });
     } else {
+        // FIXME: throwing here propagates to Node's uncaughtException trap
+        // (src/index.ts), which exits the process. A non-Error thrown
+        // anywhere in the request pipeline takes the whole server down.
+        // Should respond 500 + log instead. See session-9 memory + audit.
         throw err;
     }
 };
