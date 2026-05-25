@@ -162,7 +162,9 @@ export function createResolvers(entities: EntityResolverConfig[]): IResolvers<un
                     from: args.offset,
                     query,
                     sort: esSort,
-                    search_after: args.searchAfter as unknown[] | undefined,
+                    // ES rejects `search_after: null` — omit the field
+                    // entirely when the caller didn't supply one.
+                    ...(args.searchAfter ? { search_after: args.searchAfter as unknown[] } : {}),
                     track_total_hits: true,
                 });
                 return {
