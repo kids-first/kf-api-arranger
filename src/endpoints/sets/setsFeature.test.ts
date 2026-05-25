@@ -8,7 +8,7 @@ import {
     type CreateSetBody,
     type CreateUpdateBody,
     RIFF_TYPE_SET,
-    type Set,
+    type SavedSet,
     type Sort,
     type UpdateSetContentBody,
     type UpdateSetTagBody,
@@ -52,7 +52,7 @@ describe('Set management', () => {
         updated_date: new Date(),
     };
 
-    const set: Set = {
+    const set: SavedSet = {
         id: userSet.id,
         tag: userSet.alias,
         size: userSet.content.ids.length,
@@ -69,7 +69,7 @@ describe('Set management', () => {
 
         it('should send get user contents and convert to Set', async () => {
             const mockUserSets = [userSet];
-            const expectedSets: Set[] = [set];
+            const expectedSets: SavedSet[] = [set];
             vi.mocked(getUserSets).mockResolvedValue(mockUserSets);
 
             const result = await getSets(accessToken);
@@ -186,7 +186,7 @@ describe('Set management', () => {
                 updated_date: new Date(),
             };
 
-            const expectedSet: Set = {
+            const expectedSet: SavedSet = {
                 ...set,
                 size: 3,
                 updated_date: truncatedUserSet.updated_date,
@@ -239,7 +239,7 @@ describe('Set management', () => {
         });
 
         it('should send put user content and return result', async () => {
-            const expectedResult: Set = {
+            const expectedResult: SavedSet = {
                 ...set,
                 tag: 'tag updated',
                 updated_date: updatedSet.updated_date,
@@ -325,7 +325,7 @@ describe('Set management', () => {
                 updated_date: new Date(),
             };
 
-            const updatedSet: Set = {
+            const updatedSet: SavedSet = {
                 ...set,
                 size: 3,
                 updated_date: updatedUserSet.updated_date,
@@ -383,7 +383,7 @@ describe('Set management', () => {
                 },
                 updated_date: new Date(),
             };
-            const updatedSet: Set = {
+            const updatedSet: SavedSet = {
                 ...set,
                 size: 3,
                 updated_date: updatedUserSet.updated_date,
@@ -438,7 +438,7 @@ describe('Set management', () => {
                 },
                 updated_date: new Date(),
             };
-            const updatedSet: Set = {
+            const updatedSet: SavedSet = {
                 ...set,
                 size: 1,
                 updated_date: updatedUserSet.updated_date,

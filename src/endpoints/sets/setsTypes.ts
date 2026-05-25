@@ -47,7 +47,7 @@ export type Sort = {
     order: string;
 };
 
-export type Set = {
+export type SavedSet = {
     id: string;
     tag: string;
     size: number;

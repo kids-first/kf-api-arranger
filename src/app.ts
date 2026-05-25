@@ -20,7 +20,7 @@ import {
 } from './endpoints/sets/setsFeature.js';
 import type {
     CreateSetBody,
-    Set,
+    SavedSet,
     SetSqon,
     UpdateSetContentBody,
     UpdateSetTagBody,
@@ -70,28 +70,24 @@ export default (keycloak: Keycloak, runInternalQuery: RunInternalQuery): Express
 
     app.use(resolveSetIdMiddleware());
 
-    app.get('/status', (_req, res, next) => {
-        try {
-            res.send({
-                dependencies,
-                version,
-                keycloak: keycloakURL,
-                elasticsearch: esHost,
-                users: userApiURL,
-                arrangerNext: true,
-            });
-        } catch (e) {
-            next(e);
-        }
+    // Express 5 catches both sync and async handler rejections and routes
+    // them to globalErrorHandler — no try/catch + next(e) wrappers needed
+    // on the route handlers below.
+
+    app.get('/status', (_req, res) => {
+        res.send({
+            dependencies,
+            version,
+            keycloak: keycloakURL,
+            elasticsearch: esHost,
+            users: userApiURL,
+            arrangerNext: true,
+        });
     });
 
-    app.post('/cache-clear', keycloak.protect('realm:ADMIN'), async (_req, res, next) => {
-        try {
-            flushAllCache();
-            res.send('OK');
-        } catch (e) {
-            next(e);
-        }
+    app.post('/cache-clear', keycloak.protect('realm:ADMIN'), async (_req, res) => {
+        flushAllCache();
+        res.send('OK');
     });
 
     app.use('/transcriptomics', keycloak.protect(), transcriptomicsRouter);
@@ -106,206 +102,149 @@ export default (keycloak: Keycloak, runInternalQuery: RunInternalQuery): Express
         genomicFeatureSuggestions(req, res, next, SUGGESTIONS_TYPES.VARIANT_SOMATIC),
     );
 
-    app.get('/statistics', async (_req, res, next) => {
-        try {
-            const data = await twineWithCache(STATISTICS_CACHE_ID, getStatistics);
-            res.json(data);
-        } catch (e) {
-            next(e);
-        }
+    app.get('/statistics', async (_req, res) => {
+        const data = await twineWithCache(STATISTICS_CACHE_ID, getStatistics);
+        res.json(data);
     });
 
-    app.get('/statistics/studies', async (_req, res, next) => {
-        try {
-            const data = await twineWithCache(STATISTICS_PUBLIC_CACHE_ID, getStudiesStatistics);
-            res.json(data);
-        } catch (e) {
-            next(e);
-        }
+    app.get('/statistics/studies', async (_req, res) => {
+        const data = await twineWithCache(STATISTICS_PUBLIC_CACHE_ID, getStudiesStatistics);
+        res.json(data);
     });
 
     // TODO re-enable keycloak.protect() once auth flow is validated end-to-end.
-    app.get('/sets', async (req, res, next) => {
-        try {
-            const accessToken = req.headers.authorization;
-            const userSets = await getSets(accessToken);
-
-            res.send(userSets);
-        } catch (e) {
-            next(e);
-        }
+    app.get('/sets', async (req, res) => {
+        const accessToken = req.headers.authorization;
+        const userSets = await getSets(accessToken);
+        res.send(userSets);
     });
 
     // TODO re-enable keycloak.protect() once auth flow is validated end-to-end.
-    app.post('/sets', async (req, res, next) => {
-        try {
-            const accessToken = req.headers.authorization;
-            const userId = req.kauth?.grant?.access_token?.content?.sub;
-            const createdSet = await createSet(req.body as CreateSetBody, accessToken, userId, runInternalQuery);
-
-            res.send(createdSet);
-        } catch (e) {
-            next(e);
-        }
+    app.post('/sets', async (req, res) => {
+        const accessToken = req.headers.authorization;
+        const userId = req.kauth?.grant?.access_token?.content?.sub;
+        const createdSet = await createSet(req.body as CreateSetBody, accessToken, userId, runInternalQuery);
+        res.send(createdSet);
     });
 
     // TODO re-enable keycloak.protect() once auth flow is validated end-to-end.
-    app.put('/sets/:setId', async (req, res, next) => {
-        try {
-            const requestBody: UpdateSetTagBody | UpdateSetContentBody = req.body;
-            const accessToken = req.headers.authorization;
-            const userId = req.kauth?.grant?.access_token?.content?.sub;
-            const setId = req.params.setId as string;
-            let updatedSet: Set;
+    app.put('/sets/:setId', async (req, res) => {
+        const requestBody: UpdateSetTagBody | UpdateSetContentBody = req.body;
+        const accessToken = req.headers.authorization;
+        const userId = req.kauth?.grant?.access_token?.content?.sub;
+        const setId = req.params.setId as string;
+        let updatedSet: SavedSet;
 
-            if (requestBody.subAction === SubActionTypes.RENAME_TAG) {
-                updatedSet = await updateSetTag(requestBody as UpdateSetTagBody, accessToken, setId);
-            } else {
-                updatedSet = await updateSetContent(
-                    requestBody as UpdateSetContentBody,
-                    accessToken,
-                    userId,
-                    setId,
-                    runInternalQuery,
-                );
-            }
-            res.send(updatedSet);
-        } catch (e) {
-            next(e);
-        }
-    });
-
-    // TODO re-enable keycloak.protect() once auth flow is validated end-to-end.
-    app.delete('/sets/:setId', async (req, res, next) => {
-        try {
-            const accessToken = req.headers.authorization;
-            const setId = req.params.setId as string;
-
-            const deletedResult = await deleteSet(accessToken, setId);
-
-            res.send(deletedResult);
-        } catch (e) {
-            next(e);
-        }
-    });
-
-    // TODO re-enable keycloak.protect() once auth flow is validated end-to-end.
-    app.post('/sets/aliases', async (req, res, next) => {
-        const isPlainObject = (input: unknown) => Object.prototype.toString.call(input) === '[object Object]';
-        try {
-            const queries = req.body?.queries;
-            if (!queries || !Array.isArray(queries) || queries.some(q => !isPlainObject(q))) {
-                res.status(422).send('Bad Inputs');
-                return;
-            }
-
-            const setIdsToTags = await resolveQueriesSetAliases(queries, req.headers.authorization);
-
-            res.send({
-                data: setIdsToTags,
-            });
-        } catch (e) {
-            next(e);
-        }
-    });
-
-    // TODO re-enable keycloak.protect() once auth flow is validated end-to-end.
-    app.post('/phenotypes', async (req, res, next) => {
-        try {
-            const accessToken = req.headers.authorization;
-            const sqon: SetSqon = req.body.sqon;
-            const type: string = req.body.type;
-            const aggregations_filter_themselves: boolean = req.body.aggregations_filter_themselves || false;
-            const data = await getPhenotypesNodes(
-                sqon,
-                runInternalQuery,
-                type,
-                aggregations_filter_themselves,
+        if (requestBody.subAction === SubActionTypes.RENAME_TAG) {
+            updatedSet = await updateSetTag(requestBody as UpdateSetTagBody, accessToken, setId);
+        } else {
+            updatedSet = await updateSetContent(
+                requestBody as UpdateSetContentBody,
                 accessToken,
+                userId,
+                setId,
+                runInternalQuery,
             );
-
-            res.send({ data });
-        } catch (e) {
-            next(e);
         }
+        res.send(updatedSet);
+    });
+
+    // TODO re-enable keycloak.protect() once auth flow is validated end-to-end.
+    app.delete('/sets/:setId', async (req, res) => {
+        const accessToken = req.headers.authorization;
+        const setId = req.params.setId as string;
+        const deletedResult = await deleteSet(accessToken, setId);
+        res.send(deletedResult);
+    });
+
+    // TODO re-enable keycloak.protect() once auth flow is validated end-to-end.
+    app.post('/sets/aliases', async (req, res) => {
+        const isPlainObject = (input: unknown) => Object.prototype.toString.call(input) === '[object Object]';
+        const queries = req.body?.queries;
+        if (!queries || !Array.isArray(queries) || queries.some(q => !isPlainObject(q))) {
+            res.status(422).send('Bad Inputs');
+            return;
+        }
+
+        const setIdsToTags = await resolveQueriesSetAliases(queries, req.headers.authorization);
+
+        res.send({
+            data: setIdsToTags,
+        });
+    });
+
+    // TODO re-enable keycloak.protect() once auth flow is validated end-to-end.
+    app.post('/phenotypes', async (req, res) => {
+        const accessToken = req.headers.authorization;
+        const sqon: SetSqon = req.body.sqon;
+        const type: string = req.body.type;
+        const aggregations_filter_themselves: boolean = req.body.aggregations_filter_themselves || false;
+        const data = await getPhenotypesNodes(
+            sqon,
+            runInternalQuery,
+            type,
+            aggregations_filter_themselves,
+            accessToken,
+        );
+        res.send({ data });
     });
 
     app.post('/authorized-studies', keycloak.protect(), async (req, res, next) => {
-        try {
-            await computeAuthorizedStudiesForAllFences(req, res, next);
-        } catch (e) {
-            next(e);
-        }
+        await computeAuthorizedStudiesForAllFences(req, res, next);
     });
 
-    app.post('/upset', keycloak.protect(), async (req, res, next) => {
-        try {
-            const sqon = await resolveSetsInSqon(req.body.sqon, null, req.headers.authorization);
-            const data = await computeUpset(sqon, req.body.topN);
-            res.send(data);
-        } catch (e) {
-            next(e);
-        }
+    app.post('/upset', keycloak.protect(), async (req, res) => {
+        const sqon = await resolveSetsInSqon(req.body.sqon, null, req.headers.authorization);
+        const data = await computeUpset(sqon, req.body.topN);
+        res.send(data);
     });
 
-    app.post('/venn', keycloak.protect(), async (req, res, next) => {
+    app.post('/venn', keycloak.protect(), async (req, res) => {
         const lengthOk = (l: Sqon[]) => [2, 3].includes(l.length);
-        try {
-            const qbSqons = req.body?.qbSqons;
-            const rawEntitySqons = req.body?.entitySqons;
+        const qbSqons = req.body?.qbSqons;
+        const rawEntitySqons = req.body?.entitySqons;
 
-            if (!lengthOk(qbSqons) || !lengthOk(rawEntitySqons)) {
-                res.status(422).send('Bad Inputs');
-                return;
-            }
-
-            const { resolvedSqons: sqons, m: mSetItToIds } = await resolveSetsInAllSqonsWithMapper(
-                rawEntitySqons,
-                null,
-                req.headers.authorization,
-            );
-
-            const index = ['participant', 'file', 'biospecimen', 'variant', 'variant_somatic'].includes(req.body?.index)
-                ? req.body?.index
-                : 'participant';
-
-            const datum1 = await venn(sqons, index);
-            const datum2 = datum1.map(x => ({ ...x, sqon: replaceIdsWithSetId(x.sqon, mSetItToIds) }));
-
-            res.send({
-                data: reformatVenn(datum2, qbSqons),
-            });
-        } catch (e) {
-            next(e);
+        if (!lengthOk(qbSqons) || !lengthOk(rawEntitySqons)) {
+            res.status(422).send('Bad Inputs');
+            return;
         }
+
+        const { resolvedSqons: sqons, m: mSetItToIds } = await resolveSetsInAllSqonsWithMapper(
+            rawEntitySqons,
+            null,
+            req.headers.authorization,
+        );
+
+        const index = ['participant', 'file', 'biospecimen', 'variant', 'variant_somatic'].includes(req.body?.index)
+            ? req.body?.index
+            : 'participant';
+
+        const datum1 = await venn(sqons, index);
+        const datum2 = datum1.map(x => ({ ...x, sqon: replaceIdsWithSetId(x.sqon, mSetItToIds) }));
+
+        res.send({
+            data: reformatVenn(datum2, qbSqons),
+        });
     });
 
-    app.get('/public-study/study/:code', async (req, res, next) => {
-        try {
-            const code = req.params.code;
-            if (!code || typeof code !== 'string') {
-                res.status(422).send('Bad Inputs');
-                return;
-            }
-            const study = await getPublicStudy(req.params.code);
-            res.send(study || {});
-        } catch (e) {
-            next(e);
+    app.get('/public-study/study/:code', async (req, res) => {
+        const code = req.params.code;
+        if (!code || typeof code !== 'string') {
+            res.status(422).send('Bad Inputs');
+            return;
         }
+        const study = await getPublicStudy(req.params.code);
+        res.send(study || {});
     });
 
-    app.get('/public-study/graphs/:code', async (req, res, next) => {
-        try {
-            const code = req.params.code;
-            if (!code || typeof code !== 'string') {
-                res.status(422).send('Bad Inputs');
-                return;
-            }
-            const study = await getPublicGraphs(req.params.code);
-            res.send(study || {});
-        } catch (e) {
-            next(e);
+    app.get('/public-study/graphs/:code', async (req, res) => {
+        const code = req.params.code;
+        if (!code || typeof code !== 'string') {
+            res.status(422).send('Bad Inputs');
+            return;
         }
+        const study = await getPublicGraphs(req.params.code);
+        res.send(study || {});
     });
 
     app.use(globalErrorLogger, globalErrorHandler);

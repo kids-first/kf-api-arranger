@@ -15,7 +15,7 @@ import {
     updateSetContent,
     updateSetTag,
 } from './endpoints/sets/setsFeature.js';
-import type { Set, UpdateSetContentBody, UpdateSetTagBody } from './endpoints/sets/setsTypes.js';
+import type { SavedSet, UpdateSetContentBody, UpdateSetTagBody } from './endpoints/sets/setsTypes.js';
 import { getStatistics, getStudiesStatistics, type Statistics } from './endpoints/statistics/index.js';
 import { flushAllCache } from './middleware/cache.js';
 import { UserApiError } from './userApi/userApiError.js';
@@ -262,12 +262,12 @@ describe('Express app (without Arranger)', () => {
                     id: '1ae',
                     tag: 'tag1',
                     size: 11,
-                } as Set,
+                } as SavedSet,
                 {
                     id: '1af',
                     tag: 'tag2',
                     size: 22,
-                } as Set,
+                } as SavedSet,
             ];
             vi.mocked(getSets).mockResolvedValue(expectedSets);
 
@@ -329,7 +329,7 @@ describe('Express app (without Arranger)', () => {
                 id: '1eg',
                 tag: 'Nevus',
                 size: 2,
-            } as Set;
+            } as SavedSet;
             vi.mocked(createSet).mockResolvedValue(expectedCreatedSet);
 
             const token = getToken();
@@ -404,7 +404,7 @@ describe('Express app (without Arranger)', () => {
                 id: '1eh',
                 size: 2,
                 tag: 'Nevus Updated',
-            } as Set;
+            } as SavedSet;
             vi.mocked(updateSetTag).mockResolvedValue(expectedUpdatedSet);
 
             const userId = 'user_id';
@@ -433,7 +433,7 @@ describe('Express app (without Arranger)', () => {
                 id: '1eh',
                 size: 2,
                 tag: 'Nevus',
-            } as Set;
+            } as SavedSet;
             vi.mocked(updateSetContent).mockResolvedValue(expectedUpdatedSet);
 
             const userId = 'user_id';

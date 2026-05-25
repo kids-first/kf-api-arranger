@@ -9,7 +9,7 @@ import {
     type CreateSetBody,
     type CreateUpdateBody,
     RIFF_TYPE_SET,
-    type Set,
+    type SavedSet,
     type UpdateSetContentBody,
     type UpdateSetTagBody,
 } from './setsTypes.js';
@@ -29,7 +29,7 @@ export const getUserSet = async (accessToken: string, setId: string): Promise<Us
     return existingSetsFilterById[0];
 };
 
-export const getSets = async (accessToken: string): Promise<Set[]> => {
+export const getSets = async (accessToken: string): Promise<SavedSet[]> => {
     const userContents = await getUserSets(accessToken);
     return userContents.map(set => mapUserResultToSet(set));
 };
@@ -39,7 +39,7 @@ export const createSet = async (
     accessToken: string,
     userId: string,
     runInternalQuery: RunInternalQuery,
-): Promise<Set> => {
+): Promise<SavedSet> => {
     const { sqon, sort, type, idField, tag, is_invisible } = requestBody;
     const sqonAfterReplace = await resolveSetsInSqon(sqon, userId, accessToken);
     const ids = await searchSqon(sqonAfterReplace, type, sort, idField, runInternalQuery);
@@ -60,7 +60,11 @@ export const createSet = async (
     return mapUserResultToSet(createResult);
 };
 
-export const updateSetTag = async (requestBody: UpdateSetTagBody, accessToken: string, setId: string): Promise<Set> => {
+export const updateSetTag = async (
+    requestBody: UpdateSetTagBody,
+    accessToken: string,
+    setId: string,
+): Promise<SavedSet> => {
     const setToUpdate: UserSet = await getUserSet(accessToken, setId);
 
     const payload: CreateUpdateBody = {
@@ -79,7 +83,7 @@ export const updateSetContent = async (
     userId: string,
     setId: string,
     runInternalQuery: RunInternalQuery,
-): Promise<Set> => {
+): Promise<SavedSet> => {
     const setToUpdate = await getUserSet(accessToken, setId);
 
     const { sqon, ids, setType } = setToUpdate.content;
@@ -123,7 +127,7 @@ export const updateSetContent = async (
 export const deleteSet = async (accessToken: string, setId: string): Promise<string> =>
     await deleteUserSet(accessToken, setId);
 
-const mapUserResultToSet = (output: UserSet): Set => ({
+const mapUserResultToSet = (output: UserSet): SavedSet => ({
     id: output.id,
     tag: output.alias,
     size: output.content.ids.length,

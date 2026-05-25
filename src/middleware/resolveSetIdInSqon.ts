@@ -24,35 +24,28 @@ export type SearchPayload = {
 export const resolveSetIdMiddleware =
     () =>
     async (req: Request, _res: Response, next: NextFunction): Promise<void> => {
-        try {
-            const userId = req.kauth?.grant?.access_token?.content?.sub;
-            const accessToken = req.headers.authorization;
-            if (req.body?.variables) {
-                req.body = await resolveSetIdForSearchPayload(req.body, userId, accessToken);
-            }
-
-            if (req.body && Array.isArray(req.body)) {
-                const searchBody: SearchPayload[] = req.body;
-                req.body = await Promise.all(
-                    searchBody.map(searchPayload => resolveSetIdForSearchPayload(searchPayload, userId, accessToken)),
-                );
-            }
-
-            if (req.body?.params) {
-                const params = JSON.parse(req.body.params);
-                const files = params.files || [];
-                const filesUpdated = await Promise.all(
-                    files.map((file: File) => resolveSetIdForFile(file, userId, accessToken)),
-                );
-                req.body.params = JSON.stringify({ ...params, files: filesUpdated });
-            }
-            next();
-        } catch (e) {
-            // Async middleware rejections aren't caught by Express 4 — forward
-            // explicitly so the central error handler responds instead of the
-            // process-wide unhandledRejection trap exiting the server.
-            next(e);
+        const userId = req.kauth?.grant?.access_token?.content?.sub;
+        const accessToken = req.headers.authorization;
+        if (req.body?.variables) {
+            req.body = await resolveSetIdForSearchPayload(req.body, userId, accessToken);
         }
+
+        if (req.body && Array.isArray(req.body)) {
+            const searchBody: SearchPayload[] = req.body;
+            req.body = await Promise.all(
+                searchBody.map(searchPayload => resolveSetIdForSearchPayload(searchPayload, userId, accessToken)),
+            );
+        }
+
+        if (req.body?.params) {
+            const params = JSON.parse(req.body.params);
+            const files = params.files || [];
+            const filesUpdated = await Promise.all(
+                files.map((file: File) => resolveSetIdForFile(file, userId, accessToken)),
+            );
+            req.body.params = JSON.stringify({ ...params, files: filesUpdated });
+        }
+        next();
     };
 
 const resolveSetIdForFile = async (file: File, userId: string, accessToken: string): Promise<File> => {

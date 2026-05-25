@@ -34,8 +34,7 @@
                     "level": "error",
                     "options": { "allow": ["warn", "error", "log", "assert"] }
                 },
-                "noExplicitAny": "off",
-                "noShadowRestrictedNames": "off"
+                "noExplicitAny": "off"
             },
             "style": {
                 "useTemplate": "warn",
