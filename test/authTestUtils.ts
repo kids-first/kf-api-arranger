@@ -1,18 +1,21 @@
+import { generateKeyPairSync } from 'node:crypto';
 import jwt from 'jsonwebtoken';
 
-const privateKey = `
------BEGIN RSA PRIVATE KEY-----
-MIIBOwIBAAJBAJgoVgqi7/C9uSoUsfQeep2Dbw5HfXWQIyypg+XZ3NqsxTA2k2Fr
-2vmBu82iGsNgwWBKac5IOzSGvyob1l64MkUCAwEAAQJAQ7b/w7ALtEna091t7MR7
-sQnDLMmoDd/dp4yxRGOWpEI3TEOWSS6pEmwsvHuCKT18UmxnoHkBU8drgnw0/Rd5
-6QIhAPb9YscAI0oaAQufnWz4qupF6iHC05AEu/4HuLUKbwKjAiEAnbVSNG/8aVSU
-3az9OuPMj1KdbIiCgOh6cq7qPFWiLfcCIQDizfmnzcuaH1j4aIEycQLaEIuYpwSJ
-ip9q/YIy1TrtSwIge4GQizhYODThEGl1NzVG8ccFOgX+De4CVuXc0rtNcykCIQC0
-JBCiTrVNMy4wmZruwoG/sae517Jl6cIFePSifpOTsA==
------END RSA PRIVATE KEY-----
-`;
+// Generate a fresh RSA keypair per test process. jsonwebtoken@9 enforces a
+// 2048-bit minimum for RS256; the previous hardcoded 512-bit fixture would
+// throw. Keycloak-connect accepts the SPKI public key as a base64-only
+// string (no PEM markers), matching its `'realm-public-key'` config option.
+const { privateKey: generatedPrivateKey, publicKey: generatedPublicKey } = generateKeyPairSync('rsa', {
+    modulusLength: 2048,
+    privateKeyEncoding: { type: 'pkcs1', format: 'pem' },
+    publicKeyEncoding: { type: 'spki', format: 'pem' },
+});
 
-export const publicKey = `MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAJgoVgqi7/C9uSoUsfQeep2Dbw5HfXWQIyypg+XZ3NqsxTA2k2Fr2vmBu82iGsNgwWBKac5IOzSGvyob1l64MkUCAwEAAQ==`;
+const privateKey = generatedPrivateKey;
+export const publicKey = generatedPublicKey
+    .replace(/-----BEGIN [^-]+-----/g, '')
+    .replace(/-----END [^-]+-----/g, '')
+    .replace(/\s+/g, '');
 
 export const fakeKeycloakRealm = 'fake_realm';
 export const fakeKeycloakClient = 'fake_client';
