@@ -1,3 +1,4 @@
+import { jest } from '@jest/globals';
 import EsInstance from '../../ElasticSearchClientInstance.js';
 import { getNestedFieldsForIndex } from '../../sqon/getNestedFieldsForIndex.js';
 import { venn } from './venn.js';

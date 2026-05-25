@@ -1,3 +1,4 @@
+import { jest } from '@jest/globals';
 import { computeAuthorizedStudiesForFence } from './computeAuthorizedStudies.js';
 import { multiSearchFilesAccessCounts, searchAggregatedAuthorizedStudiesForFence } from './searchers.js';
 import { AuthStudiesData } from './types.js';
@@ -98,8 +99,8 @@ describe('Compute Authorized Studies', () => {
                 'phs002330.c2',
             ]);
 
-            expect((searchAggregatedAuthorizedStudiesForFence as jest.Mock).mock.calls.length).toEqual(1);
-            expect((multiSearchFilesAccessCounts as jest.Mock).mock.calls.length).toEqual(1);
+            expect((searchAggregatedAuthorizedStudiesForFence as jest.Mock)).toHaveBeenCalledTimes(1);
+            expect((multiSearchFilesAccessCounts as jest.Mock)).toHaveBeenCalledTimes(1);
             expect(r).toHaveProperty(['data']);
             expect(r.data).toEqual([
                 {

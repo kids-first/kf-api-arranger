@@ -1,3 +1,4 @@
+import { jest } from '@jest/globals';
 import EsInstance from '../ElasticSearchClientInstance.js';
 import { buildSteps, computeUpset, countIt, topN } from './upset.js';
 

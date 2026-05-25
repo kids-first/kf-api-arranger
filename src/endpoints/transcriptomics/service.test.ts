@@ -1,3 +1,4 @@
+import { jest } from '@jest/globals';
 import EsInstance from '../../ElasticSearchClientInstance.js';
 import { datalakeS3Url } from '../../env.js';
 import { generatePreSignedUrl } from '../../s3Api/index.js';
@@ -258,13 +259,13 @@ describe('Transcriptomics', () => {
         it('should return the pre-signed url for diff gene exp file', async () => {
             const expectedUrl = 'pre-signed-url';
 
-            (generatePreSignedUrl as jest.Mock).mockResolvedValue(expectedUrl);
+            (generatePreSignedUrl as jest.MockedFunction<typeof generatePreSignedUrl>).mockResolvedValue(expectedUrl);
 
             const result = await exportDiffGeneExp();
 
             expect(result).toEqual({ url: expectedUrl });
 
-            expect((generatePreSignedUrl as jest.Mock).mock.calls.length).toEqual(1);
+            expect((generatePreSignedUrl as jest.Mock)).toHaveBeenCalledTimes(1);
             expect((generatePreSignedUrl as jest.Mock).mock.calls[0][0]).toEqual(datalakeS3Url);
             expect((generatePreSignedUrl as jest.Mock).mock.calls[0][1]).toEqual(DIFF_GENE_EXP_FILE_KEY);
         });
@@ -386,13 +387,13 @@ describe('Transcriptomics', () => {
         it('should return the pre-signed url for sample gene exp file', async () => {
             const expectedUrl = 'pre-signed-url';
 
-            (generatePreSignedUrl as jest.Mock).mockResolvedValue(expectedUrl);
+            (generatePreSignedUrl as jest.MockedFunction<typeof generatePreSignedUrl>).mockResolvedValue(expectedUrl);
 
             const result = await exportSampleGeneExp();
 
             expect(result).toEqual({ url: expectedUrl });
 
-            expect((generatePreSignedUrl as jest.Mock).mock.calls.length).toEqual(1);
+            expect((generatePreSignedUrl as jest.Mock)).toHaveBeenCalledTimes(1);
             expect((generatePreSignedUrl as jest.Mock).mock.calls[0][0]).toEqual(datalakeS3Url);
             expect((generatePreSignedUrl as jest.Mock).mock.calls[0][1]).toEqual(SAMPLE_GENE_EXP_FILE_KEY);
         });

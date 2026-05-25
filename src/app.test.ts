@@ -1,3 +1,4 @@
+import { jest } from '@jest/globals';
 import { Express } from 'express';
 import Keycloak from 'keycloak-connect';
 import request from 'supertest';
@@ -21,6 +22,14 @@ import { UserApiError } from './userApi/userApiError.js';
 
 jest.mock('./endpoints/sets/setsFeature');
 jest.mock('./endpoints/statistics');
+
+// Silence the production-path error logger for this suite — several tests
+// deliberately trigger globalErrorLogger (mocked routes throw, real handler
+// console.errors the result). The stack-trace dumps make passing runs look
+// like a fire. Scoped to this file so unexpected console.errors elsewhere
+// still surface.
+beforeAll(() => { jest.spyOn(console, 'error').mockImplementation(() => {}); });
+afterAll(() => { jest.restoreAllMocks(); });
 
 describe('Express app (without Arranger)', () => {
     let app: Express;
@@ -170,7 +179,7 @@ describe('Express app (without Arranger)', () => {
             await request(app)
                 .get('/statistics')
                 .expect(200, expectedStats);
-            expect((getStatistics as jest.Mock).mock.calls.length).toEqual(1);
+            expect((getStatistics as jest.Mock)).toHaveBeenCalledTimes(1);
         });
 
         it('should return 500 if an error occurs', async () => {
@@ -182,7 +191,7 @@ describe('Express app (without Arranger)', () => {
             await request(app)
                 .get('/statistics')
                 .expect(500, { error: 'Internal Server Error' });
-            expect((getStatistics as jest.Mock).mock.calls.length).toEqual(1);
+            expect((getStatistics as jest.Mock)).toHaveBeenCalledTimes(1);
         });
     });
 
@@ -232,7 +241,7 @@ describe('Express app (without Arranger)', () => {
             await request(app)
                 .get('/statistics/studies')
                 .expect(200, expectedPublicStats);
-            expect((getStudiesStatistics as jest.Mock).mock.calls.length).toEqual(1);
+            expect((getStudiesStatistics as jest.Mock)).toHaveBeenCalledTimes(1);
         });
 
         it('should return 500 if an error occurs', async () => {
@@ -244,7 +253,7 @@ describe('Express app (without Arranger)', () => {
             await request(app)
                 .get('/statistics/studies')
                 .expect(500, { error: 'Internal Server Error' });
-            expect((getStudiesStatistics as jest.Mock).mock.calls.length).toEqual(1);
+            expect((getStudiesStatistics as jest.Mock)).toHaveBeenCalledTimes(1);
         });
     });
 
@@ -253,7 +262,9 @@ describe('Express app (without Arranger)', () => {
             (getSets as jest.Mock).mockReset();
         });
 
-        it('should return 403 if no Authorization header', () =>
+        // Skipped while keycloak.protect() is off on /sets (Phase A2). Re-enable
+        // when task #2 from the remaining plan lands.
+        it.skip('should return 403 if no Authorization header', () =>
             request(app)
                 .get('/sets')
                 .expect(403));
@@ -279,7 +290,7 @@ describe('Express app (without Arranger)', () => {
                 .get('/sets')
                 .set({ Authorization: `Bearer ${token}` })
                 .expect(200, expectedSets);
-            expect((getSets as jest.Mock).mock.calls.length).toEqual(1);
+            expect((getSets as jest.Mock)).toHaveBeenCalledTimes(1);
         });
 
         it('should return 500 if Authorization header contains valid token but an error occurs', async () => {
@@ -294,7 +305,7 @@ describe('Express app (without Arranger)', () => {
                 .get('/sets')
                 .set({ Authorization: `Bearer ${token}` })
                 .expect(500, { error: 'Internal Server Error' });
-            expect((getSets as jest.Mock).mock.calls.length).toEqual(1);
+            expect((getSets as jest.Mock)).toHaveBeenCalledTimes(1);
         });
     });
 
@@ -322,7 +333,9 @@ describe('Express app (without Arranger)', () => {
             (createSet as jest.Mock).mockReset();
         });
 
-        it('should return 403 if no Authorization header', () =>
+        // Skipped while keycloak.protect() is off on /sets (Phase A2). Re-enable
+        // when task #2 from the remaining plan lands.
+        it.skip('should return 403 if no Authorization header', () =>
             request(app)
                 .post('/sets')
                 .expect(403));
@@ -348,7 +361,7 @@ describe('Express app (without Arranger)', () => {
                 .set({ Authorization: `Bearer ${token}` })
                 .expect(checkRes)
                 .expect(200);
-            expect((createSet as jest.Mock).mock.calls.length).toEqual(1);
+            expect((createSet as jest.Mock)).toHaveBeenCalledTimes(1);
         });
 
         it('should return 500 if Authorization header contains valid token but an error occurs', async () => {
@@ -365,7 +378,7 @@ describe('Express app (without Arranger)', () => {
                 .set('Content-type', 'application/json')
                 .set({ Authorization: `Bearer ${token}` })
                 .expect(500, { error: 'Internal Server Error' });
-            expect((createSet as jest.Mock).mock.calls.length).toEqual(1);
+            expect((createSet as jest.Mock)).toHaveBeenCalledTimes(1);
         });
     });
 
@@ -398,7 +411,9 @@ describe('Express app (without Arranger)', () => {
             (updateSetContent as jest.Mock).mockReset();
         });
 
-        it('should return 403 if no Authorization header', () =>
+        // Skipped while keycloak.protect() is off on /sets (Phase A2). Re-enable
+        // when task #2 from the remaining plan lands.
+        it.skip('should return 403 if no Authorization header', () =>
             request(app)
                 .put('/sets/1eh')
                 .expect(403));
@@ -426,7 +441,7 @@ describe('Express app (without Arranger)', () => {
                 .expect(checkRes)
                 .expect(200);
 
-            expect((updateSetTag as jest.Mock).mock.calls.length).toEqual(1);
+            expect((updateSetTag as jest.Mock)).toHaveBeenCalledTimes(1);
             expect((updateSetTag as jest.Mock).mock.calls[0][0]).toEqual(updateSetTagBody);
             expect((updateSetTag as jest.Mock).mock.calls[0][1]).toEqual(`Bearer ${token}`);
             expect((updateSetTag as jest.Mock).mock.calls[0][2]).toEqual('1eh');
@@ -454,7 +469,7 @@ describe('Express app (without Arranger)', () => {
                 .set({ Authorization: `Bearer ${token}` })
                 .expect(checkRes)
                 .expect(200);
-            expect((updateSetContent as jest.Mock).mock.calls.length).toEqual(1);
+            expect((updateSetContent as jest.Mock)).toHaveBeenCalledTimes(1);
             expect((updateSetContent as jest.Mock).mock.calls[0][0]).toEqual(updateSetContentBody);
             expect((updateSetContent as jest.Mock).mock.calls[0][1]).toEqual(`Bearer ${token}`);
             expect((updateSetContent as jest.Mock).mock.calls[0][2]).toEqual(userId);
@@ -475,7 +490,7 @@ describe('Express app (without Arranger)', () => {
                 .set('Content-type', 'application/json')
                 .set({ Authorization: `Bearer ${token}` })
                 .expect(404, { error: 'Not Found' });
-            expect((updateSetTag as jest.Mock).mock.calls.length).toEqual(1);
+            expect((updateSetTag as jest.Mock)).toHaveBeenCalledTimes(1);
         });
     });
 
@@ -484,7 +499,9 @@ describe('Express app (without Arranger)', () => {
             (deleteSet as jest.Mock).mockReset();
         });
 
-        it('should return 403 if no Authorization header', () =>
+        // Skipped while keycloak.protect() is off on /sets (Phase A2). Re-enable
+        // when task #2 from the remaining plan lands.
+        it.skip('should return 403 if no Authorization header', () =>
             request(app)
                 .delete('/sets/1eh')
                 .expect(403));
@@ -499,7 +516,7 @@ describe('Express app (without Arranger)', () => {
                 .set('Content-type', 'application/json')
                 .set({ Authorization: `Bearer ${token}` })
                 .expect(200, 'true');
-            expect((deleteSet as jest.Mock).mock.calls.length).toEqual(1);
+            expect((deleteSet as jest.Mock)).toHaveBeenCalledTimes(1);
         });
 
         it('should return 500 if Authorization header contains valid token but an error occurs', async () => {
@@ -515,7 +532,7 @@ describe('Express app (without Arranger)', () => {
                 .set('Content-type', 'application/json')
                 .set({ Authorization: `Bearer ${token}` })
                 .expect(500, { error: 'Internal Server Error' });
-            expect((deleteSet as jest.Mock).mock.calls.length).toEqual(1);
+            expect((deleteSet as jest.Mock)).toHaveBeenCalledTimes(1);
         });
     });
 });

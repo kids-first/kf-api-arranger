@@ -1,3 +1,4 @@
+import { jest } from '@jest/globals';
 import type { RunInternalQuery } from '../../arrangerUtils.js';
 import { resolveSetsInSqon } from '../../sqon/resolveSetInSqon.js';
 import { searchSqon } from '../../sqon/searchSqon.js';
@@ -74,7 +75,7 @@ describe('Set management', () => {
             const result = await getSets(accessToken);
 
             expect(result).toEqual(expectedSets);
-            expect((getUserSets as jest.Mock).mock.calls.length).toEqual(1);
+            expect((getUserSets as jest.Mock)).toHaveBeenCalledTimes(1);
         });
 
         it('should send get user contents and return error if get request throws an error', async () => {
@@ -87,7 +88,7 @@ describe('Set management', () => {
             } catch (e) {
                 expect(e.message).toEqual('OOPS');
             } finally {
-                expect((getUserSets as jest.Mock).mock.calls.length).toEqual(1);
+                expect((getUserSets as jest.Mock)).toHaveBeenCalledTimes(1);
             }
         });
     });
@@ -129,9 +130,9 @@ describe('Set management', () => {
             const result = await createSet(createSetBody, accessToken, userId, runInternalQuery);
 
             expect(result).toEqual(set);
-            expect((resolveSetsInSqon as jest.Mock).mock.calls.length).toEqual(1);
-            expect((searchSqon as jest.Mock).mock.calls.length).toEqual(1);
-            expect((postUserSet as jest.Mock).mock.calls.length).toEqual(1);
+            expect((resolveSetsInSqon as jest.Mock)).toHaveBeenCalledTimes(1);
+            expect((searchSqon as jest.Mock)).toHaveBeenCalledTimes(1);
+            expect((postUserSet as jest.Mock)).toHaveBeenCalledTimes(1);
             expect((postUserSet as jest.Mock).mock.calls[0][0]).toEqual(accessToken);
             expect((postUserSet as jest.Mock).mock.calls[0][1]).toEqual(expectedCreatesSetBody);
         });
@@ -154,10 +155,10 @@ describe('Set management', () => {
             const result = await createSet({ ...createSetBody, sqon: sqonWithSetId }, accessToken, userId, runInternalQuery);
 
             expect(result).toEqual(set);
-            expect((resolveSetsInSqon as jest.Mock).mock.calls.length).toEqual(1);
+            expect((resolveSetsInSqon as jest.Mock)).toHaveBeenCalledTimes(1);
             expect((resolveSetsInSqon as jest.Mock).mock.calls[0][0]).toEqual(sqonWithSetId);
-            expect((searchSqon as jest.Mock).mock.calls.length).toEqual(1);
-            expect((postUserSet as jest.Mock).mock.calls.length).toEqual(1);
+            expect((searchSqon as jest.Mock)).toHaveBeenCalledTimes(1);
+            expect((postUserSet as jest.Mock)).toHaveBeenCalledTimes(1);
             expect((postUserSet as jest.Mock).mock.calls[0][0]).toEqual(accessToken);
             expect((postUserSet as jest.Mock).mock.calls[0][1]).toEqual({
                 ...expectedCreatesSetBody,
@@ -192,9 +193,9 @@ describe('Set management', () => {
             const result = await createSet(createSetBody, accessToken, userId, runInternalQuery);
 
             expect(result).toEqual(expectedSet);
-            expect((resolveSetsInSqon as jest.Mock).mock.calls.length).toEqual(1);
-            expect((searchSqon as jest.Mock).mock.calls.length).toEqual(1);
-            expect((postUserSet as jest.Mock).mock.calls.length).toEqual(1);
+            expect((resolveSetsInSqon as jest.Mock)).toHaveBeenCalledTimes(1);
+            expect((searchSqon as jest.Mock)).toHaveBeenCalledTimes(1);
+            expect((postUserSet as jest.Mock)).toHaveBeenCalledTimes(1);
             expect((postUserSet as jest.Mock).mock.calls[0][0]).toEqual(accessToken);
             expect((postUserSet as jest.Mock).mock.calls[0][1]).toEqual({
                 ...expectedCreatesSetBody,
@@ -245,8 +246,8 @@ describe('Set management', () => {
             const result = await updateSetTag(updateSetTagBody, accessToken, setId);
 
             expect(result).toEqual(expectedResult);
-            expect((getUserSets as jest.Mock).mock.calls.length).toEqual(1);
-            expect((putUserSet as jest.Mock).mock.calls.length).toEqual(1);
+            expect((getUserSets as jest.Mock)).toHaveBeenCalledTimes(1);
+            expect((putUserSet as jest.Mock)).toHaveBeenCalledTimes(1);
             expect((putUserSet as jest.Mock).mock.calls[0][0]).toEqual(accessToken);
             expect((putUserSet as jest.Mock).mock.calls[0][1]).toEqual(expectedUpdateBody);
             expect((putUserSet as jest.Mock).mock.calls[0][2]).toEqual(setId);
@@ -261,8 +262,8 @@ describe('Set management', () => {
             } catch (e) {
                 expect(e.message).toEqual('Set to update can not be found !');
             } finally {
-                expect((getUserSets as jest.Mock).mock.calls.length).toEqual(1);
-                expect((putUserSet as jest.Mock).mock.calls.length).toEqual(0);
+                expect((getUserSets as jest.Mock)).toHaveBeenCalledTimes(1);
+                expect((putUserSet as jest.Mock)).toHaveBeenCalledTimes(0);
             }
         });
 
@@ -277,8 +278,8 @@ describe('Set management', () => {
             } catch (e) {
                 expect(e.message).toEqual('OOPS');
             } finally {
-                expect((getUserSets as jest.Mock).mock.calls.length).toEqual(1);
-                expect((putUserSet as jest.Mock).mock.calls.length).toEqual(1);
+                expect((getUserSets as jest.Mock)).toHaveBeenCalledTimes(1);
+                expect((putUserSet as jest.Mock)).toHaveBeenCalledTimes(1);
                 expect((putUserSet as jest.Mock).mock.calls[0][0]).toEqual(accessToken);
                 expect((putUserSet as jest.Mock).mock.calls[0][1]).toEqual(expectedUpdateBody);
                 expect((putUserSet as jest.Mock).mock.calls[0][2]).toEqual(setId);
@@ -343,10 +344,10 @@ describe('Set management', () => {
             const result = await updateSetContent(updateSetContentAddSqon, accessToken, userId, setId, runInternalQuery);
 
             expect(result).toEqual(updatedSet);
-            expect((getUserSets as jest.Mock).mock.calls.length).toEqual(1);
-            expect((resolveSetsInSqon as jest.Mock).mock.calls.length).toEqual(1);
-            expect((searchSqon as jest.Mock).mock.calls.length).toEqual(1);
-            expect((putUserSet as jest.Mock).mock.calls.length).toEqual(1);
+            expect((getUserSets as jest.Mock)).toHaveBeenCalledTimes(1);
+            expect((resolveSetsInSqon as jest.Mock)).toHaveBeenCalledTimes(1);
+            expect((searchSqon as jest.Mock)).toHaveBeenCalledTimes(1);
+            expect((putUserSet as jest.Mock)).toHaveBeenCalledTimes(1);
             expect((putUserSet as jest.Mock).mock.calls[0][0]).toEqual(accessToken);
             expect((putUserSet as jest.Mock).mock.calls[0][1]).toEqual(expectedUpdateBody);
             expect((putUserSet as jest.Mock).mock.calls[0][2]).toEqual(setId);
@@ -401,12 +402,12 @@ describe('Set management', () => {
             );
 
             expect(result).toEqual(updatedSet);
-            expect((getUserSets as jest.Mock).mock.calls.length).toEqual(1);
-            expect((resolveSetsInSqon as jest.Mock).mock.calls.length).toEqual(1);
+            expect((getUserSets as jest.Mock)).toHaveBeenCalledTimes(1);
+            expect((resolveSetsInSqon as jest.Mock)).toHaveBeenCalledTimes(1);
             expect((resolveSetsInSqon as jest.Mock).mock.calls[0][0]).toEqual(newSqonWithSetId);
-            expect((searchSqon as jest.Mock).mock.calls.length).toEqual(1);
+            expect((searchSqon as jest.Mock)).toHaveBeenCalledTimes(1);
             expect((searchSqon as jest.Mock).mock.calls[0][0]).toEqual(newSqonWithResolvedSet);
-            expect((putUserSet as jest.Mock).mock.calls.length).toEqual(1);
+            expect((putUserSet as jest.Mock)).toHaveBeenCalledTimes(1);
             expect((putUserSet as jest.Mock).mock.calls[0][0]).toEqual(accessToken);
             expect((putUserSet as jest.Mock).mock.calls[0][1]).toEqual(expectedUpdateBody);
             expect((putUserSet as jest.Mock).mock.calls[0][2]).toEqual(setId);
@@ -450,10 +451,10 @@ describe('Set management', () => {
             const result = await updateSetContent(updateSetContentRemoveSqon, accessToken, userId, setId, runInternalQuery);
 
             expect(result).toEqual(updatedSet);
-            expect((getUserSets as jest.Mock).mock.calls.length).toEqual(1);
-            expect((resolveSetsInSqon as jest.Mock).mock.calls.length).toEqual(1);
-            expect((searchSqon as jest.Mock).mock.calls.length).toEqual(1);
-            expect((putUserSet as jest.Mock).mock.calls.length).toEqual(1);
+            expect((getUserSets as jest.Mock)).toHaveBeenCalledTimes(1);
+            expect((resolveSetsInSqon as jest.Mock)).toHaveBeenCalledTimes(1);
+            expect((searchSqon as jest.Mock)).toHaveBeenCalledTimes(1);
+            expect((putUserSet as jest.Mock)).toHaveBeenCalledTimes(1);
             expect((putUserSet as jest.Mock).mock.calls[0][0]).toEqual(accessToken);
             expect((putUserSet as jest.Mock).mock.calls[0][1]).toEqual(expectedUpdateBody);
             expect((putUserSet as jest.Mock).mock.calls[0][2]).toEqual(setId);
@@ -467,10 +468,10 @@ describe('Set management', () => {
             } catch (e) {
                 expect(e.message).toEqual('Set to update can not be found !');
             } finally {
-                expect((getUserSets as jest.Mock).mock.calls.length).toEqual(1);
-                expect((resolveSetsInSqon as jest.Mock).mock.calls.length).toEqual(0);
-                expect((searchSqon as jest.Mock).mock.calls.length).toEqual(0);
-                expect((putUserSet as jest.Mock).mock.calls.length).toEqual(0);
+                expect((getUserSets as jest.Mock)).toHaveBeenCalledTimes(1);
+                expect((resolveSetsInSqon as jest.Mock)).toHaveBeenCalledTimes(0);
+                expect((searchSqon as jest.Mock)).toHaveBeenCalledTimes(0);
+                expect((putUserSet as jest.Mock)).toHaveBeenCalledTimes(0);
             }
         });
 
@@ -487,10 +488,10 @@ describe('Set management', () => {
             } catch (e) {
                 expect(e.message).toEqual('OOPS');
             } finally {
-                expect((getUserSets as jest.Mock).mock.calls.length).toEqual(1);
-                expect((resolveSetsInSqon as jest.Mock).mock.calls.length).toEqual(1);
-                expect((searchSqon as jest.Mock).mock.calls.length).toEqual(1);
-                expect((putUserSet as jest.Mock).mock.calls.length).toEqual(1);
+                expect((getUserSets as jest.Mock)).toHaveBeenCalledTimes(1);
+                expect((resolveSetsInSqon as jest.Mock)).toHaveBeenCalledTimes(1);
+                expect((searchSqon as jest.Mock)).toHaveBeenCalledTimes(1);
+                expect((putUserSet as jest.Mock)).toHaveBeenCalledTimes(1);
             }
         });
     });
@@ -507,7 +508,7 @@ describe('Set management', () => {
             const result = await deleteSet(accessToken, setId);
 
             expect(result).toEqual(true);
-            expect((deleteUserSet as jest.Mock).mock.calls.length).toEqual(1);
+            expect((deleteUserSet as jest.Mock)).toHaveBeenCalledTimes(1);
         });
 
         it('should send delete and return error if delete throws an error', async () => {
@@ -520,7 +521,7 @@ describe('Set management', () => {
             } catch (e) {
                 expect(e.message).toEqual('OOPS');
             } finally {
-                expect((deleteUserSet as jest.Mock).mock.calls.length).toEqual(1);
+                expect((deleteUserSet as jest.Mock)).toHaveBeenCalledTimes(1);
             }
         });
     });

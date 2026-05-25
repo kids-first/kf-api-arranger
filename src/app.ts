@@ -1,8 +1,10 @@
+import fs from 'node:fs';
+import path from 'node:path';
+
 import cors from 'cors';
 import express, { Express } from 'express';
 import { Keycloak } from 'keycloak-connect';
 
-import pkg from '../package.json' with { type: 'json' };
 import { type RunInternalQuery } from './arrangerUtils.js';
 import { computeAuthorizedStudiesForAllFences } from './endpoints/authorizedStudies/computeAuthorizedStudies.js';
 import genomicFeatureSuggestions, { SUGGESTIONS_TYPES } from './endpoints/genomicFeatureSuggestions.js';
@@ -30,6 +32,12 @@ import { Sqon } from './sqon/types.js';
 import { resolveQueriesSetAliases } from './sqon/setSqon.js';
 import { getPublicGraphs, getPublicStudy } from './endpoints/publicStudy/publicStudy.js';
 
+// Read package.json at startup via fs (instead of an `import ... with { type:
+// 'json' }` attribute) so ts-jest can compile this file under module:commonjs
+// for tests. The attribute syntax requires module:esnext/nodenext at TS level.
+const pkg = JSON.parse(
+    fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf8'),
+) as { dependencies: Record<string, string>; version: string };
 const { dependencies, version } = pkg;
 
 export default (keycloak: Keycloak, runInternalQuery: RunInternalQuery): Express => {

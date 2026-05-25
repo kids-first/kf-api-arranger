@@ -1,3 +1,4 @@
+import { jest } from '@jest/globals';
 import { getUserSets, postSetsTags } from '../userApi/userApiClient.js';
 import { resolveSetIds, resolveQueriesSetAliases } from './setSqon.js';
 import { Sqon } from './types.js';
@@ -109,7 +110,7 @@ describe(`resolveSetIds`, () => {
         expect(result.op).toEqual(sqon.op);
         expect(result.content.length).toEqual(2);
         expect(JSON.stringify(result)).not.toContain('set_id:');
-        expect((getUserSets as jest.Mock).mock.calls.length).toEqual(1);
+        expect((getUserSets as jest.Mock)).toHaveBeenCalledTimes(1);
     });
 });
 
@@ -188,6 +189,6 @@ describe(`resolveQueriesSetAliases`, () => {
         expect(result.sort((a, b) => a.setId.localeCompare(b.setId))).toEqual(
             sampleSetIdsToTags.sort((a, b) => a.setId.localeCompare(b.setId)),
         );
-        expect((postSetsTags as jest.Mock).mock.calls.length).toEqual(1);
+        expect((postSetsTags as jest.Mock)).toHaveBeenCalledTimes(1);
     });
 });

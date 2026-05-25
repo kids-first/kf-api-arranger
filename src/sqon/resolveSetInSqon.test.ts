@@ -1,3 +1,4 @@
+import { jest } from '@jest/globals';
 import { RIFF_TYPE_SET } from '../endpoints/sets/setsTypes.js';
 import { getSharedSet, getUserSets, UserSet } from '../userApi/userApiClient.js';
 import { retrieveSetsFromUsers } from './resolveSetInSqon.js';
@@ -67,8 +68,8 @@ describe('retrieveSetsFromUsers', () => {
 
         expect(result.length).toEqual(2);
         expect(result).toEqual(expect.arrayContaining([setId1, setId2]));
-        expect((getUserSets as jest.Mock).mock.calls.length).toEqual(1);
-        expect((getSharedSet as jest.Mock).mock.calls.length).toEqual(0);
+        expect((getUserSets as jest.Mock)).toHaveBeenCalledTimes(1);
+        expect((getSharedSet as jest.Mock)).toHaveBeenCalledTimes(0);
     });
 
     it('should add all shared sets', async () => {
@@ -80,8 +81,8 @@ describe('retrieveSetsFromUsers', () => {
         expect(result.length).toEqual(3);
         expect(result).toEqual(expect.arrayContaining([setId1, setId2, sharedSet]));
 
-        expect((getUserSets as jest.Mock).mock.calls.length).toEqual(1);
-        expect((getSharedSet as jest.Mock).mock.calls.length).toEqual(1);
+        expect((getUserSets as jest.Mock)).toHaveBeenCalledTimes(1);
+        expect((getSharedSet as jest.Mock)).toHaveBeenCalledTimes(1);
     });
 
     it('should fail if the shared set is not public (ie not returned by users-api)', async () => {
@@ -90,13 +91,9 @@ describe('retrieveSetsFromUsers', () => {
             throw new Error('User Set #sharedSet does not exist.');
         });
 
-        try {
-            await retrieveSetsFromUsers('access_token', [...setIds, 'sharedSet']);
-        } catch (e) {
-            expect(e.message).toEqual('User Set #sharedSet does not exist.');
-        } finally {
-            expect((getUserSets as jest.Mock).mock.calls.length).toEqual(1);
-            expect((getSharedSet as jest.Mock).mock.calls.length).toEqual(1);
-        }
+        await expect(retrieveSetsFromUsers('access_token', [...setIds, 'sharedSet']))
+            .rejects.toThrow('User Set #sharedSet does not exist.');
+        expect((getUserSets as jest.Mock)).toHaveBeenCalledTimes(1);
+        expect((getSharedSet as jest.Mock)).toHaveBeenCalledTimes(1);
     });
 });
