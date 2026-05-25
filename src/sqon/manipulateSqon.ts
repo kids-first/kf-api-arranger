@@ -35,8 +35,8 @@ const combine = (op, sqon, content, pivot) => {
         // dont automatically assign pivot: undefined to an operator, it will then appear in every output and that is not desired
         // optionally assigning pivot only if it has a value avoids this
 
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-expect-error
+        // @ts-expect-error -- combine() is generic over its return type; pivot
+        // is added only when defined to avoid serializing `pivot: undefined`.
         output.pivot = pivot;
     }
     return output;

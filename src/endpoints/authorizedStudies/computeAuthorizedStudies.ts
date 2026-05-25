@@ -1,5 +1,5 @@
 import type { Client } from '@elastic/elasticsearch';
-import type { NextFunction, Request, Response } from 'express';
+import type { Request, Response } from 'express';
 
 import EsInstance from '../../ElasticSearchClientInstance.js';
 import { multiSearchFilesAccessCounts, searchAggregatedAuthorizedStudiesForFence } from './searchers.js';
@@ -41,10 +41,8 @@ export const computeAuthorizedStudiesForFence = async (
     const countFailures =
         accessCounts?.filter(x => x._shards?.failures && x._shards.failures.length > 0)?.map(x => x._shards.failures) ||
         [];
-    // eslint-disable-next-line no-console
     console.assert(countFailures.length === 0, 'failures detected', countFailures);
     const size = Object.keys(M_SEARCH).length; //there are "size" response elements per study
-    // eslint-disable-next-line no-console
     console.assert(
         accessCounts.length % size === 0,
         '`Authorized-Studies: Unexpected chunks size from files counts multi-search',
@@ -67,75 +65,68 @@ export const computeAuthorizedStudiesForFence = async (
     };
 };
 
-export const computeAuthorizedStudiesForAllFences = async (
-    req: Request,
-    res: Response,
-    next: NextFunction,
-): Promise<Response> => {
-    try {
-        const body: {
-            gen3: {
-                acl: string[];
-            };
-            dcf: {
-                acl: string[];
-            };
-        } = req.body;
+export const computeAuthorizedStudiesForAllFences = async (req: Request, res: Response): Promise<Response> => {
+    const body: {
+        gen3: {
+            acl: string[];
+        };
+        dcf: {
+            acl: string[];
+        };
+    } = req.body;
 
-        //===== INPUT Validations
-        const fences = Object.keys(body);
-        const fencesAreProcessable =
-            Array.isArray(fences) && fences.length > 0 && fences.every(f => SUPPORTED_FENCES.includes(f));
-        if (!fencesAreProcessable) {
-            return res.status(422).send('Unsupported Fence(s) format or value');
-        }
-
-        const MAX_ACL_SIZE = 500;
-        const MAX_ALC_LENGTH_VALUE = 100;
-        const aclAreProcessable = Object.values(body).every(
-            x =>
-                Array.isArray(x.acl) &&
-                x.acl.length <= MAX_ACL_SIZE &&
-                x.acl.every(a => typeof a === 'string' && a.length < MAX_ALC_LENGTH_VALUE),
-        );
-        if (!aclAreProcessable) {
-            return res
-                .status(422)
-                .send(`Acls must be a list of acl values for each fence and not exceed a certain size`);
-        }
-
-        const state: ResponseResult = Object.fromEntries(
-            Object.entries({
-                gen3: {
-                    data: [],
-                    error: false,
-                },
-                dcf: {
-                    data: [],
-                    error: false,
-                },
-            }).filter(([k]) => fences.includes(k)),
-        );
-
-        const client = EsInstance.getInstance();
-        for (const fence of fences) {
-            try {
-                const { data } = await computeAuthorizedStudiesForFence(client, fence, body[fence].acl);
-                state[fence] = {
-                    ...state[fence],
-                    data,
-                };
-            } catch (e) {
-                console.error(`Authorized-Studies (${computeAuthorizedStudiesForFence.name}):\n`, e);
-                state[fence] = {
-                    ...state[fence],
-                    error: true,
-                };
-            }
-        }
-
-        return res.send(state);
-    } catch (e) {
-        next(e);
+    //===== INPUT Validations
+    const fences = Object.keys(body);
+    const fencesAreProcessable =
+        Array.isArray(fences) && fences.length > 0 && fences.every(f => SUPPORTED_FENCES.includes(f));
+    if (!fencesAreProcessable) {
+        return res.status(422).send('Unsupported Fence(s) format or value');
     }
+
+    const MAX_ACL_SIZE = 500;
+    const MAX_ALC_LENGTH_VALUE = 100;
+    const aclAreProcessable = Object.values(body).every(
+        x =>
+            Array.isArray(x.acl) &&
+            x.acl.length <= MAX_ACL_SIZE &&
+            x.acl.every(a => typeof a === 'string' && a.length < MAX_ALC_LENGTH_VALUE),
+    );
+    if (!aclAreProcessable) {
+        return res.status(422).send(`Acls must be a list of acl values for each fence and not exceed a certain size`);
+    }
+
+    const state: ResponseResult = Object.fromEntries(
+        Object.entries({
+            gen3: {
+                data: [],
+                error: false,
+            },
+            dcf: {
+                data: [],
+                error: false,
+            },
+        }).filter(([k]) => fences.includes(k)),
+    );
+
+    const client = EsInstance.getInstance();
+    for (const fence of fences) {
+        // Per-fence try/catch is deliberate: one fence's failure shouldn't
+        // poison the others. The outer handler (Express 5) catches anything
+        // else that escapes.
+        try {
+            const { data } = await computeAuthorizedStudiesForFence(client, fence, body[fence].acl);
+            state[fence] = {
+                ...state[fence],
+                data,
+            };
+        } catch (e) {
+            console.error(`Authorized-Studies (${computeAuthorizedStudiesForFence.name}):\n`, e);
+            state[fence] = {
+                ...state[fence],
+                error: true,
+            };
+        }
+    }
+
+    return res.send(state);
 };

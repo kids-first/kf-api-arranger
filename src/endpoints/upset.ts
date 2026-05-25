@@ -76,7 +76,7 @@ export const computeUpset = async (
         ],
     };
 
-    let hits = [];
+    const hits: { fhir_id: string; phenotype: { hpo_phenotype_observed: string }[] }[] = [];
     for (const step of buildSteps()) {
         const { body } = await client.search({
             index: 'participant_centric',
@@ -85,12 +85,11 @@ export const computeUpset = async (
             body: searchBody,
         });
 
-        hits = [
-            ...hits,
+        hits.push(
             ...body.hits.hits.map(
                 (x: { _source: { fhir_id: string; phenotype: { hpo_phenotype_observed: string }[] } }) => x._source,
             ),
-        ];
+        );
 
         const hasNext: boolean = body.hits.total.value >= step.from + BATCH_SIZE;
         if (!hasNext) {

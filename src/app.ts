@@ -92,14 +92,14 @@ export default (keycloak: Keycloak, runInternalQuery: RunInternalQuery): Express
 
     app.use('/transcriptomics', keycloak.protect(), transcriptomicsRouter);
 
-    app.get('/genesFeature/suggestions/:prefix', keycloak.protect(), (req, res, next) =>
-        genomicFeatureSuggestions(req, res, next, SUGGESTIONS_TYPES.GENE),
+    app.get('/genesFeature/suggestions/:prefix', keycloak.protect(), (req, res) =>
+        genomicFeatureSuggestions(req, res, SUGGESTIONS_TYPES.GENE),
     );
-    app.get('/variantsFeature/suggestions/:prefix', keycloak.protect(), (req, res, next) =>
-        genomicFeatureSuggestions(req, res, next, SUGGESTIONS_TYPES.VARIANT),
+    app.get('/variantsFeature/suggestions/:prefix', keycloak.protect(), (req, res) =>
+        genomicFeatureSuggestions(req, res, SUGGESTIONS_TYPES.VARIANT),
     );
-    app.get('/variantsSomaticFeature/suggestions/:prefix', keycloak.protect(), (req, res, next) =>
-        genomicFeatureSuggestions(req, res, next, SUGGESTIONS_TYPES.VARIANT_SOMATIC),
+    app.get('/variantsSomaticFeature/suggestions/:prefix', keycloak.protect(), (req, res) =>
+        genomicFeatureSuggestions(req, res, SUGGESTIONS_TYPES.VARIANT_SOMATIC),
     );
 
     app.get('/statistics', async (_req, res) => {
@@ -189,8 +189,8 @@ export default (keycloak: Keycloak, runInternalQuery: RunInternalQuery): Express
         res.send({ data });
     });
 
-    app.post('/authorized-studies', keycloak.protect(), async (req, res, next) => {
-        await computeAuthorizedStudiesForAllFences(req, res, next);
+    app.post('/authorized-studies', keycloak.protect(), async (req, res) => {
+        await computeAuthorizedStudiesForAllFences(req, res);
     });
 
     app.post('/upset', keycloak.protect(), async (req, res) => {

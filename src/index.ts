@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { expressMiddleware } from '@as-integrations/express5';
 import express from 'express';
 import Keycloak from 'keycloak-connect';

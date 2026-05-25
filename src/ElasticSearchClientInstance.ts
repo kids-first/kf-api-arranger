@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { Client } from '@elastic/elasticsearch';
 
 import { esHost, esPass, esUser } from './env.js';
