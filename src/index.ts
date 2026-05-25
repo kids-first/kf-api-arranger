@@ -4,7 +4,6 @@ import express from 'express';
 import Keycloak from 'keycloak-connect';
 
 import buildApp from './app.js';
-import { ArrangerProject } from './arrangerUtils.js';
 import { port, projectId } from './env.js';
 import { buildGraphqlServer } from './graphql/server.js';
 import keycloakConfig from './keycloak.js';
@@ -26,19 +25,6 @@ process.on('SIGINT', () => {
 
 const keycloak = new Keycloak({}, keycloakConfig);
 
-// Stub during the cut-over (branch `explore/post-arranger`). Routes that
-// dispatch via `getProject().runQuery` (`/sets`, `/phenotypes`) throw at
-// request time. Both are slated for redesign to call ES directly rather
-// than detour through GraphQL.
-const getProject = (_projectId: string): ArrangerProject => ({
-    runQuery: async () => {
-        throw new Error(
-            'getProject().runQuery is deferred during the server-v2 cut-over. ' +
-            'Routes calling it (/sets, /phenotypes) are paused on branch explore/post-arranger.',
-        );
-    },
-});
-
 const k: any = keycloak;
 const originalValidateGrant = k.grantManager.validateGrant;
 k.grantManager.validateGrant = grant =>
@@ -47,8 +33,10 @@ k.grantManager.validateGrant = grant =>
         throw err;
     });
 
-const app = buildApp(keycloak, getProject);
-const { server: apollo, context } = await buildGraphqlServer();
+// Build the GraphQL server first — its `runInternalQuery` runs the
+// in-process queries the /sets + /phenotypes routes need.
+const { server: apollo, context, runInternalQuery } = await buildGraphqlServer();
+const app = buildApp(keycloak, runInternalQuery);
 
 // Mount Apollo at /${projectId}/graphql — single project per deployment,
 // driven entirely by the PROJECT_ID env var (default 'include').

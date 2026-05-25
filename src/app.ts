@@ -4,7 +4,7 @@ import { StatusCodes } from 'http-status-codes';
 import { Keycloak } from 'keycloak-connect';
 
 import pkg from '../package.json' with { type: 'json' };
-import { ArrangerProject } from './arrangerUtils.js';
+import { type RunInternalQuery } from './arrangerUtils.js';
 import { computeAuthorizedStudiesForAllFences } from './endpoints/authorizedStudies/computeAuthorizedStudies.js';
 import genomicFeatureSuggestions, { SUGGESTIONS_TYPES } from './endpoints/genomicFeatureSuggestions.js';
 import { getPhenotypesNodes } from './endpoints/phenotypes.js';
@@ -33,7 +33,7 @@ import { getPublicGraphs, getPublicStudy } from './endpoints/publicStudy/publicS
 
 const { dependencies, version } = pkg;
 
-export default (keycloak: Keycloak, getProject: (projectId: string) => ArrangerProject): Express => {
+export default (keycloak: Keycloak, runInternalQuery: RunInternalQuery): Express => {
     const app = express();
 
     app.use(cors());
@@ -110,7 +110,8 @@ export default (keycloak: Keycloak, getProject: (projectId: string) => ArrangerP
         }
     });
 
-    app.get('/sets', keycloak.protect(), async (req, res, next) => {
+    // TODO re-enable keycloak.protect() once auth flow is validated end-to-end.
+    app.get('/sets', async (req, res, next) => {
         try {
             const accessToken = req.headers.authorization;
             const userSets = await getSets(accessToken);
@@ -121,11 +122,12 @@ export default (keycloak: Keycloak, getProject: (projectId: string) => ArrangerP
         }
     });
 
-    app.post('/sets', keycloak.protect(), async (req, res, next) => {
+    // TODO re-enable keycloak.protect() once auth flow is validated end-to-end.
+    app.post('/sets', async (req, res, next) => {
         try {
             const accessToken = req.headers.authorization;
             const userId = req['kauth']?.grant?.access_token?.content?.sub;
-            const createdSet = await createSet(req.body as CreateSetBody, accessToken, userId, getProject);
+            const createdSet = await createSet(req.body as CreateSetBody, accessToken, userId, runInternalQuery);
 
             res.send(createdSet);
         } catch (e) {
@@ -133,7 +135,8 @@ export default (keycloak: Keycloak, getProject: (projectId: string) => ArrangerP
         }
     });
 
-    app.put('/sets/:setId', keycloak.protect(), async (req, res, next) => {
+    // TODO re-enable keycloak.protect() once auth flow is validated end-to-end.
+    app.put('/sets/:setId', async (req, res, next) => {
         try {
             const requestBody: UpdateSetTagBody | UpdateSetContentBody = req.body;
             const accessToken = req.headers.authorization;
@@ -149,7 +152,7 @@ export default (keycloak: Keycloak, getProject: (projectId: string) => ArrangerP
                     accessToken,
                     userId,
                     setId,
-                    getProject,
+                    runInternalQuery,
                 );
             }
             res.send(updatedSet);
@@ -158,7 +161,8 @@ export default (keycloak: Keycloak, getProject: (projectId: string) => ArrangerP
         }
     });
 
-    app.delete('/sets/:setId', keycloak.protect(), async (req, res, next) => {
+    // TODO re-enable keycloak.protect() once auth flow is validated end-to-end.
+    app.delete('/sets/:setId', async (req, res, next) => {
         try {
             const accessToken = req.headers.authorization;
             const setId = req.params.setId as string;
@@ -171,7 +175,8 @@ export default (keycloak: Keycloak, getProject: (projectId: string) => ArrangerP
         }
     });
 
-    app.post('/sets/aliases', keycloak.protect(), async (req, res, next) => {
+    // TODO re-enable keycloak.protect() once auth flow is validated end-to-end.
+    app.post('/sets/aliases', async (req, res, next) => {
         const isPlainObject = (input: unknown) => Object.prototype.toString.call(input) === '[object Object]';
         try {
             const queries = req.body?.queries;
@@ -190,17 +195,16 @@ export default (keycloak: Keycloak, getProject: (projectId: string) => ArrangerP
         }
     });
 
-    app.post('/phenotypes', keycloak.protect(), async (req, res, next) => {
+    // TODO re-enable keycloak.protect() once auth flow is validated end-to-end.
+    app.post('/phenotypes', async (req, res, next) => {
         try {
             const accessToken = req.headers.authorization;
             const sqon: SetSqon = req.body.sqon;
             const type: string = req.body.type;
-            const projectId: string = req.body.project;
             const aggregations_filter_themselves: boolean = req.body.aggregations_filter_themselves || false;
             const data = await getPhenotypesNodes(
                 sqon,
-                projectId,
-                getProject,
+                runInternalQuery,
                 type,
                 aggregations_filter_themselves,
                 accessToken,

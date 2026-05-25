@@ -2,9 +2,9 @@
 // arranger-2.19.2/modules/schema/src/Aggregations.js. Field order matches
 // arranger exactly so future SDL parity checks have a chance.
 //
-// Slice-T scope: omits Bucket.top_hits, Bucket.filter_by_term,
-// NumericAggregations.histogram, Aggregations.buckets(max:) arg, and
-// Aggregations.cardinality. All addressable in slice T+1.
+// Still omitted (not addressed by our consumers yet): NumericAggregations.
+// histogram, Aggregations.buckets(max:) arg, and Aggregations.cardinality.
+// top_hits + filter_by_term were added for the /phenotypes route (Phase A2).
 
 import {
     GraphQLFloat,
@@ -13,6 +13,7 @@ import {
     GraphQLObjectType,
     GraphQLString,
 } from 'graphql';
+import { GraphQLJSON } from './jsonScalar.js';
 
 export const Stats = new GraphQLObjectType({
     name: 'Stats',
@@ -31,6 +32,20 @@ export const Bucket = new GraphQLObjectType({
         doc_count: { type: GraphQLInt },
         key: { type: GraphQLString },
         key_as_string: { type: GraphQLString },
+        // Arranger extensions used by /phenotypes (flattened by
+        // flattenAggregations — top_hits returns the picked _source projection,
+        // filter_by_term returns just `{doc_count}`).
+        top_hits: {
+            type: GraphQLJSON,
+            args: {
+                _source: { type: new GraphQLList(GraphQLString) },
+                size: { type: GraphQLInt },
+            },
+        },
+        filter_by_term: {
+            type: GraphQLJSON,
+            args: { filter: { type: GraphQLJSON } },
+        },
     }),
 });
 

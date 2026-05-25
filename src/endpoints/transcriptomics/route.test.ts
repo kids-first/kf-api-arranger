@@ -10,7 +10,7 @@ import {
     publicKey,
 } from '../../../test/authTestUtils.js';
 import buildApp from '../../app.js';
-import { ArrangerProject } from '../../arrangerUtils.js';
+import type { RunInternalQuery } from '../../arrangerUtils.js';
 import { flushAllCache } from '../../middleware/cache.js';
 import {
     checkGenesExist,
@@ -29,7 +29,7 @@ describe('Transcriptomics router', () => {
     let app: Express;
     let keycloakFakeConfig;
 
-    const getProject = (_s: string) => ({} as ArrangerProject);
+    const runInternalQuery: RunInternalQuery = async () => ({ data: null });
 
     beforeEach(() => {
         const publicKeyToVerify = publicKey;
@@ -43,7 +43,7 @@ describe('Transcriptomics router', () => {
             'realm-public-key': publicKeyToVerify, // For test purpose, we use public key to validate token.
         };
         const keycloak = new Keycloak({}, keycloakFakeConfig);
-        app = buildApp(keycloak, getProject); // Re-create app between each test to ensure isolation between tests.
+        app = buildApp(keycloak, runInternalQuery); // Re-create app between each test to ensure isolation between tests.
     });
 
     describe('POST /transcriptomics/diffGeneExp', () => {

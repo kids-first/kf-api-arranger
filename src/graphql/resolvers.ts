@@ -183,7 +183,10 @@ export function createResolvers(entities: EntityResolverConfig[]): IResolvers<un
                 ctx: ServerContext,
                 info: GraphQLResolveInfo,
             ) {
-                const requested = graphqlFields(info);
+                // `processArguments: true` is required by @arranger/middleware's
+                // sub-aggregation builders (top_hits / filter_by_term read
+                // `__arguments[0]` off each requested field).
+                const requested = graphqlFields(info, {}, { processArguments: true });
                 const sqon = normalizeSqonInput(args.filters);
                 const built = buildQuery({ nestedFields, filters: sqon });
                 const query = Object.keys(built).length > 0 ? built : { match_all: {} };

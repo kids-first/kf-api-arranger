@@ -1,26 +1,18 @@
-import { graphql } from 'graphql';
 import _lodash from 'lodash';
 const { get } = _lodash;
 
-import { ArrangerProject } from '../arrangerUtils.js';
+import type { RunInternalQuery } from '../arrangerUtils.js';
 import { SetSqon, Sort } from '../endpoints/sets/setsTypes.js';
 import { maxSetContentSize } from '../env.js';
 
 export const searchSqon = async (
     sqon: SetSqon,
-    projectId: string,
     type: string,
     sort: Sort[],
     idField: string,
-    getProject: (projectId: string) => ArrangerProject,
+    runInternalQuery: RunInternalQuery,
 ): Promise<string[]> => {
-    const project = getProject(projectId);
-
-    if (!project) {
-        throw new Error(`ProjectID '${projectId}' cannot be established.`);
-    }
-
-    const results = await runQuery({
+    const results = await runInternalQuery({
         query: `
             query ($sqon: JSON, $sort: [Sort], $first: Int) {
                 ${type} {
@@ -35,8 +27,6 @@ export const searchSqon = async (
             }
         `,
         variables: { sqon, sort, first: maxSetContentSize },
-        mock: false,
-        project,
     });
 
     if (get(results, 'errors', undefined)) {
@@ -46,18 +36,4 @@ export const searchSqon = async (
     const ids: string[] = get(results, `data.${type}.hits.edges`, []).map(edge => edge.node[idField]);
 
     return ids;
-};
-
-const runQuery = ({ query, variables, mock, project }) => {
-    const schema = mock ? project.mockSchema : project.schema;
-    return graphql({
-        schema,
-        contextValue: {
-            schema,
-            es: project.es,
-            projectId: project.id,
-        },
-        source: query,
-        variableValues: variables,
-    });
 };

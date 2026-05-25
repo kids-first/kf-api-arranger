@@ -2,8 +2,7 @@ import { ExecutionResult } from 'graphql/execution/execute';
 import _lodash from 'lodash';
 const { get } = _lodash;
 
-import { runProjectQuery } from '../arrangerUtils.js';
-import { ArrangerProject } from '../arrangerUtils.js';
+import type { RunInternalQuery } from '../arrangerUtils.js';
 import { throwErrorsFromGqlQueryIfExist } from '../errors.js';
 import { ES_SEARCH_MAX_BUCKETS } from '../esUtils.js';
 import { resolveSetIds } from '../sqon/setSqon.js';
@@ -15,13 +14,9 @@ const extractPsIds = (resp): string[] => (resp?.data?.participant?.hits?.edges |
 
 const getParticipantIds = async (
     sqon: SetSqon,
-    projectId: string,
-    getProject: (projectId: string) => ArrangerProject,
+    runInternalQuery: RunInternalQuery,
 ) => {
-    const project = getProject(projectId);
-    const runQuery = runProjectQuery(project);
-
-    const countRes: ExecutionResult = await runQuery({
+    const countRes: ExecutionResult = await runInternalQuery({
         query: `query getParticipantCount($sqon: JSON) {
           participant {
             hits(filters: $sqon) {
@@ -33,14 +28,14 @@ const getParticipantIds = async (
         variables: { sqon },
     });
     // Cast: ExecutionResult.data is `Record<string, unknown>` in graphql 16,
-    // and we don't statically type the query shape here. Route is deferred during cut-over.
+    // and we don't statically type the query shape here.
     const psCount = (countRes?.data as any)?.participant?.hits?.total ?? 0;
     if (psCount === 0) {
         return [];
     }
     const batchSize = 5000;
     const gqlVariables = { sqon, sort: [{ field: idKey, order: 'asc' }], first: batchSize };
-    const psResp = await runQuery({
+    const psResp = await runInternalQuery({
         query: `
             query ($sqon: JSON, $sort: [Sort], $first: Int) {
                 participant {
@@ -66,7 +61,7 @@ const getParticipantIds = async (
     let x = it.next();
     while (!x.done) {
         const lastFetchedId = state.ids.slice(-1);
-        const psResp = await runQuery({
+        const psResp = await runInternalQuery({
             query: `
             query ($sqon: JSON, $sort: [Sort], $first: Int, $searchAfter: JSON) {
                 participant {
@@ -103,29 +98,27 @@ const getParticipantIds = async (
 
 export const getPhenotypesNodes = async (
     sqon: SetSqon,
-    projectId: string,
-    getProject: (projectId: string) => ArrangerProject,
+    runInternalQuery: RunInternalQuery,
     type: string,
     aggregations_filter_themselves: boolean,
     accessToken: string,
 ) => {
     const newSqon = await resolveSetIds(sqon, accessToken);
 
-    const participantIds = await getParticipantIds(newSqon as SetSqon, projectId, getProject);
+    const participantIds = await getParticipantIds(newSqon as SetSqon, runInternalQuery);
 
-    return getPhenotypesNodesByIds(participantIds, projectId, getProject, type, aggregations_filter_themselves);
+    return getPhenotypesNodesByIds(participantIds, runInternalQuery, type, aggregations_filter_themselves);
 };
 
 const getPhenotypesNodesByIds = async (
     ids: string[],
-    projectId: string,
-    getProject: (projectId: string) => ArrangerProject,
+    runInternalQuery: RunInternalQuery,
     type: string,
     aggregations_filter_themselves: boolean,
 ) => {
-    const query = `query($sqon: JSON, $term_filters: JSON) {
+    const query = `query($sqon: JSON, $term_filters: JSON, $aggregations_filter_themselves: Boolean) {
           participant {
-            aggregations(filters: $sqon, aggregations_filter_themselves: ${aggregations_filter_themselves}) {
+            aggregations(filters: $sqon, aggregations_filter_themselves: $aggregations_filter_themselves) {
               ${type}__name {
                 buckets {
                   key
@@ -165,14 +158,15 @@ const getPhenotypesNodesByIds = async (
         ],
     };
 
-    const project = getProject(projectId);
-    if (!project) {
-        throw new Error(`ProjectID '${projectId}' cannot be established.`);
-    }
-
-    const res = await project.runQuery({
+    const res = await runInternalQuery({
         query,
-        variables: { sqon, term_filters: termFilter, size: ES_SEARCH_MAX_BUCKETS, offset: 0 },
+        variables: {
+            sqon,
+            term_filters: termFilter,
+            aggregations_filter_themselves,
+            size: ES_SEARCH_MAX_BUCKETS,
+            offset: 0,
+        },
     });
     return get(res, `data.participant.aggregations.${type}__name.buckets`, []);
 };

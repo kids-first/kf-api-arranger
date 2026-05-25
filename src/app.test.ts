@@ -4,7 +4,7 @@ import request from 'supertest';
 
 import { fakeKeycloakClient, fakeKeycloakRealm, fakeKeycloakUrl, getToken, publicKey } from '../test/authTestUtils.js';
 import buildApp from './app.js';
-import { ArrangerProject } from './arrangerUtils.js';
+import type { RunInternalQuery } from './arrangerUtils.js';
 import { SetNotFoundError } from './endpoints/sets/setError.js';
 import {
     createSet,
@@ -26,7 +26,7 @@ describe('Express app (without Arranger)', () => {
     let app: Express;
     let keycloakFakeConfig;
 
-    const getProject = (_s: string) => ({} as ArrangerProject);
+    const runInternalQuery: RunInternalQuery = async () => ({ data: null });
 
     beforeEach(() => {
         const publicKeyToVerify = publicKey;
@@ -40,7 +40,7 @@ describe('Express app (without Arranger)', () => {
             'realm-public-key': publicKeyToVerify, // For test purpose, we use public key to validate token.
         };
         const keycloak = new Keycloak({}, keycloakFakeConfig);
-        app = buildApp(keycloak, getProject); // Re-create app between each test to ensure isolation between tests.
+        app = buildApp(keycloak, runInternalQuery); // Re-create app between each test to ensure isolation between tests.
     });
 
     it('GET /status (public) should responds with json', async () => {
@@ -300,7 +300,6 @@ describe('Express app (without Arranger)', () => {
 
     describe('POST /sets', () => {
         const requestBody = {
-            projectId: '2021_05_03_v2',
             type: 'participant',
             sqon: {
                 op: 'and',
@@ -378,7 +377,6 @@ describe('Express app (without Arranger)', () => {
         };
 
         const updateSetContentBody: UpdateSetContentBody = {
-            projectId: '2021_05_03_v2',
             sourceType: 'QUERY',
             subAction: SubActionTypes.ADD_IDS,
             sqon: {

@@ -1,4 +1,4 @@
-import { ArrangerProject } from '../../arrangerUtils.js';
+import type { RunInternalQuery } from '../../arrangerUtils.js';
 import { resolveSetsInSqon } from '../../sqon/resolveSetInSqon.js';
 import { searchSqon } from '../../sqon/searchSqon.js';
 import { deleteUserSet, getUserSets, postUserSet, putUserSet, UserSet } from '../../userApi/userApiClient.js';
@@ -25,13 +25,12 @@ describe('Set management', () => {
     const sqon = { op: 'and', content: [] };
     const tag = 'tag';
     const idField = 'kf_id';
-    const projectId = '2021_05_03_v2';
     const type = 'participant';
     const sort: Sort[] = [];
     const accessToken = 'Bearer bearer';
     const setId = '1ea';
     const userId = 'user_id';
-    const getProject = (_s: string) => ({} as ArrangerProject);
+    const runInternalQuery: RunInternalQuery = async () => ({ data: null });
 
     const mockParticipantIds = ['participant_1', 'participant_2'];
 
@@ -96,7 +95,6 @@ describe('Set management', () => {
     describe('Create a set', () => {
         const createSetBody: CreateSetBody = {
             idField,
-            projectId,
             sort,
             sqon,
             tag,
@@ -128,7 +126,7 @@ describe('Set management', () => {
             (searchSqon as jest.Mock).mockImplementation(() => mockParticipantIds);
             (postUserSet as jest.Mock).mockImplementation(() => userSet);
 
-            const result = await createSet(createSetBody, accessToken, userId, getProject);
+            const result = await createSet(createSetBody, accessToken, userId, runInternalQuery);
 
             expect(result).toEqual(set);
             expect((resolveSetsInSqon as jest.Mock).mock.calls.length).toEqual(1);
@@ -153,7 +151,7 @@ describe('Set management', () => {
             (searchSqon as jest.Mock).mockImplementation(() => mockParticipantIds);
             (postUserSet as jest.Mock).mockImplementation(() => userSet);
 
-            const result = await createSet({ ...createSetBody, sqon: sqonWithSetId }, accessToken, userId, getProject);
+            const result = await createSet({ ...createSetBody, sqon: sqonWithSetId }, accessToken, userId, runInternalQuery);
 
             expect(result).toEqual(set);
             expect((resolveSetsInSqon as jest.Mock).mock.calls.length).toEqual(1);
@@ -191,7 +189,7 @@ describe('Set management', () => {
             (searchSqon as jest.Mock).mockImplementation(() => mockTooLongParticipantIds);
             (postUserSet as jest.Mock).mockImplementation(() => truncatedUserSet);
 
-            const result = await createSet(createSetBody, accessToken, userId, getProject);
+            const result = await createSet(createSetBody, accessToken, userId, runInternalQuery);
 
             expect(result).toEqual(expectedSet);
             expect((resolveSetsInSqon as jest.Mock).mock.calls.length).toEqual(1);
@@ -297,7 +295,6 @@ describe('Set management', () => {
         const updateSetContentAddSqon: UpdateSetContentBody = {
             sourceType: 'SAVE_SET',
             subAction: SubActionTypes.ADD_IDS,
-            projectId,
             sqon: newSqon,
         };
 
@@ -343,7 +340,7 @@ describe('Set management', () => {
             (searchSqon as jest.Mock).mockImplementation(() => mockNewSqonParticipantIds);
             (putUserSet as jest.Mock).mockImplementation(() => updatedUserSet);
 
-            const result = await updateSetContent(updateSetContentAddSqon, accessToken, userId, setId, getProject);
+            const result = await updateSetContent(updateSetContentAddSqon, accessToken, userId, setId, runInternalQuery);
 
             expect(result).toEqual(updatedSet);
             expect((getUserSets as jest.Mock).mock.calls.length).toEqual(1);
@@ -400,7 +397,7 @@ describe('Set management', () => {
                 accessToken,
                 userId,
                 setId,
-                getProject,
+                runInternalQuery,
             );
 
             expect(result).toEqual(updatedSet);
@@ -450,7 +447,7 @@ describe('Set management', () => {
             (searchSqon as jest.Mock).mockImplementation(() => mockNewSqonParticipantIds);
             (putUserSet as jest.Mock).mockImplementation(() => updatedUserSet);
 
-            const result = await updateSetContent(updateSetContentRemoveSqon, accessToken, userId, setId, getProject);
+            const result = await updateSetContent(updateSetContentRemoveSqon, accessToken, userId, setId, runInternalQuery);
 
             expect(result).toEqual(updatedSet);
             expect((getUserSets as jest.Mock).mock.calls.length).toEqual(1);
@@ -466,7 +463,7 @@ describe('Set management', () => {
             (getUserSets as jest.Mock).mockImplementation(() => []);
 
             try {
-                await updateSetContent(updateSetContentAddSqon, accessToken, userId, setId, getProject);
+                await updateSetContent(updateSetContentAddSqon, accessToken, userId, setId, runInternalQuery);
             } catch (e) {
                 expect(e.message).toEqual('Set to update can not be found !');
             } finally {
@@ -486,7 +483,7 @@ describe('Set management', () => {
             });
 
             try {
-                await updateSetContent(updateSetContentAddSqon, accessToken, userId, setId, getProject);
+                await updateSetContent(updateSetContentAddSqon, accessToken, userId, setId, runInternalQuery);
             } catch (e) {
                 expect(e.message).toEqual('OOPS');
             } finally {

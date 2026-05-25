@@ -16,6 +16,7 @@ import { buildSchema, type EntityModule } from './schema/index.js';
 import { loadAllEntitiesFromEs } from './schema/esLoaders.js';
 import { createResolvers, type ServerContext } from './resolvers.js';
 import { createRealEsClient, pingCluster } from './es/realClient.js';
+import { makeRunInternalQuery, type RunInternalQuery } from '../arrangerUtils.js';
 
 // The 7 entity ES indices that include-portal-ui queries against, paired
 // with the GraphQL entity name each one exposes. Pairing is local config
@@ -37,6 +38,9 @@ const ES_ENTITIES: ReadonlyArray<{ esIndex: string; entityName: string }> = [
 export type GraphqlServerHandle = {
     server: ApolloServer<ServerContext>;
     context: ServerContext;
+    // In-process runner for internal routes (/sets, /phenotypes) that need
+    // to issue GraphQL queries against our own schema without an HTTP hop.
+    runInternalQuery: RunInternalQuery;
 };
 
 export async function buildGraphqlServer(): Promise<GraphqlServerHandle> {
@@ -66,5 +70,9 @@ export async function buildGraphqlServer(): Promise<GraphqlServerHandle> {
     const server = new ApolloServer<ServerContext>({ schema });
     await server.start();
 
-    return { server, context: { es } };
+    return {
+        server,
+        context: { es },
+        runInternalQuery: makeRunInternalQuery(schema, es),
+    };
 }

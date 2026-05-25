@@ -1,7 +1,7 @@
 import _lodash from 'lodash';
 const { difference, dropRight, union } = _lodash;
 
-import { ArrangerProject } from '../../arrangerUtils.js';
+import type { RunInternalQuery } from '../../arrangerUtils.js';
 import { maxSetContentSize } from '../../env.js';
 import { addSqonToSetSqon, removeSqonToSetSqon } from '../../sqon/manipulateSqon.js';
 import { resolveSetsInSqon } from '../../sqon/resolveSetInSqon.js';
@@ -41,11 +41,11 @@ export const createSet = async (
     requestBody: CreateSetBody,
     accessToken: string,
     userId: string,
-    getProject: (projectId: string) => ArrangerProject,
+    runInternalQuery: RunInternalQuery,
 ): Promise<Set> => {
-    const { sqon, sort, projectId, type, idField, tag, is_invisible } = requestBody;
+    const { sqon, sort, type, idField, tag, is_invisible } = requestBody;
     const sqonAfterReplace = await resolveSetsInSqon(sqon, userId, accessToken);
-    const ids = await searchSqon(sqonAfterReplace, projectId, type, sort, idField, getProject);
+    const ids = await searchSqon(sqonAfterReplace, type, sort, idField, runInternalQuery);
 
     const truncatedIds = truncateIds(ids);
 
@@ -81,7 +81,7 @@ export const updateSetContent = async (
     accessToken: string,
     userId: string,
     setId: string,
-    getProject: (projectId: string) => ArrangerProject,
+    runInternalQuery: RunInternalQuery,
 ): Promise<Set> => {
     const setToUpdate = await getUserSet(accessToken, setId);
 
@@ -91,11 +91,10 @@ export const updateSetContent = async (
 
     const newSqonIds = await searchSqon(
         sqonAfterReplace,
-        requestBody.projectId,
         setToUpdate.content.setType,
         setToUpdate.content.sort,
         setToUpdate.content.idField,
-        getProject,
+        runInternalQuery,
     );
 
     if (setType !== setToUpdate.content.setType) {
