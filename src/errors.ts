@@ -1,23 +1,16 @@
 import { NextFunction, Request, Response } from 'express';
 import { ExecutionResult } from 'graphql/execution/execute';
-import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 
 import { SetNotFoundError } from './endpoints/sets/setError.js';
 import { MissingFilterError } from './endpoints/transcriptomics/errors.js';
 
 export const globalErrorHandler = (err: unknown, _req: Request, res: Response, _next: NextFunction): void => {
     if (err instanceof SetNotFoundError) {
-        res.status(StatusCodes.NOT_FOUND).json({
-            error: getReasonPhrase(StatusCodes.NOT_FOUND),
-        });
+        res.status(404).json({ error: 'Not Found' });
     } else if (err instanceof MissingFilterError) {
-        res.status(StatusCodes.BAD_REQUEST).json({
-            error: err.message,
-        });
+        res.status(400).json({ error: err.message });
     } else if (err instanceof Error) {
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-            error: getReasonPhrase(StatusCodes.INTERNAL_SERVER_ERROR),
-        });
+        res.status(500).json({ error: 'Internal Server Error' });
     } else {
         throw err;
     }

@@ -1,6 +1,3 @@
-import _lodash from 'lodash';
-const { get } = _lodash;
-
 import type { RunInternalQuery } from '../arrangerUtils.js';
 import { SetSqon, Sort } from '../endpoints/sets/setsTypes.js';
 import { maxSetContentSize } from '../env.js';
@@ -29,11 +26,10 @@ export const searchSqon = async (
         variables: { sqon, sort, first: maxSetContentSize },
     });
 
-    if (get(results, 'errors', undefined)) {
-        throw new Error(get(results, 'errors', undefined));
+    if (results?.errors) {
+        throw new Error(String(results.errors));
     }
 
-    const ids: string[] = get(results, `data.${type}.hits.edges`, []).map(edge => edge.node[idField]);
-
-    return ids;
+    const edges = ((results?.data as any)?.[type]?.hits?.edges ?? []) as Array<{ node: Record<string, string> }>;
+    return edges.map(edge => edge.node[idField]);
 };

@@ -1,6 +1,5 @@
 import cors from 'cors';
 import express, { Express } from 'express';
-import { StatusCodes } from 'http-status-codes';
 import { Keycloak } from 'keycloak-connect';
 
 import pkg from '../package.json' with { type: 'json' };
@@ -181,7 +180,7 @@ export default (keycloak: Keycloak, runInternalQuery: RunInternalQuery): Express
         try {
             const queries = req.body?.queries;
             if (!queries || !Array.isArray(queries) || queries.some(q => !isPlainObject(q))) {
-                res.status(StatusCodes.UNPROCESSABLE_ENTITY).send('Bad Inputs');
+                res.status(422).send('Bad Inputs');
                 return;
             }
 
@@ -237,7 +236,7 @@ export default (keycloak: Keycloak, runInternalQuery: RunInternalQuery): Express
             const rawEntitySqons = req.body?.entitySqons;
 
             if (!lengthOk(qbSqons) || !lengthOk(rawEntitySqons)) {
-                res.status(StatusCodes.UNPROCESSABLE_ENTITY).send('Bad Inputs');
+                res.status(422).send('Bad Inputs');
                 return;
             }
 
@@ -266,7 +265,7 @@ export default (keycloak: Keycloak, runInternalQuery: RunInternalQuery): Express
         try {
             const code = req.params.code;
             if (!code || typeof code !== 'string') {
-                res.status(StatusCodes.UNPROCESSABLE_ENTITY).send('Bad Inputs');
+                res.status(422).send('Bad Inputs');
                 return;
             }
             const study = await getPublicStudy(req.params.code);
@@ -280,7 +279,7 @@ export default (keycloak: Keycloak, runInternalQuery: RunInternalQuery): Express
         try {
             const code = req.params.code;
             if (!code || typeof code !== 'string') {
-                res.status(StatusCodes.UNPROCESSABLE_ENTITY).send('Bad Inputs');
+                res.status(422).send('Bad Inputs');
                 return;
             }
             const study = await getPublicGraphs(req.params.code);

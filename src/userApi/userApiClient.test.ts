@@ -1,5 +1,3 @@
-import fetch from 'node-fetch';
-
 import { CreateUpdateBody } from '../endpoints/sets/setsTypes.js';
 import {
     deleteUserSet,
@@ -12,7 +10,8 @@ import {
 } from './userApiClient.js';
 import { UserApiError } from './userApiError.js';
 
-jest.mock('node-fetch');
+// TODO: when jest is revived (Phase B), rewrite this file's mocking to use
+// jest.spyOn(globalThis, 'fetch') or undici.MockAgent. node-fetch is gone.
 
 describe('UserApi Client', () => {
     const accessToken = 'Bearer bearer';

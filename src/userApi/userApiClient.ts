@@ -1,5 +1,3 @@
-import fetch from 'node-fetch';
-
 import { CreateUpdateBody, SetIdToTag, SetSqon, Sort } from '../endpoints/sets/setsTypes.js';
 import { userApiURL } from '../env.js';
 import { UserApiError } from './userApiError.js';
@@ -35,7 +33,7 @@ export const getSharedSet = async (accessToken: string, setId: string): Promise<
         },
     });
 
-    const body = await response.json();
+    const body = (await response.json()) as UserSet;
 
     if (response.status === 200) {
         return body;
@@ -55,7 +53,7 @@ export const getUserSets = async (accessToken: string): Promise<UserSet[]> => {
         },
     });
 
-    const body = await response.json();
+    const body = (await response.json()) as UserSet[];
 
     if (response.status === 200) {
         return body;
@@ -76,7 +74,7 @@ export const postUserSet = async (accessToken: string, set: CreateUpdateBody): P
         body: JSON.stringify(set),
     });
 
-    const body = await response.json();
+    const body = (await response.json()) as UserSet;
 
     if (response.status < 300) {
         return body;
@@ -97,7 +95,7 @@ export const putUserSet = async (accessToken: string, set: CreateUpdateBody, set
         body: JSON.stringify(set),
     });
 
-    const body = await response.json();
+    const body = (await response.json()) as UserSet;
 
     if (response.status < 300) {
         return body;
@@ -140,7 +138,7 @@ export const postSetsTags = async (setIds: string[], accessToken: string): Promi
         body: JSON.stringify(bodyPayload),
     });
 
-    const body = await response.json();
+    const body = (await response.json()) as SetIdToTag[];
 
     if (response.status === 200) {
         return body;

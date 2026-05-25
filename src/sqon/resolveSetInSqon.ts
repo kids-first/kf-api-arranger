@@ -1,31 +1,27 @@
-import type { Dictionary } from 'lodash';
-import _lodash from 'lodash';
-const { flattenDeep, get, isArray, zipObject } = _lodash;
-
 import { SetSqon } from '../endpoints/sets/setsTypes.js';
 import { getSharedSet, getUserSets, UserSet } from '../userApi/userApiClient.js';
 import { sqonContainsSet } from './manipulateSqon.js';
 import { Sqon } from './types.js';
 
 const getSetIdsFromSqon = (sqon: SetSqon, collection = []) =>
-    (isArray(sqon.content)
-        ? flattenDeep(
-              sqon.content.reduce((acc, subSqon) => [...acc, ...getSetIdsFromSqon(subSqon, collection)], collection),
-          )
-        : isArray(sqon.content?.value)
+    (Array.isArray(sqon.content)
+        ? sqon.content
+              .reduce((acc, subSqon) => [...acc, ...getSetIdsFromSqon(subSqon, collection)], collection)
+              .flat(Infinity)
+        : Array.isArray(sqon.content?.value)
         ? sqon.content?.value.filter(value => String(value).indexOf('set_id:') === 0)
         : [...(String(sqon.content?.value).indexOf?.('set_id:') === 0 ? [sqon.content.value] : [])]
     ).map(setId => setId.replace('set_id:', ''));
 
-const injectIdsIntoSqon = (sqon: SetSqon, setIdsToValueMap: Dictionary<string[]>) => ({
+const injectIdsIntoSqon = (sqon: SetSqon, setIdsToValueMap: Record<string, string[]>) => ({
     ...sqon,
     content: sqon.content.map(op => ({
         ...op,
-        content: !isArray(op.content)
+        content: !Array.isArray(op.content)
             ? {
                   ...op.content,
-                  value: isArray(op.content.value)
-                      ? flattenDeep(op.content.value.map(value => setIdsToValueMap[value] || op.content.value))
+                  value: Array.isArray(op.content.value)
+                      ? op.content.value.map(value => setIdsToValueMap[value] || op.content.value).flat(Infinity)
                       : setIdsToValueMap[op.content.value] || op.content.value,
               }
             : injectIdsIntoSqon(op, setIdsToValueMap).content,
@@ -38,15 +34,14 @@ export const resolveSetsInSqonWithMapper = async (
     accessToken: string,
 ): Promise<{
     resolvedSqon: SetSqon;
-    m?: Dictionary<string[]>;
+    m?: Record<string, string[]>;
 }> => {
     const setIds: string[] = getSetIdsFromSqon(sqon || ({} as SetSqon));
     if (setIds.length) {
         const userSets: UserSet[] = await retrieveSetsFromUsers(accessToken, setIds);
-        const ids = setIds.map(setId => get(userSets.filter(r => r.id === setId)[0], 'content.ids', []));
-        const setIdsToValueMap: Dictionary<string[]> = zipObject(
-            setIds.map(id => `set_id:${id}`),
-            ids,
+        const ids = setIds.map(setId => userSets.filter(r => r.id === setId)[0]?.content?.ids ?? []);
+        const setIdsToValueMap: Record<string, string[]> = Object.fromEntries(
+            setIds.map((id, i) => [`set_id:${id}`, ids[i]]),
         );
 
         return {

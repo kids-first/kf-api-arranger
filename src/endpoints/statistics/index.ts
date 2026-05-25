@@ -1,5 +1,4 @@
 import { Client } from '@elastic/elasticsearch';
-import filesize from 'filesize';
 
 import EsInstance from '../../ElasticSearchClientInstance.js';
 import { esBiospecimenIndex, esFileIndex, esParticipantIndex, esStudyIndex, esVariantIndex } from '../../esUtils.js';
@@ -46,7 +45,19 @@ const fetchFileSizeStats = async (client: Client): Promise<string> => {
         },
         size: 0,
     });
-    return filesize(body.aggregations.types_count.value);
+    return humanByteSize(body.aggregations.types_count.value);
+};
+
+// Replacement for filesize@3 — binary (1024) base, 2 decimals, JEDEC-style unit names.
+const humanByteSize = (bytes: number): string => {
+    const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
+    let n = bytes;
+    let i = 0;
+    while (n >= 1024 && i < units.length - 1) {
+        n /= 1024;
+        i++;
+    }
+    return `${n.toFixed(2)} ${units[i]}`;
 };
 
 const fetchStudyStats = async (client: Client): Promise<number> => {

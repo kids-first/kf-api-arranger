@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from 'express';
-import { StatusCodes } from 'http-status-codes';
 
 import EsInstance from '../ElasticSearchClientInstance.js';
 import {
@@ -53,7 +52,7 @@ export default async (req: Request, res: Response, next: NextFunction, type: str
         const searchText = suggestionResponse.text;
         const suggestions = suggestionResponse.options.map(suggestion => suggestion._source);
 
-        res.status(StatusCodes.OK).send({
+        res.status(200).send({
             searchText,
             suggestions,
         });

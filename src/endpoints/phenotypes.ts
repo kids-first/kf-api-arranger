@@ -1,6 +1,3 @@
-import _lodash from 'lodash';
-const { get } = _lodash;
-
 import type { RunInternalQuery } from '../arrangerUtils.js';
 import { resolveSetIds } from '../sqon/setSqon.js';
 import { SetSqon } from './sets/setsTypes.js';
@@ -42,5 +39,5 @@ export const getPhenotypesNodes = async (
         query,
         variables: { sqon: resolvedSqon, term_filters: termFilter, aggregations_filter_themselves },
     });
-    return get(res, `data.participant.aggregations.${type}__name.buckets`, []);
+    return (res?.data as any)?.participant?.aggregations?.[`${type}__name`]?.buckets ?? [];
 };

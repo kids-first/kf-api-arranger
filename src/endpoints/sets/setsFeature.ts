@@ -1,20 +1,17 @@
-import _lodash from 'lodash';
-const { difference, dropRight, union } = _lodash;
-
 import type { RunInternalQuery } from '../../arrangerUtils.js';
 import { maxSetContentSize } from '../../env.js';
 import { addSqonToSetSqon, removeSqonToSetSqon } from '../../sqon/manipulateSqon.js';
 import { resolveSetsInSqon } from '../../sqon/resolveSetInSqon.js';
 import { searchSqon } from '../../sqon/searchSqon.js';
-import { deleteUserSet, getUserSets, postUserSet, putUserSet, UserSet } from '../../userApi/userApiClient.js';
+import { deleteUserSet, getUserSets, postUserSet, putUserSet, type UserSet } from '../../userApi/userApiClient.js';
 import { SetNotFoundError } from './setError.js';
 import {
-    CreateSetBody,
-    CreateUpdateBody,
+    type CreateSetBody,
+    type CreateUpdateBody,
     RIFF_TYPE_SET,
-    Set,
-    UpdateSetContentBody,
-    UpdateSetTagBody,
+    type Set,
+    type UpdateSetContentBody,
+    type UpdateSetTagBody,
 } from './setsTypes.js';
 
 export const SubActionTypes = {
@@ -106,8 +103,11 @@ export const updateSetContent = async (
             ? addSqonToSetSqon(sqon, requestBody.sqon)
             : removeSqonToSetSqon(sqon, requestBody.sqon);
 
+    const newSqonIdsSet = new Set(newSqonIds);
     const existingIdsWithNewIds =
-        requestBody.subAction === SubActionTypes.ADD_IDS ? union(ids, newSqonIds) : difference(ids, newSqonIds);
+        requestBody.subAction === SubActionTypes.ADD_IDS
+            ? [...new Set([...ids, ...newSqonIds])]
+            : ids.filter(x => !newSqonIdsSet.has(x));
     const truncatedIds = truncateIds(existingIdsWithNewIds);
 
     const payload: CreateUpdateBody = {
@@ -137,5 +137,5 @@ const truncateIds = (ids: string[]): string[] => {
     if (ids.length <= maxSetContentSize) {
         return ids;
     }
-    return dropRight(ids, ids.length - maxSetContentSize);
+    return ids.slice(0, maxSetContentSize);
 };
