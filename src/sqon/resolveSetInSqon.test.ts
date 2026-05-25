@@ -1,14 +1,14 @@
-import { jest } from '@jest/globals';
+import { vi } from 'vitest';
 import { RIFF_TYPE_SET } from '../endpoints/sets/setsTypes.js';
 import { getSharedSet, getUserSets, UserSet } from '../userApi/userApiClient.js';
 import { retrieveSetsFromUsers } from './resolveSetInSqon.js';
 
-jest.mock('../userApi/userApiClient');
+vi.mock('../userApi/userApiClient');
 
 describe('retrieveSetsFromUsers', () => {
     beforeEach(() => {
-        (getUserSets as jest.Mock).mockReset();
-        (getSharedSet as jest.Mock).mockReset();
+        vi.mocked(getUserSets).mockReset();
+        vi.mocked(getSharedSet).mockReset();
     });
 
     const setIds = ['setId1', 'setId2'];
@@ -62,38 +62,38 @@ describe('retrieveSetsFromUsers', () => {
     };
 
     it('should include user sets', async () => {
-        (getUserSets as jest.Mock).mockImplementation(() => [setId1, setId2]);
+        vi.mocked(getUserSets).mockResolvedValue([setId1, setId2]);
 
         const result = await retrieveSetsFromUsers('access_token', setIds);
 
         expect(result.length).toEqual(2);
         expect(result).toEqual(expect.arrayContaining([setId1, setId2]));
-        expect((getUserSets as jest.Mock)).toHaveBeenCalledTimes(1);
-        expect((getSharedSet as jest.Mock)).toHaveBeenCalledTimes(0);
+        expect(vi.mocked(getUserSets)).toHaveBeenCalledTimes(1);
+        expect(vi.mocked(getSharedSet)).toHaveBeenCalledTimes(0);
     });
 
     it('should add all shared sets', async () => {
-        (getUserSets as jest.Mock).mockImplementation(() => [setId1, setId2]);
-        (getSharedSet as jest.Mock).mockImplementation(() => sharedSet);
+        vi.mocked(getUserSets).mockResolvedValue([setId1, setId2]);
+        vi.mocked(getSharedSet).mockResolvedValue(sharedSet);
 
         const result = await retrieveSetsFromUsers('access_token', [...setIds, 'sharedSet']);
 
         expect(result.length).toEqual(3);
         expect(result).toEqual(expect.arrayContaining([setId1, setId2, sharedSet]));
 
-        expect((getUserSets as jest.Mock)).toHaveBeenCalledTimes(1);
-        expect((getSharedSet as jest.Mock)).toHaveBeenCalledTimes(1);
+        expect(vi.mocked(getUserSets)).toHaveBeenCalledTimes(1);
+        expect(vi.mocked(getSharedSet)).toHaveBeenCalledTimes(1);
     });
 
     it('should fail if the shared set is not public (ie not returned by users-api)', async () => {
-        (getUserSets as jest.Mock).mockImplementation(() => [setId1, setId2]);
-        (getSharedSet as jest.Mock).mockImplementation(() => {
+        vi.mocked(getUserSets).mockResolvedValue([setId1, setId2]);
+        vi.mocked(getSharedSet).mockImplementation(() => {
             throw new Error('User Set #sharedSet does not exist.');
         });
 
         await expect(retrieveSetsFromUsers('access_token', [...setIds, 'sharedSet']))
             .rejects.toThrow('User Set #sharedSet does not exist.');
-        expect((getUserSets as jest.Mock)).toHaveBeenCalledTimes(1);
-        expect((getSharedSet as jest.Mock)).toHaveBeenCalledTimes(1);
+        expect(vi.mocked(getUserSets)).toHaveBeenCalledTimes(1);
+        expect(vi.mocked(getSharedSet)).toHaveBeenCalledTimes(1);
     });
 });

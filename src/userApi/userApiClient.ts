@@ -119,7 +119,8 @@ export const deleteUserSet = async (accessToken: string, setId: string): Promise
         return setId;
     }
 
-    throw new UserApiError(response.status, response.body);
+    const body = await response.json();
+    throw new UserApiError(response.status, body);
 };
 
 export const postSetsTags = async (setIds: string[], accessToken: string): Promise<SetIdToTag[]> => {

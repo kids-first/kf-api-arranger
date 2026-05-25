@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals';
+import { vi } from 'vitest';
 import { CreateUpdateBody } from '../endpoints/sets/setsTypes.js';
 import {
     deleteUserSet,
@@ -11,10 +11,10 @@ import {
 } from './userApiClient.js';
 import { UserApiError } from './userApiError.js';
 
-// Replace global fetch with a jest.fn() for the whole suite. Node 22+ ships
+// Replace global fetch with a vi.fn() for the whole suite. Node 22+ ships
 // fetch as a global — it's not an import — so we swap globalThis.fetch and
 // restore at the end.
-const fetchMock = jest.fn();
+const fetchMock = vi.fn();
 const originalFetch = globalThis.fetch;
 
 beforeAll(() => {

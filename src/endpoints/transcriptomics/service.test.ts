@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals';
+import { vi } from 'vitest';
 import EsInstance from '../../ElasticSearchClientInstance.js';
 import { datalakeS3Url } from '../../env.js';
 import { generatePreSignedUrl } from '../../s3Api/index.js';
@@ -15,13 +15,13 @@ import {
 } from './service.js';
 import { DiffGeneExpVolcano, Facets, MatchedGene, SampleGeneExpVolcano } from './types.js';
 
-jest.mock('../../s3Api');
-jest.mock('../../ElasticSearchClientInstance');
+vi.mock('../../s3Api');
+vi.mock('../../ElasticSearchClientInstance');
 
 describe('Transcriptomics', () => {
     describe('fetchDiffGeneExp', () => {
         beforeEach(() => {
-            (EsInstance.getInstance as jest.Mock).mockReset();
+            vi.mocked(EsInstance.getInstance).mockReset();
         });
 
         it('fetchDiffGeneExp should return gene expr group by category', async () => {
@@ -241,7 +241,7 @@ describe('Transcriptomics', () => {
                 },
             ];
 
-            (EsInstance.getInstance as jest.Mock).mockImplementation(() => ({
+            vi.mocked(EsInstance.getInstance).mockImplementation(() => ({
                 search: async () => ({ body: mockEsResponseBody }),
             }));
 
@@ -253,27 +253,27 @@ describe('Transcriptomics', () => {
 
     describe('exportDiffGeneExp', () => {
         beforeEach(() => {
-            (generatePreSignedUrl as jest.Mock).mockReset();
+            vi.mocked(generatePreSignedUrl).mockReset();
         });
 
         it('should return the pre-signed url for diff gene exp file', async () => {
             const expectedUrl = 'pre-signed-url';
 
-            (generatePreSignedUrl as jest.MockedFunction<typeof generatePreSignedUrl>).mockResolvedValue(expectedUrl);
+            vi.mocked(generatePreSignedUrl).mockResolvedValue(expectedUrl);
 
             const result = await exportDiffGeneExp();
 
             expect(result).toEqual({ url: expectedUrl });
 
-            expect((generatePreSignedUrl as jest.Mock)).toHaveBeenCalledTimes(1);
-            expect((generatePreSignedUrl as jest.Mock).mock.calls[0][0]).toEqual(datalakeS3Url);
-            expect((generatePreSignedUrl as jest.Mock).mock.calls[0][1]).toEqual(DIFF_GENE_EXP_FILE_KEY);
+            expect(vi.mocked(generatePreSignedUrl)).toHaveBeenCalledTimes(1);
+            expect(vi.mocked(generatePreSignedUrl).mock.calls[0][0]).toEqual(datalakeS3Url);
+            expect(vi.mocked(generatePreSignedUrl).mock.calls[0][1]).toEqual(DIFF_GENE_EXP_FILE_KEY);
         });
     });
 
     describe('fetchSampleGeneExp', () => {
         beforeEach(() => {
-            (EsInstance.getInstance as jest.Mock).mockReset();
+            vi.mocked(EsInstance.getInstance).mockReset();
         });
 
         it('should return gene exp by sample for a specific gene symbol', async () => {
@@ -369,7 +369,7 @@ describe('Transcriptomics', () => {
                 max_fpkm_value: 2.4399124042981217,
             };
 
-            (EsInstance.getInstance as jest.Mock).mockImplementation(() => ({
+            vi.mocked(EsInstance.getInstance).mockImplementation(() => ({
                 search: async () => ({ body: mockEsResponseBody }),
             }));
 
@@ -381,27 +381,27 @@ describe('Transcriptomics', () => {
 
     describe('exportSampleGeneExp', () => {
         beforeEach(() => {
-            (generatePreSignedUrl as jest.Mock).mockReset();
+            vi.mocked(generatePreSignedUrl).mockReset();
         });
 
         it('should return the pre-signed url for sample gene exp file', async () => {
             const expectedUrl = 'pre-signed-url';
 
-            (generatePreSignedUrl as jest.MockedFunction<typeof generatePreSignedUrl>).mockResolvedValue(expectedUrl);
+            vi.mocked(generatePreSignedUrl).mockResolvedValue(expectedUrl);
 
             const result = await exportSampleGeneExp();
 
             expect(result).toEqual({ url: expectedUrl });
 
-            expect((generatePreSignedUrl as jest.Mock)).toHaveBeenCalledTimes(1);
-            expect((generatePreSignedUrl as jest.Mock).mock.calls[0][0]).toEqual(datalakeS3Url);
-            expect((generatePreSignedUrl as jest.Mock).mock.calls[0][1]).toEqual(SAMPLE_GENE_EXP_FILE_KEY);
+            expect(vi.mocked(generatePreSignedUrl)).toHaveBeenCalledTimes(1);
+            expect(vi.mocked(generatePreSignedUrl).mock.calls[0][0]).toEqual(datalakeS3Url);
+            expect(vi.mocked(generatePreSignedUrl).mock.calls[0][1]).toEqual(SAMPLE_GENE_EXP_FILE_KEY);
         });
     });
 
     describe('fetchFacets', () => {
         beforeEach(() => {
-            (EsInstance.getInstance as jest.Mock).mockReset();
+            vi.mocked(EsInstance.getInstance).mockReset();
         });
 
         it('should return chromosome and doc count for each one', async () => {
@@ -462,7 +462,7 @@ describe('Transcriptomics', () => {
                 ],
             };
 
-            (EsInstance.getInstance as jest.Mock).mockImplementation(() => ({
+            vi.mocked(EsInstance.getInstance).mockImplementation(() => ({
                 search: async () => ({ body: mockEsResponseBody }),
             }));
 
@@ -474,7 +474,7 @@ describe('Transcriptomics', () => {
 
     describe('checkSampleIdsAndGene', () => {
         beforeEach(() => {
-            (EsInstance.getInstance as jest.Mock).mockReset();
+            vi.mocked(EsInstance.getInstance).mockReset();
         });
 
         it('should return sample ids that are in the data for the gene in param', async () => {
@@ -508,7 +508,7 @@ describe('Transcriptomics', () => {
 
             const expectedResponse: string[] = ['bs-aa000aaa', 'bs-bbbb11b1'];
 
-            (EsInstance.getInstance as jest.Mock).mockImplementation(() => ({
+            vi.mocked(EsInstance.getInstance).mockImplementation(() => ({
                 search: async () => ({ body: mockEsResponseBody }),
             }));
 
@@ -551,7 +551,7 @@ describe('Transcriptomics', () => {
 
             const expectedResponse: string[] = ['bs-aa000aaa', 'bs-bbbb11b1'];
 
-            (EsInstance.getInstance as jest.Mock).mockImplementation(() => ({
+            vi.mocked(EsInstance.getInstance).mockImplementation(() => ({
                 search: async () => ({ body: mockEsResponseBody }),
             }));
 
@@ -563,7 +563,7 @@ describe('Transcriptomics', () => {
 
     describe('checkGenesExist', () => {
         beforeEach(() => {
-            (EsInstance.getInstance as jest.Mock).mockReset();
+            vi.mocked(EsInstance.getInstance).mockReset();
         });
 
         it('should return gene_symbol and ensembl_gene_id for the list of gene_symbol and or ensembl_gene_id received in param', async () => {
@@ -614,7 +614,7 @@ describe('Transcriptomics', () => {
                 },
             ];
 
-            (EsInstance.getInstance as jest.Mock).mockImplementation(() => ({
+            vi.mocked(EsInstance.getInstance).mockImplementation(() => ({
                 search: async () => ({ body: mockEsResponseBody }),
             }));
 

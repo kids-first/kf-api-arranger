@@ -1,20 +1,20 @@
-import { jest } from '@jest/globals';
+import { vi } from 'vitest';
 import EsInstance from '../../ElasticSearchClientInstance.js';
 import { getNestedFieldsForIndex } from '../../sqon/getNestedFieldsForIndex.js';
 import { venn } from './venn.js';
 
-jest.mock('../../ElasticSearchClientInstance');
-jest.mock('../../sqon/getNestedFieldsForIndex');
+vi.mock('../../ElasticSearchClientInstance');
+vi.mock('../../sqon/getNestedFieldsForIndex');
 
 const isNumber = (value: unknown) => typeof value === 'number' && Number.isFinite(value);
 
 describe('Venn', () => {
     describe(`${venn.name} utils`, () => {
         beforeEach(() => {
-            (EsInstance.getInstance as jest.Mock).mockReset();
+            vi.mocked(EsInstance.getInstance).mockReset();
         });
         it('should generate a response suited for the building of the Venn diagram', async () => {
-            (getNestedFieldsForIndex as jest.Mock).mockImplementation(() => [
+            vi.mocked(getNestedFieldsForIndex).mockResolvedValue([
                 'diagnosis',
                 'family.relations_to_proband',
                 'files',
@@ -36,7 +36,7 @@ describe('Venn', () => {
                 'study.publications_details.authors',
             ]);
 
-            (EsInstance.getInstance as jest.Mock).mockImplementation(() => ({
+            vi.mocked(EsInstance.getInstance).mockImplementation(() => ({
                 msearch: async () => ({
                     body: {
                         took: 37,

@@ -1,13 +1,13 @@
-import { jest } from '@jest/globals';
-import { getUserSets, postSetsTags } from '../userApi/userApiClient.js';
+import { vi } from 'vitest';
+import { getUserSets, postSetsTags, UserSet } from '../userApi/userApiClient.js';
 import { resolveSetIds, resolveQueriesSetAliases } from './setSqon.js';
 import { Sqon } from './types.js';
 
-jest.mock('../userApi/userApiClient');
+vi.mock('../userApi/userApiClient');
 
 describe(`resolveSetIds`, () => {
     beforeEach(() => {
-        (getUserSets as jest.Mock).mockReset();
+        vi.mocked(getUserSets).mockReset();
     });
 
     it('should leave the sqon intact if no set_id is detected', async () => {
@@ -50,7 +50,7 @@ describe(`resolveSetIds`, () => {
     });
 
     it('should replace set_ids with concrete ids when appropriate', async () => {
-        (getUserSets as jest.Mock).mockImplementation(() => [
+        vi.mocked(getUserSets).mockResolvedValue([
             {
                 id: 'e1ef0cb7-a40f-4133-b14c-01fa6b4a23ef',
                 content: {
@@ -63,7 +63,7 @@ describe(`resolveSetIds`, () => {
                     ids: ['participantId3'],
                 },
             },
-        ]);
+        ] as unknown as UserSet[]);
 
         const sqon = {
             content: [
@@ -110,13 +110,13 @@ describe(`resolveSetIds`, () => {
         expect(result.op).toEqual(sqon.op);
         expect(result.content.length).toEqual(2);
         expect(JSON.stringify(result)).not.toContain('set_id:');
-        expect((getUserSets as jest.Mock)).toHaveBeenCalledTimes(1);
+        expect(vi.mocked(getUserSets)).toHaveBeenCalledTimes(1);
     });
 });
 
 describe(`resolveQueriesSetAliases`, () => {
     beforeEach(() => {
-        (postSetsTags as jest.Mock).mockReset();
+        vi.mocked(postSetsTags).mockReset();
     });
 
     it('should return an empty if no set_id is detected', async () => {
@@ -150,7 +150,7 @@ describe(`resolveQueriesSetAliases`, () => {
                 alias: 'Q1 union Q2 - 1165',
             },
         ];
-        (postSetsTags as jest.Mock).mockImplementation(() => sampleSetIdsToTags);
+        vi.mocked(postSetsTags).mockResolvedValue(sampleSetIdsToTags);
 
         const queries: Sqon[] = [
             {
@@ -189,6 +189,6 @@ describe(`resolveQueriesSetAliases`, () => {
         expect(result.sort((a, b) => a.setId.localeCompare(b.setId))).toEqual(
             sampleSetIdsToTags.sort((a, b) => a.setId.localeCompare(b.setId)),
         );
-        expect((postSetsTags as jest.Mock)).toHaveBeenCalledTimes(1);
+        expect(vi.mocked(postSetsTags)).toHaveBeenCalledTimes(1);
     });
 });

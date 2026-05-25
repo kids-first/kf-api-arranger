@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import { SetSqon } from '../endpoints/sets/setsTypes.js';
 import { addSqonToSetSqon, removeSqonToSetSqon } from './manipulateSqon.js';
 
