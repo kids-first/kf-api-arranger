@@ -19,3 +19,6 @@ scripts/smoke.mjs
 scripts/fetch-baselines.mjs
 scripts/diff-real.mjs
 scripts/baselines.json
+
+# Claude Code session metadata + local memory backup (not project content)
+.claude/
