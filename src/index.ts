@@ -48,7 +48,7 @@ k.grantManager.validateGrant = grant =>
     });
 
 const app = buildApp(keycloak, getProject);
-const { server: apollo, context } = await buildGraphqlServer(projectId);
+const { server: apollo, context } = await buildGraphqlServer();
 
 // Mount Apollo at /${projectId}/graphql — single project per deployment,
 // driven entirely by the PROJECT_ID env var (default 'include').

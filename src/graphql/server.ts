@@ -5,12 +5,10 @@
 // Boot sequence (one call to `buildGraphqlServer()`):
 //   1. requireEsHost via pingCluster() — fail fast if ES_HOST unset/unreachable.
 //   2. Build the EsClient.
-//   3. Fetch project docs (1 call) + all mappings (N parallel) from ES.
-//   4. Compose entity GraphQL types from the in-memory data.
-//   5. Build schema, attach resolvers, return { server, context }.
-//
-// File-mode `loadEntity` (schema/index.ts) still exists — it backs
-// __check__.ts against the committed arranger-projects fixture.
+//   3. Fetch mappings for all entities (N parallel) from ES.
+//   4. Derive per-entity `extended` from each mapping (see deriveExtended).
+//   5. Compose entity GraphQL types from the in-memory data.
+//   6. Build schema, attach resolvers, return { server, context }.
 
 import { ApolloServer } from '@apollo/server';
 import { addResolversToSchema } from '@graphql-tools/schema';
@@ -19,31 +17,34 @@ import { loadAllEntitiesFromEs } from './schema/esLoaders.js';
 import { createResolvers, type ServerContext } from './resolvers.js';
 import { createRealEsClient, pingCluster } from './es/realClient.js';
 
-// The 7 entity ES indices that include-portal-ui queries against. Each one
-// must have a matching _id in the arranger-projects-<PROJECT_ID> doc.
-const ES_INDICES = [
-    'biospecimen_centric',
-    'file_centric',
-    'gene_centric',
-    'participant_centric',
-    'specimen_tree_centric',
-    'study_centric',
-    'variant_centric',
-] as const;
+// The 7 entity ES indices that include-portal-ui queries against, paired
+// with the GraphQL entity name each one exposes. Pairing is local config
+// because ES `_mapping` has no notion of the GraphQL entity name and the
+// pluralization is not derivable from the esIndex (variant_centric →
+// variants, gene_centric → genes, specimen_tree_centric → biospecimen_trees).
+// Candidate for ES root `_meta.entityName` on the mapping once the ETL
+// adopts it.
+const ES_ENTITIES: ReadonlyArray<{ esIndex: string; entityName: string }> = [
+    { esIndex: 'biospecimen_centric', entityName: 'biospecimen' },
+    { esIndex: 'file_centric', entityName: 'file' },
+    { esIndex: 'gene_centric', entityName: 'genes' },
+    { esIndex: 'participant_centric', entityName: 'participant' },
+    { esIndex: 'specimen_tree_centric', entityName: 'biospecimen_trees' },
+    { esIndex: 'study_centric', entityName: 'study' },
+    { esIndex: 'variant_centric', entityName: 'variants' },
+];
 
 export type GraphqlServerHandle = {
     server: ApolloServer<ServerContext>;
     context: ServerContext;
 };
 
-// `arranger-projects-<projectId>` is where per-entity config (extended +
-// columns-state) lives. Caller supplies the projectId from env.
-export async function buildGraphqlServer(projectId: string): Promise<GraphqlServerHandle> {
+export async function buildGraphqlServer(): Promise<GraphqlServerHandle> {
     const status = await pingCluster();
     console.log(`ES cluster status: ${status}`);
 
     const es = createRealEsClient();
-    const entities: EntityModule[] = await loadAllEntitiesFromEs(es, projectId, ES_INDICES);
+    const entities: EntityModule[] = await loadAllEntitiesFromEs(es, ES_ENTITIES);
 
     for (const e of entities) {
         console.log(`  ${e.esIndex} → ${e.entityName}  (${e.nestedFields.length} nested fields)`);

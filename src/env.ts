@@ -4,10 +4,10 @@ dotenv.config();
 
 export const port = process.env.PORT || 5050;
 
-// One deployment serves one project. Used to build the GraphQL URL prefix
-// (`/${projectId}/graphql`) and the ES config doc name
-// (`arranger-projects-${projectId}`). Legacy from arranger's multi-tenant
-// model — will be removed entirely once the FE drops the prefix too.
+// One deployment serves one project. Used only to build the GraphQL URL
+// prefix (`/${projectId}/graphql`) for FE compatibility — legacy from
+// arranger's multi-tenant model; will be removed entirely once the FE
+// drops the prefix too.
 export const projectId = process.env.PROJECT_ID || 'include';
 
 export const keycloakURL = process.env.KEYCLOAK_URL || 'https://kf-keycloak-qa.kf-strides.org/auth';

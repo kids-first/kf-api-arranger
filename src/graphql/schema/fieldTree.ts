@@ -14,6 +14,7 @@ const SUPPORTED_SCALARS = new Set<ScalarEsType>([
 type RawField = {
     type?: string;
     properties?: Record<string, RawField>;
+    meta?: Record<string, string>;
 };
 
 type RawMapping = {
@@ -35,13 +36,28 @@ function walkProperties(props: Record<string, RawField>): FieldNode[] {
 
 function walkField(name: string, def: RawField): FieldNode {
     if (def.type === 'nested') {
-        return { kind: 'nested', name, fields: def.properties ? walkProperties(def.properties) : [] };
+        return {
+            kind: 'nested',
+            name,
+            fields: def.properties ? walkProperties(def.properties) : [],
+            ...(def.meta && { meta: def.meta }),
+        };
     }
     if (def.properties) {
-        return { kind: 'object', name, fields: walkProperties(def.properties) };
+        return {
+            kind: 'object',
+            name,
+            fields: walkProperties(def.properties),
+            ...(def.meta && { meta: def.meta }),
+        };
     }
     if (def.type && isSupportedScalar(def.type)) {
-        return { kind: 'scalar', name, esType: def.type };
+        return {
+            kind: 'scalar',
+            name,
+            esType: def.type,
+            ...(def.meta && { meta: def.meta }),
+        };
     }
     return { kind: 'unsupported', name, esType: def.type ?? '(no type)' };
 }
