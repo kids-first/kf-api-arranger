@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from 'express';
-import { ExecutionResult } from 'graphql/execution/execute';
 
 import { SetNotFoundError } from './endpoints/sets/setError.js';
 import { MissingFilterError } from './endpoints/transcriptomics/errors.js';
@@ -19,10 +18,4 @@ export const globalErrorHandler = (err: unknown, _req: Request, res: Response, _
 export const globalErrorLogger = (err: unknown, _req: Request, _res: Response, next: NextFunction): void => {
     console.error(err);
     next(err);
-};
-
-export const throwErrorsFromGqlQueryIfExist = (resp: ExecutionResult): void | never => {
-    if (resp.errors) {
-        throw new Error(resp.errors.join(','));
-    }
 };
