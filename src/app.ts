@@ -112,23 +112,20 @@ export default (keycloak: Keycloak, runInternalQuery: RunInternalQuery): Express
         res.json(data);
     });
 
-    // TODO re-enable keycloak.protect() once auth flow is validated end-to-end.
-    app.get('/sets', async (req, res) => {
+    app.get('/sets', keycloak.protect(), async (req, res) => {
         const accessToken = req.headers.authorization;
         const userSets = await getSets(accessToken);
         res.send(userSets);
     });
 
-    // TODO re-enable keycloak.protect() once auth flow is validated end-to-end.
-    app.post('/sets', async (req, res) => {
+    app.post('/sets', keycloak.protect(), async (req, res) => {
         const accessToken = req.headers.authorization;
         const userId = req.kauth?.grant?.access_token?.content?.sub;
         const createdSet = await createSet(req.body as CreateSetBody, accessToken, userId, runInternalQuery);
         res.send(createdSet);
     });
 
-    // TODO re-enable keycloak.protect() once auth flow is validated end-to-end.
-    app.put('/sets/:setId', async (req, res) => {
+    app.put('/sets/:setId', keycloak.protect(), async (req, res) => {
         const requestBody: UpdateSetTagBody | UpdateSetContentBody = req.body;
         const accessToken = req.headers.authorization;
         const userId = req.kauth?.grant?.access_token?.content?.sub;
@@ -149,16 +146,14 @@ export default (keycloak: Keycloak, runInternalQuery: RunInternalQuery): Express
         res.send(updatedSet);
     });
 
-    // TODO re-enable keycloak.protect() once auth flow is validated end-to-end.
-    app.delete('/sets/:setId', async (req, res) => {
+    app.delete('/sets/:setId', keycloak.protect(), async (req, res) => {
         const accessToken = req.headers.authorization;
         const setId = req.params.setId as string;
         const deletedResult = await deleteSet(accessToken, setId);
         res.send(deletedResult);
     });
 
-    // TODO re-enable keycloak.protect() once auth flow is validated end-to-end.
-    app.post('/sets/aliases', async (req, res) => {
+    app.post('/sets/aliases', keycloak.protect(), async (req, res) => {
         const isPlainObject = (input: unknown) => Object.prototype.toString.call(input) === '[object Object]';
         const queries = req.body?.queries;
         if (!queries || !Array.isArray(queries) || queries.some(q => !isPlainObject(q))) {
@@ -173,8 +168,7 @@ export default (keycloak: Keycloak, runInternalQuery: RunInternalQuery): Express
         });
     });
 
-    // TODO re-enable keycloak.protect() once auth flow is validated end-to-end.
-    app.post('/phenotypes', async (req, res) => {
+    app.post('/phenotypes', keycloak.protect(), async (req, res) => {
         const accessToken = req.headers.authorization;
         const sqon: SetSqon = req.body.sqon;
         const type: string = req.body.type;

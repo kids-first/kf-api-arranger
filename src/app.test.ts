@@ -252,9 +252,7 @@ describe('Express app (without Arranger)', () => {
             vi.mocked(getSets).mockReset();
         });
 
-        // Skipped while keycloak.protect() is off on /sets (Phase A2). Re-enable
-        // when task #2 from the remaining plan lands.
-        it.skip('should return 403 if no Authorization header', () => request(app).get('/sets').expect(403));
+        it('should return 403 if no Authorization header', () => request(app).get('/sets').expect(403));
 
         it('should return 200 if Authorization header contains valid token and no error occurs', async () => {
             const expectedSets = [
@@ -320,9 +318,7 @@ describe('Express app (without Arranger)', () => {
             vi.mocked(createSet).mockReset();
         });
 
-        // Skipped while keycloak.protect() is off on /sets (Phase A2). Re-enable
-        // when task #2 from the remaining plan lands.
-        it.skip('should return 403 if no Authorization header', () => request(app).post('/sets').expect(403));
+        it('should return 403 if no Authorization header', () => request(app).post('/sets').expect(403));
 
         it('should return 200 if Authorization header contains valid token and no error occurs', async () => {
             const expectedCreatedSet = {
@@ -395,9 +391,7 @@ describe('Express app (without Arranger)', () => {
             vi.mocked(updateSetContent).mockReset();
         });
 
-        // Skipped while keycloak.protect() is off on /sets (Phase A2). Re-enable
-        // when task #2 from the remaining plan lands.
-        it.skip('should return 403 if no Authorization header', () => request(app).put('/sets/1eh').expect(403));
+        it('should return 403 if no Authorization header', () => request(app).put('/sets/1eh').expect(403));
 
         it('should return 200 if Authorization header contains valid token and no error occurs - update tag name', async () => {
             const expectedUpdatedSet = {
@@ -480,9 +474,7 @@ describe('Express app (without Arranger)', () => {
             vi.mocked(deleteSet).mockReset();
         });
 
-        // Skipped while keycloak.protect() is off on /sets (Phase A2). Re-enable
-        // when task #2 from the remaining plan lands.
-        it.skip('should return 403 if no Authorization header', () => request(app).delete('/sets/1eh').expect(403));
+        it('should return 403 if no Authorization header', () => request(app).delete('/sets/1eh').expect(403));
 
         it('should return 200 if Authorization header contains valid token and no error occurs', async () => {
             vi.mocked(deleteSet).mockResolvedValue('1ei');

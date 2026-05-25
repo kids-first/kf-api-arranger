@@ -39,9 +39,9 @@ const app = buildApp(keycloak, runInternalQuery);
 
 // Mount Apollo at /${projectId}/graphql — single project per deployment,
 // driven entirely by the PROJECT_ID env var (default 'include').
-// TODO re-enable keycloak.protect() once auth flow is validated end-to-end.
 app.use(
     `/${projectId}/graphql`,
+    keycloak.protect(),
     express.json({ limit: '50mb' }),
     expressMiddleware(apollo, { context: async () => context }),
 );
