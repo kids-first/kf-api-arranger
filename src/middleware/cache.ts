@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 import NodeCache from 'node-cache';
 
 import { cacheTTL } from '../env.js';
@@ -14,16 +14,18 @@ const cache = new NodeCache({ stdTTL: cacheTTL });
 // Warning: If used as a handler on a route, it can make the route sends two responses if not used carefully
 // It can create errors such as: "Error [ERR_HTTP_HEADERS_SENT]: Cannot set headers after they are sent to the client"
 /** @deprecated */
-export const verifyCache = (cacheId: string) => (_req: Request, res: Response, next: NextFunction): void => {
-    try {
-        if (cache.has(cacheId)) {
-            res.status(200).json(cache.get(cacheId));
+export const verifyCache =
+    (cacheId: string) =>
+    (_req: Request, res: Response, next: NextFunction): void => {
+        try {
+            if (cache.has(cacheId)) {
+                res.status(200).json(cache.get(cacheId));
+            }
+            next();
+        } catch (err) {
+            throw new Error(err);
         }
-        next();
-    } catch (err) {
-        throw new Error(err);
-    }
-};
+    };
 
 export const updateCache = (cacheId: string, data: unknown): void => {
     cache.set(cacheId, data);

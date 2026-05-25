@@ -1,7 +1,7 @@
-import { Client } from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
 
 import { ES_SEARCH_MAX_HITS, esFileIndex } from '../../esUtils.js';
-import { FileAccessCountsResponse, SearchBucket } from './types.js';
+import type { FileAccessCountsResponse, SearchBucket } from './types.js';
 
 export const searchAggregatedAuthorizedStudiesForFence = async (
     client: Client,
@@ -68,34 +68,32 @@ export const multiSearchFilesAccessCounts = async (
     studyIds: string[],
 ): Promise<FileAccessCountsResponse[]> => {
     const { body: bodyMSearch } = await client.msearch({
-        body: studyIds
-            .map((s: string) => [
-                { index: esFileIndex },
-                {
-                    track_total_hits: true,
-                    size: 0,
-                    query: {
-                        bool: {
-                            must: [{ term: { study_id: { value: s } } }, { term: { repository: { value: fence } } }],
-                        },
+        body: studyIds.flatMap((s: string) => [
+            { index: esFileIndex },
+            {
+                track_total_hits: true,
+                size: 0,
+                query: {
+                    bool: {
+                        must: [{ term: { study_id: { value: s } } }, { term: { repository: { value: fence } } }],
                     },
                 },
-                { index: esFileIndex },
-                {
-                    track_total_hits: true,
-                    size: 0,
-                    query: {
-                        bool: {
-                            must: [
-                                { term: { study_id: { value: s } } },
-                                { term: { acl: { value: 'open_access' } } },
-                                { term: { repository: { value: fence } } },
-                            ],
-                        },
+            },
+            { index: esFileIndex },
+            {
+                track_total_hits: true,
+                size: 0,
+                query: {
+                    bool: {
+                        must: [
+                            { term: { study_id: { value: s } } },
+                            { term: { acl: { value: 'open_access' } } },
+                            { term: { repository: { value: fence } } },
+                        ],
                     },
                 },
-            ])
-            .flat(),
+            },
+        ]),
     });
     return bodyMSearch.responses || [];
 };

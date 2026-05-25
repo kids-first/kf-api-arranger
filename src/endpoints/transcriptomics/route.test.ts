@@ -1,7 +1,7 @@
-import { vi } from 'vitest';
-import { Express } from 'express';
+import type { Express } from 'express';
 import Keycloak from 'keycloak-connect';
 import request from 'supertest';
+import { vi } from 'vitest';
 
 import {
     fakeKeycloakClient,
@@ -22,7 +22,7 @@ import {
     fetchFacets,
     fetchSampleGeneExp,
 } from './service.js';
-import { DiffGeneExpVolcano, Facets as TranscriptomicsFacets, SampleGeneExpVolcano } from './types.js';
+import type { DiffGeneExpVolcano, SampleGeneExpVolcano, Facets as TranscriptomicsFacets } from './types.js';
 
 vi.mock('./service');
 
@@ -31,25 +31,27 @@ vi.mock('./service');
 // console.errors the result). The stack-trace dumps make passing runs look
 // like a fire. Scoped to this file so unexpected console.errors elsewhere
 // still surface.
-beforeAll(() => { vi.spyOn(console, 'error').mockImplementation(() => {}); });
-afterAll(() => { vi.restoreAllMocks(); });
+beforeAll(() => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+});
+afterAll(() => {
+    vi.restoreAllMocks();
+});
 
 describe('Transcriptomics router', () => {
     let app: Express;
-    let keycloakFakeConfig;
 
     const runInternalQuery: RunInternalQuery = async () => ({ data: null });
 
     beforeEach(() => {
-        const publicKeyToVerify = publicKey;
-        keycloakFakeConfig = {
+        const keycloakFakeConfig = {
             realm: fakeKeycloakRealm,
             'confidential-port': 0,
             'bearer-only': true,
             'auth-server-url': fakeKeycloakUrl,
             'ssl-required': 'external',
             resource: fakeKeycloakClient,
-            'realm-public-key': publicKeyToVerify, // For test purpose, we use public key to validate token.
+            'realm-public-key': publicKey, // For test purpose, we use public key to validate token.
         };
         const keycloak = new Keycloak({}, keycloakFakeConfig);
         app = buildApp(keycloak, runInternalQuery); // Re-create app between each test to ensure isolation between tests.
@@ -62,9 +64,7 @@ describe('Transcriptomics router', () => {
         });
 
         it('should return 403 if no Authorization header', () =>
-            request(app)
-                .post('/transcriptomics/diffGeneExp')
-                .expect(403));
+            request(app).post('/transcriptomics/diffGeneExp').expect(403));
 
         it('should return 200 if Authorization header contains valid token and no error occurs', async () => {
             const diffGeneExpByCategory: DiffGeneExpVolcano[] = [
@@ -143,9 +143,7 @@ describe('Transcriptomics router', () => {
         });
 
         it('should return 403 if no Authorization header', () =>
-            request(app)
-                .get('/transcriptomics/diffGeneExp/export')
-                .expect(403));
+            request(app).get('/transcriptomics/diffGeneExp/export').expect(403));
 
         it('should return 200 if Authorization header contains valid token and no error occurs', async () => {
             const data = { url: 'pre-signed-url' };
@@ -189,10 +187,7 @@ describe('Transcriptomics router', () => {
         };
 
         it('should return 403 if no Authorization header', () =>
-            request(app)
-                .post('/transcriptomics/sampleGeneExp')
-                .send(requestBody)
-                .expect(403));
+            request(app).post('/transcriptomics/sampleGeneExp').send(requestBody).expect(403));
 
         it('should return 200 if Authorization header contains valid token and no error occurs', async () => {
             const sampleGeneExp: SampleGeneExpVolcano = {
@@ -280,9 +275,7 @@ describe('Transcriptomics router', () => {
         });
 
         it('should return 403 if no Authorization header', () =>
-            request(app)
-                .get('/transcriptomics/sampleGeneExp/export')
-                .expect(403));
+            request(app).get('/transcriptomics/sampleGeneExp/export').expect(403));
 
         it('should return 200 if Authorization header contains valid token and no error occurs', async () => {
             const data = { url: 'pre-signed-url' };
@@ -322,9 +315,7 @@ describe('Transcriptomics router', () => {
         });
 
         it('should return 403 if no Authorization header', () =>
-            request(app)
-                .post('/transcriptomics/facets')
-                .expect(403));
+            request(app).post('/transcriptomics/facets').expect(403));
 
         it('should return 200 if Authorization header contains valid token and no error occurs', async () => {
             const facets: TranscriptomicsFacets = {

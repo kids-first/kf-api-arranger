@@ -5,10 +5,7 @@
 declare module '@arranger/middleware' {
     import type { FieldsTree } from 'graphql-fields';
 
-    export function buildQuery(args: {
-        nestedFields: string[];
-        filters: unknown;
-    }): Record<string, unknown>;
+    export function buildQuery(args: { nestedFields: string[]; filters: unknown }): Record<string, unknown>;
 
     export function buildAggregations(args: {
         sqon: unknown;

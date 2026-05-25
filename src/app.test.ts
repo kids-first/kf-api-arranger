@@ -1,7 +1,7 @@
-import { vi } from 'vitest';
-import { Express } from 'express';
+import type { Express } from 'express';
 import Keycloak from 'keycloak-connect';
 import request from 'supertest';
+import { vi } from 'vitest';
 
 import { fakeKeycloakClient, fakeKeycloakRealm, fakeKeycloakUrl, getToken, publicKey } from '../test/authTestUtils.js';
 import buildApp from './app.js';
@@ -15,8 +15,8 @@ import {
     updateSetContent,
     updateSetTag,
 } from './endpoints/sets/setsFeature.js';
-import { Set, UpdateSetContentBody, UpdateSetTagBody } from './endpoints/sets/setsTypes.js';
-import { getStatistics, getStudiesStatistics, Statistics } from './endpoints/statistics/index.js';
+import type { Set, UpdateSetContentBody, UpdateSetTagBody } from './endpoints/sets/setsTypes.js';
+import { getStatistics, getStudiesStatistics, type Statistics } from './endpoints/statistics/index.js';
 import { flushAllCache } from './middleware/cache.js';
 import { UserApiError } from './userApi/userApiError.js';
 
@@ -28,41 +28,39 @@ vi.mock('./endpoints/statistics');
 // console.errors the result). The stack-trace dumps make passing runs look
 // like a fire. Scoped to this file so unexpected console.errors elsewhere
 // still surface.
-beforeAll(() => { vi.spyOn(console, 'error').mockImplementation(() => {}); });
-afterAll(() => { vi.restoreAllMocks(); });
+beforeAll(() => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+});
+afterAll(() => {
+    vi.restoreAllMocks();
+});
 
 describe('Express app (without Arranger)', () => {
     let app: Express;
-    let keycloakFakeConfig;
 
     const runInternalQuery: RunInternalQuery = async () => ({ data: null });
 
     beforeEach(() => {
-        const publicKeyToVerify = publicKey;
-        keycloakFakeConfig = {
+        const keycloakFakeConfig = {
             realm: fakeKeycloakRealm,
             'confidential-port': 0,
             'bearer-only': true,
             'auth-server-url': fakeKeycloakUrl,
             'ssl-required': 'external',
             resource: fakeKeycloakClient,
-            'realm-public-key': publicKeyToVerify, // For test purpose, we use public key to validate token.
+            'realm-public-key': publicKey, // For test purpose, we use public key to validate token.
         };
         const keycloak = new Keycloak({}, keycloakFakeConfig);
         app = buildApp(keycloak, runInternalQuery); // Re-create app between each test to ensure isolation between tests.
     });
 
     it('GET /status (public) should responds with json', async () => {
-        await request(app)
-            .get('/status')
-            .expect('Content-Type', /json/);
+        await request(app).get('/status').expect('Content-Type', /json/);
     });
 
     describe('POST /cache-clear', () => {
         it('should return 403 if no Authorization header', async () =>
-            await request(app)
-                .post('/cache-clear')
-                .expect(403));
+            await request(app).post('/cache-clear').expect(403));
 
         it('should return 403 if not an ADMIN', async () => {
             const token = getToken();
@@ -176,9 +174,7 @@ describe('Express app (without Arranger)', () => {
             };
             vi.mocked(getStatistics).mockResolvedValue(expectedStats);
 
-            await request(app)
-                .get('/statistics')
-                .expect(200, expectedStats);
+            await request(app).get('/statistics').expect(200, expectedStats);
             expect(vi.mocked(getStatistics)).toHaveBeenCalledTimes(1);
         });
 
@@ -188,9 +184,7 @@ describe('Express app (without Arranger)', () => {
                 throw expectedError;
             });
 
-            await request(app)
-                .get('/statistics')
-                .expect(500, { error: 'Internal Server Error' });
+            await request(app).get('/statistics').expect(500, { error: 'Internal Server Error' });
             expect(vi.mocked(getStatistics)).toHaveBeenCalledTimes(1);
         });
     });
@@ -238,9 +232,7 @@ describe('Express app (without Arranger)', () => {
             };
             vi.mocked(getStudiesStatistics).mockResolvedValue(expectedPublicStats);
 
-            await request(app)
-                .get('/statistics/studies')
-                .expect(200, expectedPublicStats);
+            await request(app).get('/statistics/studies').expect(200, expectedPublicStats);
             expect(vi.mocked(getStudiesStatistics)).toHaveBeenCalledTimes(1);
         });
 
@@ -250,9 +242,7 @@ describe('Express app (without Arranger)', () => {
                 throw expectedError;
             });
 
-            await request(app)
-                .get('/statistics/studies')
-                .expect(500, { error: 'Internal Server Error' });
+            await request(app).get('/statistics/studies').expect(500, { error: 'Internal Server Error' });
             expect(vi.mocked(getStudiesStatistics)).toHaveBeenCalledTimes(1);
         });
     });
@@ -264,10 +254,7 @@ describe('Express app (without Arranger)', () => {
 
         // Skipped while keycloak.protect() is off on /sets (Phase A2). Re-enable
         // when task #2 from the remaining plan lands.
-        it.skip('should return 403 if no Authorization header', () =>
-            request(app)
-                .get('/sets')
-                .expect(403));
+        it.skip('should return 403 if no Authorization header', () => request(app).get('/sets').expect(403));
 
         it('should return 200 if Authorization header contains valid token and no error occurs', async () => {
             const expectedSets = [
@@ -335,10 +322,7 @@ describe('Express app (without Arranger)', () => {
 
         // Skipped while keycloak.protect() is off on /sets (Phase A2). Re-enable
         // when task #2 from the remaining plan lands.
-        it.skip('should return 403 if no Authorization header', () =>
-            request(app)
-                .post('/sets')
-                .expect(403));
+        it.skip('should return 403 if no Authorization header', () => request(app).post('/sets').expect(403));
 
         it('should return 200 if Authorization header contains valid token and no error occurs', async () => {
             const expectedCreatedSet = {
@@ -413,10 +397,7 @@ describe('Express app (without Arranger)', () => {
 
         // Skipped while keycloak.protect() is off on /sets (Phase A2). Re-enable
         // when task #2 from the remaining plan lands.
-        it.skip('should return 403 if no Authorization header', () =>
-            request(app)
-                .put('/sets/1eh')
-                .expect(403));
+        it.skip('should return 403 if no Authorization header', () => request(app).put('/sets/1eh').expect(403));
 
         it('should return 200 if Authorization header contains valid token and no error occurs - update tag name', async () => {
             const expectedUpdatedSet = {
@@ -501,10 +482,7 @@ describe('Express app (without Arranger)', () => {
 
         // Skipped while keycloak.protect() is off on /sets (Phase A2). Re-enable
         // when task #2 from the remaining plan lands.
-        it.skip('should return 403 if no Authorization header', () =>
-            request(app)
-                .delete('/sets/1eh')
-                .expect(403));
+        it.skip('should return 403 if no Authorization header', () => request(app).delete('/sets/1eh').expect(403));
 
         it('should return 200 if Authorization header contains valid token and no error occurs', async () => {
             vi.mocked(deleteSet).mockResolvedValue('1ei');

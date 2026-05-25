@@ -4,9 +4,16 @@
 import type { FieldNode, FieldTree, ScalarEsType } from './types.js';
 
 const SUPPORTED_SCALARS = new Set<ScalarEsType>([
-    'keyword', 'text', 'ip',
-    'long', 'integer', 'short', 'byte',
-    'double', 'float', 'half_float',
+    'keyword',
+    'text',
+    'ip',
+    'long',
+    'integer',
+    'short',
+    'byte',
+    'double',
+    'float',
+    'half_float',
     'boolean',
     'date',
 ]);

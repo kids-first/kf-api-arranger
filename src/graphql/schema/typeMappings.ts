@@ -3,8 +3,8 @@
 // avoid JS-side overflow on ES `long` (int64) > Number.MAX_SAFE_INTEGER.
 // We match that exactly for byte-parity with arranger's emitted SDL.
 
-import { GraphQLBoolean, GraphQLFloat, GraphQLInt, GraphQLString } from 'graphql';
 import type { GraphQLScalarType } from 'graphql';
+import { GraphQLBoolean, GraphQLFloat, GraphQLInt, GraphQLString } from 'graphql';
 import type { ScalarEsType } from './types.js';
 
 export const ES_TO_GQL_SCALAR: Readonly<Record<ScalarEsType, GraphQLScalarType>> = {

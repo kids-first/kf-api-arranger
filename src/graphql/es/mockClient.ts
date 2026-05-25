@@ -22,9 +22,7 @@ const MOCK_STUDY_HITS: { _id: string; _source: StudySource }[] = [
 
 export function createMockEsClient(): EsClient {
     return {
-        async search<TSource = Record<string, unknown>>(
-            params: EsSearchParams,
-        ): Promise<EsSearchResponse<TSource>> {
+        async search<TSource = Record<string, unknown>>(params: EsSearchParams): Promise<EsSearchResponse<TSource>> {
             const size = params.size ?? 10;
             const hits = MOCK_STUDY_HITS.slice(0, size).map(h => ({
                 _id: h._id,

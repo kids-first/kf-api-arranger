@@ -19,6 +19,7 @@
 // `extended` and `columnsState` (slice U); the args `includeEntityMetadata`
 // and `aggsType` switch those on.
 
+import type { GraphQLFieldConfigMap, GraphQLOutputType } from 'graphql';
 import {
     GraphQLBoolean,
     GraphQLID,
@@ -29,14 +30,10 @@ import {
     GraphQLObjectType,
     GraphQLString,
 } from 'graphql';
-import type {
-    GraphQLFieldConfigMap,
-    GraphQLOutputType,
-} from 'graphql';
-import { gqlScalarFor } from './typeMappings.js';
 import { GraphQLJSON } from './jsonScalar.js';
-import { ColumnsStateType } from './stateTypes.js';
 import { SortInputType } from './sortTypes.js';
+import { ColumnsStateType } from './stateTypes.js';
+import { gqlScalarFor } from './typeMappings.js';
 import type { ExtendedMap, FieldNode } from './types.js';
 
 const capFirst = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1);

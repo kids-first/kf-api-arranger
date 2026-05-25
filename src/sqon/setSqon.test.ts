@@ -1,7 +1,7 @@
 import { vi } from 'vitest';
-import { getUserSets, postSetsTags, UserSet } from '../userApi/userApiClient.js';
-import { resolveSetIds, resolveQueriesSetAliases } from './setSqon.js';
-import { Sqon } from './types.js';
+import { getUserSets, postSetsTags, type UserSet } from '../userApi/userApiClient.js';
+import { resolveQueriesSetAliases, resolveSetIds } from './setSqon.js';
+import type { Sqon } from './types.js';
 
 vi.mock('../userApi/userApiClient');
 

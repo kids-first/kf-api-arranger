@@ -1,4 +1,4 @@
-import { Client } from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
 
 // Recursive walker over ES mapping `properties`. Returns dotted paths of
 // every field with `type: 'nested'`. Vendored to drop the
@@ -9,10 +9,7 @@ type MappingProperty = {
     properties?: Record<string, MappingProperty>;
 };
 
-const getNestedFields = (
-    properties: Record<string, MappingProperty> | undefined,
-    prefix = '',
-): string[] => {
+const getNestedFields = (properties: Record<string, MappingProperty> | undefined, prefix = ''): string[] => {
     if (!properties) return [];
     const out: string[] = [];
     for (const [name, def] of Object.entries(properties)) {

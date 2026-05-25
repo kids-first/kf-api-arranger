@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 
 import { SetNotFoundError } from './endpoints/sets/setError.js';
 import { MissingFilterError } from './endpoints/transcriptomics/errors.js';

@@ -1,4 +1,4 @@
-import { Client } from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
 
 export const esFileIndex = 'file_centric';
 export const esStudyIndex = 'study_centric';

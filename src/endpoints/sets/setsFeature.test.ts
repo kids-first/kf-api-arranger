@@ -2,16 +2,16 @@ import { vi } from 'vitest';
 import type { RunInternalQuery } from '../../arrangerUtils.js';
 import { resolveSetsInSqon } from '../../sqon/resolveSetInSqon.js';
 import { searchSqon } from '../../sqon/searchSqon.js';
-import { deleteUserSet, getUserSets, postUserSet, putUserSet, UserSet } from '../../userApi/userApiClient.js';
+import { deleteUserSet, getUserSets, postUserSet, putUserSet, type UserSet } from '../../userApi/userApiClient.js';
 import { createSet, deleteSet, getSets, SubActionTypes, updateSetContent, updateSetTag } from './setsFeature.js';
 import {
-    CreateSetBody,
-    CreateUpdateBody,
+    type CreateSetBody,
+    type CreateUpdateBody,
     RIFF_TYPE_SET,
-    Set,
-    Sort,
-    UpdateSetContentBody,
-    UpdateSetTagBody,
+    type Set,
+    type Sort,
+    type UpdateSetContentBody,
+    type UpdateSetTagBody,
 } from './setsTypes.js';
 
 vi.mock('../../sqon/resolveSetInSqon');
@@ -152,7 +152,12 @@ describe('Set management', () => {
             vi.mocked(searchSqon).mockResolvedValue(mockParticipantIds);
             vi.mocked(postUserSet).mockResolvedValue(userSet);
 
-            const result = await createSet({ ...createSetBody, sqon: sqonWithSetId }, accessToken, userId, runInternalQuery);
+            const result = await createSet(
+                { ...createSetBody, sqon: sqonWithSetId },
+                accessToken,
+                userId,
+                runInternalQuery,
+            );
 
             expect(result).toEqual(set);
             expect(vi.mocked(resolveSetsInSqon)).toHaveBeenCalledTimes(1);
@@ -341,7 +346,13 @@ describe('Set management', () => {
             vi.mocked(searchSqon).mockResolvedValue(mockNewSqonParticipantIds);
             vi.mocked(putUserSet).mockResolvedValue(updatedUserSet);
 
-            const result = await updateSetContent(updateSetContentAddSqon, accessToken, userId, setId, runInternalQuery);
+            const result = await updateSetContent(
+                updateSetContentAddSqon,
+                accessToken,
+                userId,
+                setId,
+                runInternalQuery,
+            );
 
             expect(result).toEqual(updatedSet);
             expect(vi.mocked(getUserSets)).toHaveBeenCalledTimes(1);
@@ -448,7 +459,13 @@ describe('Set management', () => {
             vi.mocked(searchSqon).mockResolvedValue(mockNewSqonParticipantIds);
             vi.mocked(putUserSet).mockResolvedValue(updatedUserSet);
 
-            const result = await updateSetContent(updateSetContentRemoveSqon, accessToken, userId, setId, runInternalQuery);
+            const result = await updateSetContent(
+                updateSetContentRemoveSqon,
+                accessToken,
+                userId,
+                setId,
+                runInternalQuery,
+            );
 
             expect(result).toEqual(updatedSet);
             expect(vi.mocked(getUserSets)).toHaveBeenCalledTimes(1);

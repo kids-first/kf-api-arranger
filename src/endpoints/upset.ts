@@ -105,13 +105,16 @@ export const computeUpset = async (
             ph: [...new Set(x.phenotype.map(p => p.hpo_phenotype_observed))],
         }));
 
-    const allQueryPhenotypes: string[] = ps.map(x => x.ph).flat();
+    const allQueryPhenotypes: string[] = ps.flatMap(x => x.ph);
 
     //countIt is sorted by descending counts
     const top = topN(countIt(allQueryPhenotypes), topMax > 0 && topMax <= 25 ? topMax : DEFAULT_TOP);
 
     const data = top.map(x => {
-        const pts = ps.reduce((ys, y) => (y.ph.includes(x) ? [...ys, y.patient] : ys), []);
+        const pts = ps.reduce<string[]>((ys, y) => {
+            if (y.ph.includes(x)) ys.push(y.patient);
+            return ys;
+        }, []);
         return {
             name: x,
             elems: pts,

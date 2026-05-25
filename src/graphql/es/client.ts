@@ -41,8 +41,6 @@ export type EsMappingResponse = {
 };
 
 export interface EsClient {
-    search<TSource = Record<string, unknown>>(
-        params: EsSearchParams,
-    ): Promise<EsSearchResponse<TSource>>;
+    search<TSource = Record<string, unknown>>(params: EsSearchParams): Promise<EsSearchResponse<TSource>>;
     getMapping(index: string): Promise<EsMappingResponse>;
 }

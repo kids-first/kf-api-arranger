@@ -115,18 +115,20 @@ export const CASES = [
                 offset: 0,
                 sqon: {
                     op: 'and',
-                    content: [{
-                        op: 'all',
-                        content: {
-                            field: 'participant.mondo.name',
-                            index: 'participant',
-                            remoteComponent: {
-                                id: 'mondoTree',
-                                props: { visible: true, field: 'mondo' },
+                    content: [
+                        {
+                            op: 'all',
+                            content: {
+                                field: 'participant.mondo.name',
+                                index: 'participant',
+                                remoteComponent: {
+                                    id: 'mondoTree',
+                                    props: { visible: true, field: 'mondo' },
+                                },
+                                value: ['human disease (MONDO:0700096)'],
                             },
-                            value: ['human disease (MONDO:0700096)'],
                         },
-                    }],
+                    ],
                 },
                 sort: [{ field: 'sample_id', order: 'asc' }],
             },
@@ -167,14 +169,16 @@ export const CASES = [
             variables: {
                 sqon: {
                     op: 'and',
-                    content: [{
-                        op: 'not-in',
-                        content: {
-                            field: 'study.study_code',
-                            index: 'participant',
-                            value: ['HTP'],
+                    content: [
+                        {
+                            op: 'not-in',
+                            content: {
+                                field: 'study.study_code',
+                                index: 'participant',
+                                value: ['HTP'],
+                            },
                         },
-                    }],
+                    ],
                 },
             },
             query: `query ($sqon: JSON) {
@@ -201,14 +205,16 @@ export const CASES = [
             variables: {
                 sqon: {
                     op: 'and',
-                    content: [{
-                        op: 'in',
-                        content: {
-                            field: 'files.file_id',
-                            index: 'file',
-                            value: ['HTP.001149dc-4fe5-4479-b846-4e4b23aef309.single.vqsr.filtered.vep_105.vcf.gz'],
+                    content: [
+                        {
+                            op: 'in',
+                            content: {
+                                field: 'files.file_id',
+                                index: 'file',
+                                value: ['HTP.001149dc-4fe5-4479-b846-4e4b23aef309.single.vqsr.filtered.vep_105.vcf.gz'],
+                            },
                         },
-                    }],
+                    ],
                 },
             },
             query: `query AggregationDemographicInfo($sqon: JSON) {
@@ -235,14 +241,16 @@ export const CASES = [
             variables: {
                 sqon: {
                     op: 'and',
-                    content: [{
-                        op: 'between',
-                        content: {
-                            field: 'start',
-                            index: 'variants',
-                            value: [100000, 1000000],
+                    content: [
+                        {
+                            op: 'between',
+                            content: {
+                                field: 'start',
+                                index: 'variants',
+                                value: [100000, 1000000],
+                            },
                         },
-                    }],
+                    ],
                 },
             },
             query: `query getVariantsCount($sqon: JSON) {
@@ -268,14 +276,16 @@ export const CASES = [
             variables: {
                 sqon: {
                     op: 'and',
-                    content: [{
-                        op: 'in',
-                        content: {
-                            field: 'file_id',
-                            value: 'HTP.001149dc-4fe5-4479-b846-4e4b23aef309.single.vqsr.filtered.vep_105.vcf.gz',
-                            index: 'file',
+                    content: [
+                        {
+                            op: 'in',
+                            content: {
+                                field: 'file_id',
+                                value: 'HTP.001149dc-4fe5-4479-b846-4e4b23aef309.single.vqsr.filtered.vep_105.vcf.gz',
+                                index: 'file',
+                            },
                         },
-                    }],
+                    ],
                 },
             },
             query: `query getFileEntity($sqon: JSON) {
@@ -345,14 +355,16 @@ export const CASES = [
             variables: {
                 sqon: {
                     op: 'and',
-                    content: [{
-                        op: 'in',
-                        content: {
-                            field: 'mondo.name',
-                            value: 'complete trisomy 21 (MONDO:0700030)',
-                            index: 'participant',
+                    content: [
+                        {
+                            op: 'in',
+                            content: {
+                                field: 'mondo.name',
+                                value: 'complete trisomy 21 (MONDO:0700030)',
+                                index: 'participant',
+                            },
                         },
-                    }],
+                    ],
                 },
             },
             query: `query getParticipantCount($sqon: JSON) {
@@ -378,10 +390,12 @@ export const CASES = [
                 offset: 0,
                 sqon: {
                     op: 'and',
-                    content: [{
-                        op: 'in',
-                        content: { field: 'collection_fhir_id', value: ['bs-2zbedhefdn'] },
-                    }],
+                    content: [
+                        {
+                            op: 'in',
+                            content: { field: 'collection_fhir_id', value: ['bs-2zbedhefdn'] },
+                        },
+                    ],
                 },
             },
             query: `query getHierarchicalBiospecimen($sqon: JSON, $first: Int, $offset: Int, $sort: [Sort]) {
@@ -414,10 +428,12 @@ export const CASES = [
                 offset: 0,
                 sqon: {
                     op: 'and',
-                    content: [{
-                        op: 'in',
-                        content: { field: 'clinvar.clin_sig', index: 'variants', value: ['Pathogenic'] },
-                    }],
+                    content: [
+                        {
+                            op: 'in',
+                            content: { field: 'clinvar.clin_sig', index: 'variants', value: ['Pathogenic'] },
+                        },
+                    ],
                 },
                 sort: [
                     { field: 'max_impact_score', order: 'desc' },

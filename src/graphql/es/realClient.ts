@@ -18,17 +18,14 @@
 // exploration; do not "bump" mindlessly.
 
 import { Client } from '@elastic/elasticsearch';
-import type {
-    EsClient,
-    EsMappingResponse,
-    EsSearchParams,
-    EsSearchResponse,
-} from './client.js';
+import type { EsClient, EsMappingResponse, EsSearchParams, EsSearchResponse } from './client.js';
 
 function requireEsHost(host?: string): string {
     const h = host ?? process.env.ES_HOST;
     if (!h) {
-        throw new Error('ES_HOST is not set. Run with `ES_HOST=https://... npm run dev` (no implicit localhost default).');
+        throw new Error(
+            'ES_HOST is not set. Run with `ES_HOST=https://... npm run dev` (no implicit localhost default).',
+        );
     }
     return h;
 }
@@ -37,9 +34,7 @@ export function createRealEsClient(host?: string): EsClient {
     const node = requireEsHost(host);
     const client = new Client({ node });
     return {
-        async search<TSource = Record<string, unknown>>(
-            params: EsSearchParams,
-        ): Promise<EsSearchResponse<TSource>> {
+        async search<TSource = Record<string, unknown>>(params: EsSearchParams): Promise<EsSearchResponse<TSource>> {
             const res = await client.search({
                 index: params.index,
                 body: {

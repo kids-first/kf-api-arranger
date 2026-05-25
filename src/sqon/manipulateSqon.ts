@@ -1,11 +1,11 @@
-import { SetSqon } from '../endpoints/sets/setsTypes.js';
-import { Sqon } from './types.js';
+import type { SetSqon } from '../endpoints/sets/setsTypes.js';
+import type { Sqon } from './types.js';
 
 export const addSqonToSetSqon = (receivingSqon: SetSqon, donorSqon: SetSqon): SetSqon =>
     ({
         op: 'or',
         content: [receivingSqon, donorSqon],
-    } as SetSqon);
+    }) as SetSqon;
 
 export const removeSqonToSetSqon = (setSqon: SetSqon, sqonToRemove: SetSqon): SetSqon => {
     const negatedSqonToRemove = {
@@ -36,7 +36,7 @@ const combine = (op, sqon, content, pivot) => {
         // optionally assigning pivot only if it has a value avoids this
 
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
+        // @ts-expect-error
         output.pivot = pivot;
     }
     return output;

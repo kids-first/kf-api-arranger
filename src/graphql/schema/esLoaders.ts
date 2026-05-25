@@ -7,33 +7,25 @@
 // same logical mapping, so `buildFieldTree` picking Object.keys()[0] is
 // correct.
 
-import { GraphQLObjectType } from 'graphql';
+import type { GraphQLObjectType } from 'graphql';
 import type { EsClient } from '../es/client.js';
 import { buildAggsType } from './buildAggsType.js';
 import { buildEntityType } from './buildConnectionFamily.js';
-import { collectNestedFields, buildFieldTree } from './fieldTree.js';
 import { deriveExtended } from './deriveExtended.js';
+import { buildFieldTree, collectNestedFields } from './fieldTree.js';
 import type { EntityModule } from './index.js';
 
 // One ES call: fetches the mapping for one index (or alias). The response
 // is already in the shape `buildFieldTree` consumes (`{[indexName]: {mappings: {properties}}}`).
-async function fetchMapping(
-    es: EsClient,
-    esIndex: string,
-): Promise<Record<string, unknown>> {
+async function fetchMapping(es: EsClient, esIndex: string): Promise<Record<string, unknown>> {
     return es.getMapping(esIndex) as unknown as Record<string, unknown>;
 }
 
-function buildEntityModule(
-    esIndex: string,
-    entityName: string,
-    mapping: Record<string, unknown>,
-): EntityModule {
+function buildEntityModule(esIndex: string, entityName: string, mapping: Record<string, unknown>): EntityModule {
     // buildFieldTree's RawMapping type matches the ES _mapping response shape
     // exactly; cast is structural, not nominal.
     const tree = buildFieldTree(mapping as Parameters<typeof buildFieldTree>[0]);
-    const { map: extendedMap, entries: extendedEntries, columnsState } =
-        deriveExtended(esIndex, entityName, tree);
+    const { map: extendedMap, entries: extendedEntries, columnsState } = deriveExtended(esIndex, entityName, tree);
     const aggsType = buildAggsType(tree, entityName);
     const entityType: GraphQLObjectType = buildEntityType({
         entityName,
@@ -55,10 +47,6 @@ export async function loadAllEntitiesFromEs(
     es: EsClient,
     entities: ReadonlyArray<{ esIndex: string; entityName: string }>,
 ): Promise<EntityModule[]> {
-    const mappings = await Promise.all(
-        entities.map(({ esIndex }) => fetchMapping(es, esIndex)),
-    );
-    return entities.map(({ esIndex, entityName }, i) =>
-        buildEntityModule(esIndex, entityName, mappings[i]),
-    );
+    const mappings = await Promise.all(entities.map(({ esIndex }) => fetchMapping(es, esIndex)));
+    return entities.map(({ esIndex, entityName }, i) => buildEntityModule(esIndex, entityName, mappings[i]));
 }

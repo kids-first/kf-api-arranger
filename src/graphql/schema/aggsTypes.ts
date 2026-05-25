@@ -6,13 +6,7 @@
 // histogram, Aggregations.buckets(max:) arg, and Aggregations.cardinality.
 // top_hits + filter_by_term were added for the /phenotypes route (Phase A2).
 
-import {
-    GraphQLFloat,
-    GraphQLInt,
-    GraphQLList,
-    GraphQLObjectType,
-    GraphQLString,
-} from 'graphql';
+import { GraphQLFloat, GraphQLInt, GraphQLList, GraphQLObjectType, GraphQLString } from 'graphql';
 import { GraphQLJSON } from './jsonScalar.js';
 
 export const Stats = new GraphQLObjectType({

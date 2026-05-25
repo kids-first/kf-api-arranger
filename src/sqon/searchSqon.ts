@@ -1,5 +1,5 @@
 import type { RunInternalQuery } from '../arrangerUtils.js';
-import { SetSqon, Sort } from '../endpoints/sets/setsTypes.js';
+import type { SetSqon, Sort } from '../endpoints/sets/setsTypes.js';
 import { maxSetContentSize } from '../env.js';
 
 export const searchSqon = async (

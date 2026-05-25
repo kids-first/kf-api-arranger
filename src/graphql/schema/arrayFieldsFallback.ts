@@ -15,9 +15,7 @@
 // Delete this module once every esIndex has `meta.isArray` set on the
 // relevant fields and the deriver no longer logs fallback paths at boot.
 
-const BIOSPECIMEN_CENTRIC = new Set<string>([
-    'diagnoses.source_text_tumor_location',
-]);
+const BIOSPECIMEN_CENTRIC = new Set<string>(['diagnoses.source_text_tumor_location']);
 
 const FILE_CENTRIC = new Set<string>([
     'acl',
@@ -79,9 +77,7 @@ const VARIANT_CENTRIC = new Set<string>([
     'studies.zygosity',
 ]);
 
-const GENE_CENTRIC = new Set<string>([
-    'alias',
-]);
+const GENE_CENTRIC = new Set<string>(['alias']);
 
 const PARTICIPANT_CENTRIC = new Set<string>([
     'condition_source_texts',

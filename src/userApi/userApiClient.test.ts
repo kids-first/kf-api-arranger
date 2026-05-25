@@ -1,13 +1,13 @@
 import { vi } from 'vitest';
-import { CreateUpdateBody } from '../endpoints/sets/setsTypes.js';
+import type { CreateUpdateBody } from '../endpoints/sets/setsTypes.js';
 import {
     deleteUserSet,
     getSharedSet,
     getUserSets,
     postUserSet,
     putUserSet,
-    UserSet,
-    UserSetContent,
+    type UserSet,
+    type UserSetContent,
 } from './userApiClient.js';
 import { UserApiError } from './userApiError.js';
 

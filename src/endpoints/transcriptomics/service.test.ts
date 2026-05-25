@@ -13,7 +13,7 @@ import {
     fetchSampleGeneExp,
     SAMPLE_GENE_EXP_FILE_KEY,
 } from './service.js';
-import { DiffGeneExpVolcano, Facets, MatchedGene, SampleGeneExpVolcano } from './types.js';
+import type { DiffGeneExpVolcano, Facets, MatchedGene, SampleGeneExpVolcano } from './types.js';
 
 vi.mock('../../s3Api');
 vi.mock('../../ElasticSearchClientInstance');

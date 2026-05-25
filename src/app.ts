@@ -2,13 +2,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 import cors from 'cors';
-import express, { Express } from 'express';
-import { Keycloak } from 'keycloak-connect';
+import express, { type Express } from 'express';
+import type { Keycloak } from 'keycloak-connect';
 
-import { type RunInternalQuery } from './arrangerUtils.js';
+import type { RunInternalQuery } from './arrangerUtils.js';
 import { computeAuthorizedStudiesForAllFences } from './endpoints/authorizedStudies/computeAuthorizedStudies.js';
 import genomicFeatureSuggestions, { SUGGESTIONS_TYPES } from './endpoints/genomicFeatureSuggestions.js';
 import { getPhenotypesNodes } from './endpoints/phenotypes.js';
+import { getPublicGraphs, getPublicStudy } from './endpoints/publicStudy/publicStudy.js';
 import {
     createSet,
     deleteSet,
@@ -17,7 +18,13 @@ import {
     updateSetContent,
     updateSetTag,
 } from './endpoints/sets/setsFeature.js';
-import { CreateSetBody, Set, SetSqon, UpdateSetContentBody, UpdateSetTagBody } from './endpoints/sets/setsTypes.js';
+import type {
+    CreateSetBody,
+    Set,
+    SetSqon,
+    UpdateSetContentBody,
+    UpdateSetTagBody,
+} from './endpoints/sets/setsTypes.js';
 import { getStatistics, getStudiesStatistics } from './endpoints/statistics/index.js';
 import transcriptomicsRouter from './endpoints/transcriptomics/route.js';
 import { computeUpset } from './endpoints/upset.js';
@@ -28,16 +35,16 @@ import { flushAllCache, STATISTICS_CACHE_ID, STATISTICS_PUBLIC_CACHE_ID, twineWi
 import { injectBodyHttpHeaders } from './middleware/injectBodyHttpHeaders.js';
 import { resolveSetIdMiddleware } from './middleware/resolveSetIdInSqon.js';
 import { replaceIdsWithSetId, resolveSetsInAllSqonsWithMapper, resolveSetsInSqon } from './sqon/resolveSetInSqon.js';
-import { Sqon } from './sqon/types.js';
 import { resolveQueriesSetAliases } from './sqon/setSqon.js';
-import { getPublicGraphs, getPublicStudy } from './endpoints/publicStudy/publicStudy.js';
+import type { Sqon } from './sqon/types.js';
 
 // Read package.json at startup via fs (instead of an `import ... with { type:
 // 'json' }` attribute) so ts-jest can compile this file under module:commonjs
 // for tests. The attribute syntax requires module:esnext/nodenext at TS level.
-const pkg = JSON.parse(
-    fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf8'),
-) as { dependencies: Record<string, string>; version: string };
+const pkg = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf8')) as {
+    dependencies: Record<string, string>;
+    version: string;
+};
 const { dependencies, version } = pkg;
 
 export default (keycloak: Keycloak, runInternalQuery: RunInternalQuery): Express => {
@@ -133,7 +140,7 @@ export default (keycloak: Keycloak, runInternalQuery: RunInternalQuery): Express
     app.post('/sets', async (req, res, next) => {
         try {
             const accessToken = req.headers.authorization;
-            const userId = req['kauth']?.grant?.access_token?.content?.sub;
+            const userId = req.kauth?.grant?.access_token?.content?.sub;
             const createdSet = await createSet(req.body as CreateSetBody, accessToken, userId, runInternalQuery);
 
             res.send(createdSet);
@@ -147,7 +154,7 @@ export default (keycloak: Keycloak, runInternalQuery: RunInternalQuery): Express
         try {
             const requestBody: UpdateSetTagBody | UpdateSetContentBody = req.body;
             const accessToken = req.headers.authorization;
-            const userId = req['kauth']?.grant?.access_token?.content?.sub;
+            const userId = req.kauth?.grant?.access_token?.content?.sub;
             const setId = req.params.setId as string;
             let updatedSet: Set;
 

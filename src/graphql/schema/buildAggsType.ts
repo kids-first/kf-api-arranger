@@ -7,8 +7,8 @@
 // encoded later by the resolver (via @arranger/middleware.buildAggregations),
 // not in the schema.
 
-import { GraphQLObjectType } from 'graphql';
 import type { GraphQLFieldConfigMap } from 'graphql';
+import { GraphQLObjectType } from 'graphql';
 import { Aggregations, NumericAggregations } from './aggsTypes.js';
 import type { FieldNode, FieldTree, ScalarEsType } from './types.js';
 
@@ -41,11 +41,7 @@ export function buildAggsType(tree: FieldTree, entityName: string): GraphQLObjec
     });
 }
 
-function walk(
-    fields: FieldNode[],
-    prefix: string,
-    out: GraphQLFieldConfigMap<unknown, unknown>,
-): void {
+function walk(fields: FieldNode[], prefix: string, out: GraphQLFieldConfigMap<unknown, unknown>): void {
     for (const f of fields) {
         if (f.kind === 'unsupported') continue;
         const flatName = prefix ? `${prefix}__${f.name}` : f.name;

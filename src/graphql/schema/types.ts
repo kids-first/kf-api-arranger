@@ -3,9 +3,16 @@
 // experiments/schemaGen/, ported to TS.
 
 export type ScalarEsType =
-    | 'keyword' | 'text' | 'ip'
-    | 'long' | 'integer' | 'short' | 'byte'
-    | 'double' | 'float' | 'half_float'
+    | 'keyword'
+    | 'text'
+    | 'ip'
+    | 'long'
+    | 'integer'
+    | 'short'
+    | 'byte'
+    | 'double'
+    | 'float'
+    | 'half_float'
     | 'boolean'
     | 'date';
 

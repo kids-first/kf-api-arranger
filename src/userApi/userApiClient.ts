@@ -1,4 +1,4 @@
-import { CreateUpdateBody, SetIdToTag, SetSqon, Sort } from '../endpoints/sets/setsTypes.js';
+import type { CreateUpdateBody, SetIdToTag, SetSqon, Sort } from '../endpoints/sets/setsTypes.js';
 import { userApiURL } from '../env.js';
 import { UserApiError } from './userApiError.js';
 

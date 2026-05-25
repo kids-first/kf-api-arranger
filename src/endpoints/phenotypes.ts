@@ -1,6 +1,6 @@
 import type { RunInternalQuery } from '../arrangerUtils.js';
 import { resolveSetIds } from '../sqon/setSqon.js';
-import { SetSqon } from './sets/setsTypes.js';
+import type { SetSqon } from './sets/setsTypes.js';
 
 export const idKey = 'fhir_id';
 
@@ -15,9 +15,7 @@ export const getPhenotypesNodes = async (
 
     const termFilter = {
         op: 'and',
-        content: [
-            { op: 'in', content: { field: `${type}.is_tagged`, value: [true] } },
-        ],
+        content: [{ op: 'in', content: { field: `${type}.is_tagged`, value: [true] } }],
     };
 
     const query = `query($sqon: JSON, $term_filters: JSON, $aggregations_filter_themselves: Boolean) {

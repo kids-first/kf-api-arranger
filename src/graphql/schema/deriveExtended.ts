@@ -30,19 +30,9 @@
 // mode for a known-unsupported path.
 
 import { getArrayFieldsFallback } from './arrayFieldsFallback.js';
-import type {
-    DerivedExtended,
-    ExtendedEntry,
-    ExtendedMap,
-    FieldNode,
-    FieldTree,
-} from './types.js';
+import type { DerivedExtended, ExtendedEntry, ExtendedMap, FieldNode, FieldTree } from './types.js';
 
-export function deriveExtended(
-    esIndex: string,
-    entityName: string,
-    tree: FieldTree,
-): DerivedExtended {
+export function deriveExtended(esIndex: string, entityName: string, tree: FieldTree): DerivedExtended {
     const fallback = getArrayFieldsFallback(esIndex);
     const entries: ExtendedEntry[] = [];
     const fallbackHits: string[] = [];
@@ -72,7 +62,7 @@ export function deriveExtended(
     if (fallbackHits.length) {
         console.log(
             `[deriveExtended] ${esIndex}: ${fallbackHits.length} array path(s) came from the ` +
-            `hardcoded fallback. ETL should set meta.isArray="true" on: ${fallbackHits.join(', ')}`,
+                `hardcoded fallback. ETL should set meta.isArray="true" on: ${fallbackHits.join(', ')}`,
         );
     }
 

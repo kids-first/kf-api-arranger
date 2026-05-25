@@ -1,9 +1,9 @@
-import { Client } from '@elastic/elasticsearch';
-import { NextFunction, Request, Response } from 'express';
+import type { Client } from '@elastic/elasticsearch';
+import type { NextFunction, Request, Response } from 'express';
 
 import EsInstance from '../../ElasticSearchClientInstance.js';
 import { multiSearchFilesAccessCounts, searchAggregatedAuthorizedStudiesForFence } from './searchers.js';
-import { AuthStudiesData, ResponseResult, SearchBucket, StudyDataGlobal, StudyDataSpecific } from './types.js';
+import type { AuthStudiesData, ResponseResult, SearchBucket, StudyDataGlobal, StudyDataSpecific } from './types.js';
 
 const SUPPORTED_FENCES = ['gen3', 'dcf'];
 

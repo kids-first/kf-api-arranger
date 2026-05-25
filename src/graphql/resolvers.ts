@@ -63,9 +63,7 @@ function buildEsSort(sortInputs: SortInput[], nestedFields: string[]): unknown[]
             .reduce((deepest, p) => (deepest.length > p.length ? deepest : p), '');
         return {
             [fld]: {
-                missing: missing
-                    ? missing === 'first' ? '_first' : '_last'
-                    : order === 'asc' ? '_first' : '_last',
+                missing: missing ? (missing === 'first' ? '_first' : '_last') : order === 'asc' ? '_first' : '_last',
                 order,
                 ...(nestedPath.length ? { nested: { path: nestedPath } } : {}),
             },
@@ -179,12 +177,7 @@ export function createResolvers(entities: EntityResolverConfig[]): IResolvers<un
                     })),
                 };
             },
-            async aggregations(
-                _parent: unknown,
-                args: AggsArgs,
-                ctx: ServerContext,
-                info: GraphQLResolveInfo,
-            ) {
+            async aggregations(_parent: unknown, args: AggsArgs, ctx: ServerContext, info: GraphQLResolveInfo) {
                 // `processArguments: true` is required by @arranger/middleware's
                 // sub-aggregation builders (top_hits / filter_by_term read
                 // `__arguments[0]` off each requested field).
@@ -214,9 +207,7 @@ export function createResolvers(entities: EntityResolverConfig[]): IResolvers<un
                 // double underscores. Convert at the resolver boundary so the
                 // default field resolver picks up the right key — verbatim
                 // from arranger-2.19.2/modules/mapping-utils/src/resolveAggregations.js.
-                return Object.fromEntries(
-                    Object.entries(flat).map(([k, v]) => [k.replace(/\./g, '__'), v]),
-                );
+                return Object.fromEntries(Object.entries(flat).map(([k, v]) => [k.replace(/\./g, '__'), v]));
             },
         };
     }

@@ -22,9 +22,7 @@ export type EntityModule = {
 export function buildSchema(entities: EntityModule[]): GraphQLSchema {
     const rootType = new GraphQLObjectType({
         name: 'Root',
-        fields: () => Object.fromEntries(
-            entities.map(e => [e.entityName, { type: e.entityType }]),
-        ),
+        fields: () => Object.fromEntries(entities.map(e => [e.entityName, { type: e.entityType }])),
     });
     return new GraphQLSchema({ query: rootType });
 }

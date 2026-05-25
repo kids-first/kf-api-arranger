@@ -12,11 +12,11 @@
 
 import { ApolloServer } from '@apollo/server';
 import { addResolversToSchema } from '@graphql-tools/schema';
-import { buildSchema, type EntityModule } from './schema/index.js';
-import { loadAllEntitiesFromEs } from './schema/esLoaders.js';
-import { createResolvers, type ServerContext } from './resolvers.js';
-import { createRealEsClient, pingCluster } from './es/realClient.js';
 import { makeRunInternalQuery, type RunInternalQuery } from '../arrangerUtils.js';
+import { createRealEsClient, pingCluster } from './es/realClient.js';
+import { createResolvers, type ServerContext } from './resolvers.js';
+import { loadAllEntitiesFromEs } from './schema/esLoaders.js';
+import { buildSchema, type EntityModule } from './schema/index.js';
 
 // The 7 entity ES indices that include-portal-ui queries against, paired
 // with the GraphQL entity name each one exposes. Pairing is local config
@@ -58,13 +58,15 @@ export async function buildGraphqlServer(): Promise<GraphqlServerHandle> {
 
     const schema = addResolversToSchema({
         schema: rawSchema,
-        resolvers: createResolvers(entities.map(e => ({
-            entityName: e.entityName,
-            esIndex: e.esIndex,
-            nestedFields: e.nestedFields,
-            extendedEntries: e.extendedEntries,
-            columnsState: e.columnsState,
-        }))),
+        resolvers: createResolvers(
+            entities.map(e => ({
+                entityName: e.entityName,
+                esIndex: e.esIndex,
+                nestedFields: e.nestedFields,
+                extendedEntries: e.extendedEntries,
+                columnsState: e.columnsState,
+            })),
+        ),
     });
 
     const server = new ApolloServer<ServerContext>({ schema });

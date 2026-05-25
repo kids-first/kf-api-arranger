@@ -1,16 +1,14 @@
-import { SetSqon } from '../endpoints/sets/setsTypes.js';
-import { getSharedSet, getUserSets, UserSet } from '../userApi/userApiClient.js';
+import type { SetSqon } from '../endpoints/sets/setsTypes.js';
+import { getSharedSet, getUserSets, type UserSet } from '../userApi/userApiClient.js';
 import { sqonContainsSet } from './manipulateSqon.js';
-import { Sqon } from './types.js';
+import type { Sqon } from './types.js';
 
-const getSetIdsFromSqon = (sqon: SetSqon, collection = []) =>
+const getSetIdsFromSqon = (sqon: SetSqon, collection: string[] = []): string[] =>
     (Array.isArray(sqon.content)
-        ? sqon.content
-              .reduce((acc, subSqon) => [...acc, ...getSetIdsFromSqon(subSqon, collection)], collection)
-              .flat(Infinity)
+        ? [...collection, ...sqon.content.flatMap(subSqon => getSetIdsFromSqon(subSqon, collection))].flat(Infinity)
         : Array.isArray(sqon.content?.value)
-        ? sqon.content?.value.filter(value => String(value).indexOf('set_id:') === 0)
-        : [...(String(sqon.content?.value).indexOf?.('set_id:') === 0 ? [sqon.content.value] : [])]
+          ? sqon.content.value.filter(value => String(value).indexOf('set_id:') === 0)
+          : [...(String(sqon.content?.value).indexOf?.('set_id:') === 0 ? [sqon.content.value] : [])]
     ).map(setId => setId.replace('set_id:', ''));
 
 const injectIdsIntoSqon = (sqon: SetSqon, setIdsToValueMap: Record<string, string[]>) => ({
@@ -30,7 +28,7 @@ const injectIdsIntoSqon = (sqon: SetSqon, setIdsToValueMap: Record<string, strin
 
 export const resolveSetsInSqonWithMapper = async (
     sqon: SetSqon,
-    userId: string,
+    _userId: string,
     accessToken: string,
 ): Promise<{
     resolvedSqon: SetSqon;
@@ -57,7 +55,7 @@ export const resolveSetsInSqonWithMapper = async (
 
 export const resolveSetsInAllSqonsWithMapper = async (
     sqons: Sqon[],
-    userId: string,
+    _userId: string,
     accessToken: string,
 ): Promise<{
     resolvedSqons: Sqon[];

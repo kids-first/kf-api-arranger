@@ -8,7 +8,7 @@ import {
     esSampleGeneExpIndex,
 } from '../../esUtils.js';
 import { generatePreSignedUrl } from '../../s3Api/index.js';
-import {
+import type {
     DiffGeneExpPoint,
     DiffGeneExpVolcano,
     ExportResponse,

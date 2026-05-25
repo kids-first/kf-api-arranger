@@ -1,7 +1,7 @@
 import { vi } from 'vitest';
 import { computeAuthorizedStudiesForFence } from './computeAuthorizedStudies.js';
 import { multiSearchFilesAccessCounts, searchAggregatedAuthorizedStudiesForFence } from './searchers.js';
-import { AuthStudiesData, FileAccessCountsResponse } from './types.js';
+import type { AuthStudiesData, FileAccessCountsResponse } from './types.js';
 
 vi.mock('./searchers');
 vi.mock('../../ElasticSearchClientInstance');

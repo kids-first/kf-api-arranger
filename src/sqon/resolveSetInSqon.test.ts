@@ -1,6 +1,6 @@
 import { vi } from 'vitest';
 import { RIFF_TYPE_SET } from '../endpoints/sets/setsTypes.js';
-import { getSharedSet, getUserSets, UserSet } from '../userApi/userApiClient.js';
+import { getSharedSet, getUserSets, type UserSet } from '../userApi/userApiClient.js';
 import { retrieveSetsFromUsers } from './resolveSetInSqon.js';
 
 vi.mock('../userApi/userApiClient');
@@ -91,8 +91,9 @@ describe('retrieveSetsFromUsers', () => {
             throw new Error('User Set #sharedSet does not exist.');
         });
 
-        await expect(retrieveSetsFromUsers('access_token', [...setIds, 'sharedSet']))
-            .rejects.toThrow('User Set #sharedSet does not exist.');
+        await expect(retrieveSetsFromUsers('access_token', [...setIds, 'sharedSet'])).rejects.toThrow(
+            'User Set #sharedSet does not exist.',
+        );
         expect(vi.mocked(getUserSets)).toHaveBeenCalledTimes(1);
         expect(vi.mocked(getSharedSet)).toHaveBeenCalledTimes(1);
     });

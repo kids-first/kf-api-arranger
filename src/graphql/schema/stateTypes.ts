@@ -4,12 +4,7 @@
 // — include-portal-ui's frontend audit (2026-05-22) confirmed only
 // columnsState + extended are queried.
 
-import {
-    GraphQLBoolean,
-    GraphQLList,
-    GraphQLObjectType,
-    GraphQLString,
-} from 'graphql';
+import { GraphQLBoolean, GraphQLList, GraphQLObjectType, GraphQLString } from 'graphql';
 
 const ColumnSortType = new GraphQLObjectType({
     name: 'ColumnSort',

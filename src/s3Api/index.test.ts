@@ -1,5 +1,5 @@
-import { vi } from 'vitest';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { vi } from 'vitest';
 
 import { generatePreSignedUrl } from '.';
 import { S3Error } from './errors.js';
