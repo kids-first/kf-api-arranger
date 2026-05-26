@@ -1,6 +1,5 @@
-import { buildQuery } from '@arranger/middleware';
-
 import EsInstance from '../ElasticSearchClientInstance.js';
+import buildQuery from '../sqon/buildQuery/index.js';
 import { getNestedFieldsForIndex } from '../sqon/getNestedFieldsForIndex.js';
 
 export type UpsetData = {

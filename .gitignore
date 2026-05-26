@@ -10,10 +10,6 @@ dev/es_data/*
 *.env-dev
 venv
 
-# AGPL reference checkouts — DO NOT commit
-arranger-main/
-arranger-2.19.2/
-
 # Scrap exploration test tooling — kept locally, regenerable from cases.mjs
 scripts/smoke.mjs
 scripts/fetch-baselines.mjs

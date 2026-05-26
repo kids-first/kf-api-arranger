@@ -43,7 +43,6 @@
   "homepage": "https://github.com/kids-first/kf-api-arranger#readme",
   "dependencies": {
     "@apollo/server": "^5.0.0",
-    "@arranger/middleware": "^2.19.4",
     "@as-integrations/express5": "^1.1.2",
     "@aws-sdk/client-s3": "^3.689.0",
     "@aws-sdk/s3-request-presigner": "^3.689.0",

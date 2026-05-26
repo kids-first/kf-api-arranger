@@ -1,6 +1,5 @@
-import { buildQuery } from '@arranger/middleware';
-
 import EsInstance from '../../ElasticSearchClientInstance.js';
+import buildQuery from '../../sqon/buildQuery/index.js';
 import { getNestedFieldsForIndex } from '../../sqon/getNestedFieldsForIndex.js';
 import { and, not, or } from '../../sqon/manipulateSqon.js';
 import type { Sqon } from '../../sqon/types.js';

@@ -2,10 +2,8 @@
 // scalar mapping field, named via `__` flatten (e.g. study.study_code →
 // study__study_code), dispatched via ES type → agg-type table.
 //
-// Mirrors arranger's mapping-utils/src/mappingToAggsType.js + esToAggTypeMap.js.
 // `object` and `nested` parents are walked the same way — nested-ness is
-// encoded later by the resolver (via @arranger/middleware.buildAggregations),
-// not in the schema.
+// encoded later by the resolver, not in the schema.
 
 import type { GraphQLFieldConfigMap } from 'graphql';
 import { GraphQLObjectType } from 'graphql';

@@ -74,8 +74,7 @@ function isSupportedScalar(t: string): t is ScalarEsType {
 }
 
 // Collect dotted paths of all `nested`-type fields in the tree.
-// Used by @arranger/middleware's buildQuery to know which paths need
-// ES `nested` query wrapping.
+// Used by buildQuery to know which paths need ES `nested` query wrapping.
 export function collectNestedFields(tree: FieldTree): string[] {
     const out: string[] = [];
     const walk = (fields: FieldNode[], prefix: string): void => {

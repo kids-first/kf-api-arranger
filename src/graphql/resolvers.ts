@@ -1,7 +1,7 @@
 // Resolver factory.
 // Slice S: Root.<entity> + <entity>.hits.
 // Slice T (added 2026-05-21): <entity>.aggregations via
-// @arranger/middleware.buildAggregations + flattenAggregations.
+// local buildAggregations + flattenAggregations (src/sqon/).
 // Slice U (added 2026-05-22): <entity>.extended + <entity>.columnsState,
 // both read from the per-entity config loaded once at startup.
 // Slice V (added 2026-05-22): nested fields pre-shaped into Connection
@@ -13,7 +13,9 @@
 // matching arranger's signature; buildEsSort handles missing-defaults +
 // nested-path detection.
 
-import { buildAggregations, buildQuery, flattenAggregations } from '@arranger/middleware';
+import buildAggregations from '../sqon/buildAggregations/index.js';
+import buildQuery from '../sqon/buildQuery/index.js';
+import { flattenAggregations } from '../sqon/flattenAggregations.js';
 import type { IResolvers } from '@graphql-tools/utils';
 import type { GraphQLResolveInfo } from 'graphql';
 import graphqlFields from 'graphql-fields';
@@ -178,9 +180,9 @@ export function createResolvers(entities: EntityResolverConfig[]): IResolvers<un
                 };
             },
             async aggregations(_parent: unknown, args: AggsArgs, ctx: ServerContext, info: GraphQLResolveInfo) {
-                // `processArguments: true` is required by @arranger/middleware's
-                // sub-aggregation builders (top_hits / filter_by_term read
-                // `__arguments[0]` off each requested field).
+                // `processArguments: true` is required by our sub-aggregation
+                // builders (top_hits / filter_by_term read `__arguments[0]`
+                // off each requested field).
                 const requested = graphqlFields(info, {}, { processArguments: true });
                 const sqon = normalizeSqonInput(args.filters);
                 const built = buildQuery({ nestedFields, filters: sqon });
