@@ -2,6 +2,10 @@ Dockerfile
 .git
 node_modules
 
-# AGPL reference checkouts — DO NOT bake into images
-arranger-main/
-arranger-2.19.2/
+# Not needed at runtime — defense-in-depth in case the multi-stage gap
+# ever collapses to single-stage.
+admin/
+scripts/
+test/
+.github/
+*.md
