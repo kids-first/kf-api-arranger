@@ -44,7 +44,7 @@ const callUserApi = async <T>(path: string, method: Method, accessToken: string,
 };
 
 export const getSharedSet = (accessToken: string, setId: string): Promise<UserSet> =>
-    callUserApi<UserSet>(`/user-sets/shared/${setId}`, 'GET', accessToken);
+    callUserApi<UserSet>(`/user-sets/shared/${encodeURIComponent(setId)}`, 'GET', accessToken);
 
 export const getUserSets = (accessToken: string): Promise<UserSet[]> =>
     callUserApi<UserSet[]>('/user-sets', 'GET', accessToken);
@@ -53,10 +53,10 @@ export const postUserSet = (accessToken: string, set: CreateUpdateBody): Promise
     callUserApi<UserSet>('/user-sets', 'POST', accessToken, set);
 
 export const putUserSet = (accessToken: string, set: CreateUpdateBody, setId: string): Promise<UserSet> =>
-    callUserApi<UserSet>(`/user-sets/${setId}`, 'PUT', accessToken, set);
+    callUserApi<UserSet>(`/user-sets/${encodeURIComponent(setId)}`, 'PUT', accessToken, set);
 
 export const deleteUserSet = async (accessToken: string, setId: string): Promise<string> => {
-    await callUserApi<unknown>(`/user-sets/${setId}`, 'DELETE', accessToken);
+    await callUserApi<unknown>(`/user-sets/${encodeURIComponent(setId)}`, 'DELETE', accessToken);
     return setId;
 };
 

@@ -32,8 +32,6 @@ import { reformatVenn, venn } from './endpoints/venn/venn.js';
 import { esHost, keycloakURL, userApiURL } from './env.js';
 import { globalErrorHandler, globalErrorLogger } from './errors.js';
 import { flushAllCache, STATISTICS_CACHE_ID, STATISTICS_PUBLIC_CACHE_ID, twineWithCache } from './middleware/cache.js';
-import { injectBodyHttpHeaders } from './middleware/injectBodyHttpHeaders.js';
-import { resolveSetIdMiddleware } from './middleware/resolveSetIdInSqon.js';
 import { replaceIdsWithSetId, resolveSetsInAllSqonsWithMapper, resolveSetsInSqon } from './sqon/resolveSetInSqon.js';
 import { resolveQueriesSetAliases } from './sqon/setSqon.js';
 import type { Sqon } from './sqon/types.js';
@@ -59,7 +57,6 @@ export default (keycloak: Keycloak, runInternalQuery: RunInternalQuery): Express
             limit: '50mb',
         }),
     );
-    app.use(injectBodyHttpHeaders());
 
     app.use(
         keycloak.middleware({
@@ -67,8 +64,6 @@ export default (keycloak: Keycloak, runInternalQuery: RunInternalQuery): Express
             admin: '/',
         }),
     );
-
-    app.use(resolveSetIdMiddleware());
 
     // Express 5 catches both sync and async handler rejections and routes
     // them to globalErrorHandler — no try/catch + next(e) wrappers needed

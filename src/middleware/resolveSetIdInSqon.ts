@@ -23,7 +23,7 @@ export type SearchPayload = {
 
 export const resolveSetIdMiddleware =
     () =>
-    async (req: Request, _res: Response, next: NextFunction): Promise<void> => {
+    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         const userId = req.kauth?.grant?.access_token?.content?.sub;
         const accessToken = req.headers.authorization;
         if (req.body?.variables) {
@@ -38,7 +38,13 @@ export const resolveSetIdMiddleware =
         }
 
         if (req.body?.params) {
-            const params = JSON.parse(req.body.params);
+            let params: { files?: File[] };
+            try {
+                params = JSON.parse(req.body.params);
+            } catch {
+                res.status(422).send('Bad Inputs');
+                return;
+            }
             const files = params.files || [];
             const filesUpdated = await Promise.all(
                 files.map((file: File) => resolveSetIdForFile(file, userId, accessToken)),

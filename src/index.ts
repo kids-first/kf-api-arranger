@@ -6,6 +6,7 @@ import buildApp from './app.js';
 import { port, projectId } from './env.js';
 import { buildGraphqlServer } from './graphql/server.js';
 import keycloakConfig from './keycloak.js';
+import { resolveSetIdMiddleware } from './middleware/resolveSetIdInSqon.js';
 
 process.on('uncaughtException', err => {
     console.log(`Uncaught Exception: ${err.message}`);
@@ -39,10 +40,13 @@ const app = buildApp(keycloak, runInternalQuery);
 
 // Mount Apollo at /${projectId}/graphql — single project per deployment,
 // driven entirely by the PROJECT_ID env var (default 'include').
+// resolveSetIdMiddleware runs post-auth so it has req.kauth.grant available
+// and can't be triggered by unauthenticated callers.
 app.use(
     `/${projectId}/graphql`,
     keycloak.protect(),
     express.json({ limit: '50mb' }),
+    resolveSetIdMiddleware(),
     expressMiddleware(apollo, { context: async () => context }),
 );
 
