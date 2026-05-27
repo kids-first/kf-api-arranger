@@ -5,7 +5,7 @@ import Keycloak from 'keycloak-connect';
 import buildApp from './app.js';
 import { port, projectId } from './env.js';
 import { buildGraphqlServer } from './graphql/server.js';
-import keycloakConfig from './keycloak.js';
+import keycloakConfig, { installGrantErrorLogger } from './keycloak.js';
 import { resolveSetIdMiddleware } from './middleware/resolveSetIdInSqon.js';
 
 process.on('uncaughtException', err => {
@@ -24,14 +24,7 @@ process.on('SIGINT', () => {
 });
 
 const keycloak = new Keycloak({}, keycloakConfig);
-
-const k: any = keycloak;
-const originalValidateGrant = k.grantManager.validateGrant;
-k.grantManager.validateGrant = grant =>
-    originalValidateGrant.call(k.grantManager, grant).catch(err => {
-        console.error('Grant Validation Error', err);
-        throw err;
-    });
+installGrantErrorLogger(keycloak);
 
 // Build the GraphQL server first — its `runInternalQuery` runs the
 // in-process queries the /sets + /phenotypes routes need.
