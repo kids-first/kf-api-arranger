@@ -1,19 +1,20 @@
-// TEMPORARY — hardcoded fallback for the `isArray` flag on multi-value scalars.
+// Hardcoded supplemental table for the `isArray` flag on multi-value scalars.
 //
 // ES `_mapping` does not distinguish single-value from multi-value scalar
-// fields, so we can't recover this from the mapping alone. The intended
-// long-term source is per-field `meta.isArray: "true"` set by the ETL when it
-// pushes the mapping (mappings.properties.<field>.meta — ES native feature,
+// fields, so we can't recover this from the mapping alone. The primary
+// source is per-field `meta.isArray: "true"` set by the ETL when it pushes
+// the mapping (mappings.properties.<field>.meta — ES native feature,
 // 5-entry / 20-char-key / 50-char-value limit, all string).
 //
-// Until the ETL adopts that convention, this module supplies the same data
-// as a hardcoded list, extracted from the arranger-projects-include QA doc
-// on 2026-05-25 (60 scalar-array paths across 6 of the 7 entities). Nested
-// fields are NOT listed here — they are auto-detected as arrays by the
-// deriver (ES `nested`-type fields are always JSON arrays).
+// This module supplements that with a hardcoded list for paths the ETL has
+// not yet tagged. Initial population (60 scalar-array paths across 6 of the
+// 7 entities) was extracted from the arranger-projects-include QA doc on
+// 2026-05-25. Nested fields are NOT listed here — they are auto-detected as
+// arrays by the deriver (ES `nested`-type fields are always JSON arrays).
 //
-// Delete this module once every esIndex has `meta.isArray` set on the
-// relevant fields and the deriver no longer logs fallback paths at boot.
+// The boot logs a single summary of paths resolved via this fallback (see
+// graphql/server.ts), so additions to ETL meta.isArray are visible by
+// watching the count shrink over time.
 
 const BIOSPECIMEN_CENTRIC = new Set<string>(['diagnoses.source_text_tumor_location']);
 

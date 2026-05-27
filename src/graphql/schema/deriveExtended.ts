@@ -5,10 +5,14 @@
 // doesn't need to change.
 //
 // isArray resolution chain, per field path:
-//   1. `meta.isArray === "true"` on the field (long-term ETL-owned source).
+//   1. `meta.isArray === "true"` on the field (ETL-set; primary source).
 //   2. node.kind === 'nested'                  (ES nested fields are always JSON arrays).
-//   3. arrayFieldsFallback contains the path   (TEMPORARY — see arrayFieldsFallback.ts).
+//   3. arrayFieldsFallback contains the path   (supplemental table for paths the ETL has not tagged — see arrayFieldsFallback.ts).
 //   4. false.
+//
+// Paths hit via step 3 are collected into `fallbackHits` and surfaced once
+// at boot (graphql/server.ts) so the gap between ETL annotations and the
+// fallback table is visible without per-entity log noise.
 //
 // type values emitted: raw ES type for scalars; "object" / "nested" for
 // composite nodes. The arranger doc also curates `keyword` → `"id"` for
@@ -35,6 +39,7 @@ import type { DerivedExtended, ExtendedEntry, ExtendedMap, FieldNode, FieldTree 
 export function deriveExtended(esIndex: string, entityName: string, tree: FieldTree): DerivedExtended {
     const fallback = getArrayFieldsFallback(esIndex);
     const entries: ExtendedEntry[] = [];
+    const fallbackHits: string[] = [];
 
     const walk = (fields: FieldNode[], prefix: string): void => {
         for (const f of fields) {
@@ -44,6 +49,7 @@ export function deriveExtended(esIndex: string, entityName: string, tree: FieldT
             const fromNested = f.kind === 'nested';
             const fromFallback = !fromMeta && !fromNested && fallback.has(path);
             const isArray = fromMeta || fromNested || fromFallback;
+            if (fromFallback) fallbackHits.push(path);
             entries.push({
                 field: path,
                 type: typeFor(f),
@@ -58,7 +64,7 @@ export function deriveExtended(esIndex: string, entityName: string, tree: FieldT
     walk(tree.fields, '');
 
     const map: ExtendedMap = new Map(entries.map(e => [e.field, e]));
-    return { map, entries, columnsState: null, entityName };
+    return { map, entries, columnsState: null, entityName, fallbackHits };
 }
 
 function typeFor(node: FieldNode): string {

@@ -49,6 +49,17 @@ export async function buildGraphqlServer(): Promise<GraphqlServerHandle> {
     const es = createRealEsClient();
     const entities: EntityModule[] = await loadAllEntitiesFromEs(es, ES_ENTITIES);
 
+    // Single boot-time visibility of the ETL/fallback gap. Silent when the
+    // ETL has tagged every multi-value scalar via meta.isArray.
+    const entitiesWithFallback = entities.filter(e => e.fallbackHits.length > 0);
+    if (entitiesWithFallback.length > 0) {
+        const total = entitiesWithFallback.reduce((sum, e) => sum + e.fallbackHits.length, 0);
+        const breakdown = entitiesWithFallback.map(e => `${e.esIndex}: ${e.fallbackHits.length}`).join(', ');
+        console.info(
+            `[arrayFieldsFallback] active on ${total} path(s) across ${entitiesWithFallback.length} entities (${breakdown})`,
+        );
+    }
+
     const rawSchema = buildSchema(entities);
 
     const schema = addResolversToSchema({

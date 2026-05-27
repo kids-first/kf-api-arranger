@@ -17,6 +17,7 @@ export type EntityModule = {
     nestedFields: string[];
     extendedEntries: ExtendedEntry[];
     columnsState: unknown;
+    fallbackHits: string[];
 };
 
 export function buildSchema(entities: EntityModule[]): GraphQLSchema {

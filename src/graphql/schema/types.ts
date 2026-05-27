@@ -79,4 +79,8 @@ export type DerivedExtended = {
     entries: ExtendedEntry[];
     columnsState: unknown;
     entityName: string;
+    // Paths where `isArray` was resolved via arrayFieldsFallback (rather
+    // than ETL-set `meta.isArray`). Surfaced at boot so the gap between
+    // ETL annotations and the fallback table is visible.
+    fallbackHits: string[];
 };
