@@ -133,5 +133,35 @@ describe('Venn', () => {
             expect(output.every(x => Object.keys(x.sqon).length > 0)).toBeTruthy();
             expect(output.every(x => ['Q₁', 'Q₂', 'Q₁-Q₂', 'Q₂-Q₁', 'Q₁∩Q₂'].includes(x.operation))).toBeTruthy();
         });
+
+        it('caches nested fields per index — regression for cache key mismatch', async () => {
+            vi.mocked(getNestedFieldsForIndex).mockClear();
+            vi.mocked(getNestedFieldsForIndex).mockResolvedValue([]);
+            vi.mocked(EsInstance.getInstance).mockImplementation(() => ({
+                msearch: async () => ({
+                    body: {
+                        responses: Array(5).fill({
+                            hits: { total: { value: 0, relation: 'eq' }, max_score: null, hits: [] },
+                            status: 200,
+                        }),
+                    },
+                    statusCode: 200,
+                }),
+            }));
+
+            const sqons = [
+                { op: 'and', content: [] },
+                { op: 'and', content: [] },
+            ];
+
+            // Use a unique entity name to avoid cache pollution from other tests
+            // in this file — mNestedFields is module-level state.
+            await venn(sqons, 'cache_regression_test');
+            await venn(sqons, 'cache_regression_test');
+
+            // Pre-fix: cache key mismatch makes both calls miss → 2.
+            // Post-fix: second call hits the cache → 1.
+            expect(vi.mocked(getNestedFieldsForIndex)).toHaveBeenCalledTimes(1);
+        });
     });
 });

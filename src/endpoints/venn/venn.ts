@@ -99,7 +99,7 @@ export const venn = async (sqons: Sqon[], index: string): Promise<VennOutput[]> 
 
     const client = EsInstance.getInstance();
     const indexName = `${index}_centric`;
-    if (!mNestedFields.has(index)) {
+    if (!mNestedFields.has(indexName)) {
         const fields = await getNestedFieldsForIndex(client, indexName);
         mNestedFields.set(indexName, fields);
     }
