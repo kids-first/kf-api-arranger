@@ -100,7 +100,6 @@ function resolveNested(value: unknown, nestedFields: string[], parent = ''): unk
                 hits: {
                     edges: arr.map(item => ({
                         node: {
-                            ...(item as Record<string, unknown>),
                             ...(resolveNested(item, nestedFields, fullPath) as Record<string, unknown>),
                         },
                     })),
