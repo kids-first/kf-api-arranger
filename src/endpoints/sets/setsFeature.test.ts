@@ -83,13 +83,8 @@ describe('Set management', () => {
                 throw new Error('OOPS');
             });
 
-            try {
-                await getSets(accessToken);
-            } catch (e) {
-                expect(e.message).toEqual('OOPS');
-            } finally {
-                expect(vi.mocked(getUserSets)).toHaveBeenCalledTimes(1);
-            }
+            await expect(getSets(accessToken)).rejects.toThrow('OOPS');
+            expect(vi.mocked(getUserSets)).toHaveBeenCalledTimes(1);
         });
     });
 
@@ -262,14 +257,11 @@ describe('Set management', () => {
             vi.mocked(getUserSets).mockResolvedValue([]);
             vi.mocked(putUserSet).mockResolvedValue(updatedSet);
 
-            try {
-                await updateSetTag(updateSetTagBody, accessToken, setId);
-            } catch (e) {
-                expect(e.message).toEqual('Set to update can not be found !');
-            } finally {
-                expect(vi.mocked(getUserSets)).toHaveBeenCalledTimes(1);
-                expect(vi.mocked(putUserSet)).toHaveBeenCalledTimes(0);
-            }
+            await expect(updateSetTag(updateSetTagBody, accessToken, setId)).rejects.toThrow(
+                'Set to update can not be found !',
+            );
+            expect(vi.mocked(getUserSets)).toHaveBeenCalledTimes(1);
+            expect(vi.mocked(putUserSet)).toHaveBeenCalledTimes(0);
         });
 
         it('should send put user content and return error if update throws an error', async () => {
@@ -278,17 +270,12 @@ describe('Set management', () => {
                 throw new Error('OOPS');
             });
 
-            try {
-                await updateSetTag(updateSetTagBody, accessToken, setId);
-            } catch (e) {
-                expect(e.message).toEqual('OOPS');
-            } finally {
-                expect(vi.mocked(getUserSets)).toHaveBeenCalledTimes(1);
-                expect(vi.mocked(putUserSet)).toHaveBeenCalledTimes(1);
-                expect(vi.mocked(putUserSet).mock.calls[0][0]).toEqual(accessToken);
-                expect(vi.mocked(putUserSet).mock.calls[0][1]).toEqual(expectedUpdateBody);
-                expect(vi.mocked(putUserSet).mock.calls[0][2]).toEqual(setId);
-            }
+            await expect(updateSetTag(updateSetTagBody, accessToken, setId)).rejects.toThrow('OOPS');
+            expect(vi.mocked(getUserSets)).toHaveBeenCalledTimes(1);
+            expect(vi.mocked(putUserSet)).toHaveBeenCalledTimes(1);
+            expect(vi.mocked(putUserSet).mock.calls[0][0]).toEqual(accessToken);
+            expect(vi.mocked(putUserSet).mock.calls[0][1]).toEqual(expectedUpdateBody);
+            expect(vi.mocked(putUserSet).mock.calls[0][2]).toEqual(setId);
         });
     });
 
@@ -480,16 +467,13 @@ describe('Set management', () => {
         it('should return an error if set to update does not exist', async () => {
             vi.mocked(getUserSets).mockResolvedValue([]);
 
-            try {
-                await updateSetContent(updateSetContentAddSqon, accessToken, userId, setId, runInternalQuery);
-            } catch (e) {
-                expect(e.message).toEqual('Set to update can not be found !');
-            } finally {
-                expect(vi.mocked(getUserSets)).toHaveBeenCalledTimes(1);
-                expect(vi.mocked(resolveSetsInSqon)).toHaveBeenCalledTimes(0);
-                expect(vi.mocked(searchSqon)).toHaveBeenCalledTimes(0);
-                expect(vi.mocked(putUserSet)).toHaveBeenCalledTimes(0);
-            }
+            await expect(
+                updateSetContent(updateSetContentAddSqon, accessToken, userId, setId, runInternalQuery),
+            ).rejects.toThrow('Set to update can not be found !');
+            expect(vi.mocked(getUserSets)).toHaveBeenCalledTimes(1);
+            expect(vi.mocked(resolveSetsInSqon)).toHaveBeenCalledTimes(0);
+            expect(vi.mocked(searchSqon)).toHaveBeenCalledTimes(0);
+            expect(vi.mocked(putUserSet)).toHaveBeenCalledTimes(0);
         });
 
         it('should send put user content and return error if update throws an error', async () => {
@@ -500,16 +484,13 @@ describe('Set management', () => {
                 throw new Error('OOPS');
             });
 
-            try {
-                await updateSetContent(updateSetContentAddSqon, accessToken, userId, setId, runInternalQuery);
-            } catch (e) {
-                expect(e.message).toEqual('OOPS');
-            } finally {
-                expect(vi.mocked(getUserSets)).toHaveBeenCalledTimes(1);
-                expect(vi.mocked(resolveSetsInSqon)).toHaveBeenCalledTimes(1);
-                expect(vi.mocked(searchSqon)).toHaveBeenCalledTimes(1);
-                expect(vi.mocked(putUserSet)).toHaveBeenCalledTimes(1);
-            }
+            await expect(
+                updateSetContent(updateSetContentAddSqon, accessToken, userId, setId, runInternalQuery),
+            ).rejects.toThrow('OOPS');
+            expect(vi.mocked(getUserSets)).toHaveBeenCalledTimes(1);
+            expect(vi.mocked(resolveSetsInSqon)).toHaveBeenCalledTimes(1);
+            expect(vi.mocked(searchSqon)).toHaveBeenCalledTimes(1);
+            expect(vi.mocked(putUserSet)).toHaveBeenCalledTimes(1);
         });
     });
 
@@ -533,13 +514,8 @@ describe('Set management', () => {
                 throw new Error('OOPS');
             });
 
-            try {
-                await deleteSet(accessToken, setId);
-            } catch (e) {
-                expect(e.message).toEqual('OOPS');
-            } finally {
-                expect(vi.mocked(deleteUserSet)).toHaveBeenCalledTimes(1);
-            }
+            await expect(deleteSet(accessToken, setId)).rejects.toThrow('OOPS');
+            expect(vi.mocked(deleteUserSet)).toHaveBeenCalledTimes(1);
         });
     });
 });
