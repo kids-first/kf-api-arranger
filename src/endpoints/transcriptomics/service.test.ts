@@ -377,6 +377,40 @@ describe('Transcriptomics', () => {
 
             expect(result).toEqual(expectedResponse);
         });
+
+        it('returns a zeroed shape when no hits match (regression for empty-array crash)', async () => {
+            const mockEsResponseBody = {
+                took: 1,
+                timed_out: false,
+                _shards: { total: 5, successful: 5, skipped: 0, failed: 0 },
+                hits: {
+                    total: { value: 0, relation: 'eq' },
+                    max_score: null,
+                    hits: [],
+                },
+            };
+
+            vi.mocked(EsInstance.getInstance).mockImplementation(() => ({
+                search: async () => ({ body: mockEsResponseBody }),
+            }));
+
+            // Pre-fix: `hits[0]._source.<field>` throws TypeError because the
+            // `?? []` defense converts a missing body into an empty array, then
+            // the very next line indexes [0] on it.
+            // Post-fix: early-return with zero defaults — no crash, empty payload.
+            const result = await fetchSampleGeneExp('NONEXISTENT_GENE');
+
+            expect(result).toEqual({
+                data: [],
+                ensembl_gene_id: 'NONEXISTENT_GENE',
+                nControl: 0,
+                nT21: 0,
+                min_age_at_biospecimen_collection_years: 0,
+                max_age_at_biospecimen_collection_years: 0,
+                min_fpkm_value: 0,
+                max_fpkm_value: 0,
+            });
+        });
     });
 
     describe('exportSampleGeneExp', () => {

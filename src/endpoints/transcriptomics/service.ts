@@ -109,6 +109,19 @@ export const fetchSampleGeneExp = async (ensembl_gene_id: string): Promise<Sampl
 
     const hits = body.hits.hits ?? [];
 
+    if (hits.length === 0) {
+        return {
+            data: [],
+            ensembl_gene_id,
+            nControl: 0,
+            nT21: 0,
+            min_age_at_biospecimen_collection_years: 0,
+            max_age_at_biospecimen_collection_years: 0,
+            min_fpkm_value: 0,
+            max_fpkm_value: 0,
+        };
+    }
+
     const points: SampleGeneExpPoint[] = [];
     let min_age_at_biospecimen_collection_years = hits[0]._source.age_at_biospecimen_collection_years;
     let max_age_at_biospecimen_collection_years = hits[0]._source.age_at_biospecimen_collection_years;
