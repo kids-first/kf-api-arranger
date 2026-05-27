@@ -51,6 +51,5 @@ app.use(
 );
 
 app.listen(port, () => {
-    console.log('kf-api-arranger (post-arranger) starting');
     console.log(`⚡️ Listening on port ${port} ⚡️`);
 });

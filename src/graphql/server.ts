@@ -44,15 +44,10 @@ export type GraphqlServerHandle = {
 };
 
 export async function buildGraphqlServer(): Promise<GraphqlServerHandle> {
-    const status = await pingCluster();
-    console.log(`ES cluster status: ${status}`);
+    await pingCluster();
 
     const es = createRealEsClient();
     const entities: EntityModule[] = await loadAllEntitiesFromEs(es, ES_ENTITIES);
-
-    for (const e of entities) {
-        console.log(`  ${e.esIndex} → ${e.entityName}  (${e.nestedFields.length} nested fields)`);
-    }
 
     const rawSchema = buildSchema(entities);
 

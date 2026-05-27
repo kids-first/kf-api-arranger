@@ -35,7 +35,6 @@ import type { DerivedExtended, ExtendedEntry, ExtendedMap, FieldNode, FieldTree 
 export function deriveExtended(esIndex: string, entityName: string, tree: FieldTree): DerivedExtended {
     const fallback = getArrayFieldsFallback(esIndex);
     const entries: ExtendedEntry[] = [];
-    const fallbackHits: string[] = [];
 
     const walk = (fields: FieldNode[], prefix: string): void => {
         for (const f of fields) {
@@ -45,7 +44,6 @@ export function deriveExtended(esIndex: string, entityName: string, tree: FieldT
             const fromNested = f.kind === 'nested';
             const fromFallback = !fromMeta && !fromNested && fallback.has(path);
             const isArray = fromMeta || fromNested || fromFallback;
-            if (fromFallback) fallbackHits.push(path);
             entries.push({
                 field: path,
                 type: typeFor(f),
@@ -58,13 +56,6 @@ export function deriveExtended(esIndex: string, entityName: string, tree: FieldT
         }
     };
     walk(tree.fields, '');
-
-    if (fallbackHits.length) {
-        console.log(
-            `[deriveExtended] ${esIndex}: ${fallbackHits.length} array path(s) came from the ` +
-                `hardcoded fallback. ETL should set meta.isArray="true" on: ${fallbackHits.join(', ')}`,
-        );
-    }
 
     const map: ExtendedMap = new Map(entries.map(e => [e.field, e]));
     return { map, entries, columnsState: null, entityName };
