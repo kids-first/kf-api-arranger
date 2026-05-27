@@ -25,7 +25,7 @@ describe('S3 Service', () => {
             expect(vi.mocked(getSignedUrl)).toHaveBeenCalledTimes(1);
         });
 
-        it('shoudl throw an error if S3 returns an error', async () => {
+        it('should throw an error if S3 returns an error', async () => {
             const expectedError = new S3Error('OOPS from S3');
             vi.mocked(getSignedUrl).mockRejectedValue(expectedError);
 

@@ -7,7 +7,7 @@ vi.mock('./searchers');
 vi.mock('../../ElasticSearchClientInstance');
 
 describe('Compute Authorized Studies', () => {
-    describe(`${computeAuthorizedStudiesForFence.name} `, () => {
+    describe(`${computeAuthorizedStudiesForFence.name}`, () => {
         beforeEach(() => {
             vi.mocked(searchAggregatedAuthorizedStudiesForFence).mockReset();
             vi.mocked(multiSearchFilesAccessCounts).mockReset();

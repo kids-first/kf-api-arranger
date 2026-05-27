@@ -97,7 +97,7 @@ describe('Set management', () => {
             type,
         };
 
-        const expectedCreatesSetBody: CreateUpdateBody = {
+        const expectedCreateSetBody: CreateUpdateBody = {
             alias: tag,
             sharedPublicly: false,
             content: {
@@ -129,7 +129,7 @@ describe('Set management', () => {
             expect(vi.mocked(searchSqon)).toHaveBeenCalledTimes(1);
             expect(vi.mocked(postUserSet)).toHaveBeenCalledTimes(1);
             expect(vi.mocked(postUserSet).mock.calls[0][0]).toEqual(accessToken);
-            expect(vi.mocked(postUserSet).mock.calls[0][1]).toEqual(expectedCreatesSetBody);
+            expect(vi.mocked(postUserSet).mock.calls[0][1]).toEqual(expectedCreateSetBody);
         });
 
         it('should resolve set_id in sqon before saving new set', async () => {
@@ -161,8 +161,8 @@ describe('Set management', () => {
             expect(vi.mocked(postUserSet)).toHaveBeenCalledTimes(1);
             expect(vi.mocked(postUserSet).mock.calls[0][0]).toEqual(accessToken);
             expect(vi.mocked(postUserSet).mock.calls[0][1]).toEqual({
-                ...expectedCreatesSetBody,
-                content: { ...expectedCreatesSetBody.content, sqon: sqonWithSetId },
+                ...expectedCreateSetBody,
+                content: { ...expectedCreateSetBody.content, sqon: sqonWithSetId },
             });
         });
 
@@ -198,9 +198,9 @@ describe('Set management', () => {
             expect(vi.mocked(postUserSet)).toHaveBeenCalledTimes(1);
             expect(vi.mocked(postUserSet).mock.calls[0][0]).toEqual(accessToken);
             expect(vi.mocked(postUserSet).mock.calls[0][1]).toEqual({
-                ...expectedCreatesSetBody,
+                ...expectedCreateSetBody,
                 content: {
-                    ...expectedCreatesSetBody.content,
+                    ...expectedCreateSetBody.content,
                     ids: ['participant_1', 'participant_2', 'participant_3'],
                 },
             });

@@ -35,7 +35,7 @@ afterAll(() => {
     vi.restoreAllMocks();
 });
 
-describe('Express app (without Arranger)', () => {
+describe('Express app', () => {
     let app: Express;
 
     const runInternalQuery: RunInternalQuery = async () => ({ data: null });
@@ -54,7 +54,7 @@ describe('Express app (without Arranger)', () => {
         app = buildApp(keycloak, runInternalQuery); // Re-create app between each test to ensure isolation between tests.
     });
 
-    it('GET /status (public) should responds with json', async () => {
+    it('GET /status (public) should respond with json', async () => {
         await request(app).get('/status').expect('Content-Type', /json/);
     });
 
