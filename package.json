@@ -1,39 +1,35 @@
 {
   "name": "kf-api-arranger",
-  "version": "1.0.0",
-  "description": ":factory: a data-model aware GraphQL API that sits above an Elasticsearch cluster",
+  "version": "2.0.0",
+  "description": "GraphQL API over Elasticsearch for the Kids First and INCLUDE portals — post-arranger rewrite (Apollo Server 5, in-tree SQON).",
   "type": "module",
   "main": "dist/src/index.js",
   "engines": {
-    "node": ">=22"
+    "node": ">=24"
   },
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "start": "node ./dist/src/index.js",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:silent": "vitest run --silent",
-    "cleanAndBuild": "rm -rf ./dist/* && tsc --build",
+    "build": "rm -rf ./dist/* && tsc --build",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
-    "format": "biome format --write .",
-    "cbs": "npm run cleanAndBuild && npm start"
+    "serve": "npm run build && npm start"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/kids-first/kf-api-arranger.git"
   },
   "keywords": [
-    "arranger"
+    "elasticsearch",
+    "graphql",
+    "apollo",
+    "kids-first",
+    "include"
   ],
   "author": "",
   "license": "Apache-2.0",
-  "licenses": [
-    {
-      "type": "Apache-2.0",
-      "url": "http://www.apache.org/licenses/LICENSE-2.0"
-    }
-  ],
   "bugs": {
     "url": "https://github.com/kids-first/kf-api-arranger/issues"
   },
@@ -41,8 +37,8 @@
   "dependencies": {
     "@apollo/server": "^5.0.0",
     "@as-integrations/express5": "^1.1.2",
-    "@aws-sdk/client-s3": "^3.689.0",
-    "@aws-sdk/s3-request-presigner": "^3.689.0",
+    "@aws-sdk/client-s3": "^3.1054.0",
+    "@aws-sdk/s3-request-presigner": "^3.1054.0",
     "@elastic/elasticsearch": "7.13.0",
     "@graphql-tools/schema": "^10.0.33",
     "cors": "^2.8.5",
@@ -55,13 +51,12 @@
     "node-cache": "^5.1.2"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.4.15",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/express-serve-static-core": "^5.0.1",
     "@types/node": "^24.0.0",
-    "@biomejs/biome": "^2.4.15",
     "@types/supertest": "^7.2.0",
-    "json-diff": "^1.0.6",
     "jsonwebtoken": "^9.0.3",
     "supertest": "^7.2.2",
     "tsx": "^4.19.0",

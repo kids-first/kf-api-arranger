@@ -1,7 +1,7 @@
 FROM node:24-alpine3.22 AS build
 WORKDIR /app
 COPY . .
-RUN npm ci && npm run cleanAndBuild
+RUN npm ci && npm run build
 
 FROM node:24-alpine3.22 AS prod-image
 WORKDIR /app
