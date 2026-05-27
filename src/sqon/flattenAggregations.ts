@@ -47,9 +47,7 @@ export function flattenAggregations(args: {
             const hitsKey = `${field}.hits`;
             const raw: Bucket[] = [
                 ...value.buckets,
-                ...(includeMissing && missing && (missing.doc_count ?? 0) > 0
-                    ? [{ ...missing, key: MISSING }]
-                    : []),
+                ...(includeMissing && missing && (missing.doc_count ?? 0) > 0 ? [{ ...missing, key: MISSING }] : []),
             ];
             const buckets = raw
                 .map(({ rn, ...bucket }) => ({

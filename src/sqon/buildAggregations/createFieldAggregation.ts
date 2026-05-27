@@ -1,9 +1,9 @@
 // Per-field aggregation constructor. Given the graphql-fields selection for
 // one field, emit the ES `aggs` block for that field.
 
-import { BUCKET_COUNT, BUCKETS, CARDINALITY, HISTOGRAM, STATS, TOPHITS } from '../constants.js';
 import { opSwitch } from '../buildQuery/index.js';
 import normalizeFilters, { type Filter } from '../buildQuery/normalizeFilters.js';
+import { BUCKET_COUNT, BUCKETS, CARDINALITY, HISTOGRAM, STATS, TOPHITS } from '../constants.js';
 import type { EsAggs } from '../types.js';
 
 const MAX_AGGREGATION_SIZE = 300_000;
@@ -27,9 +27,7 @@ function createNumericAggregation(args: {
         [`${field}:${type}`]: {
             [type]: {
                 field,
-                ...(type === HISTOGRAM
-                    ? { interval: typeArgs?.interval?.value ?? HISTOGRAM_INTERVAL_DEFAULT }
-                    : {}),
+                ...(type === HISTOGRAM ? { interval: typeArgs?.interval?.value ?? HISTOGRAM_INTERVAL_DEFAULT } : {}),
             },
         },
     };
@@ -42,8 +40,7 @@ function createTermAggregation(args: {
     termFilters: any[];
 }): EsAggs {
     const { field, isNested, graphqlField, termFilters } = args;
-    const maxAggregations: number =
-        graphqlField?.buckets?.__arguments?.[0]?.max?.value ?? MAX_AGGREGATION_SIZE;
+    const maxAggregations: number = graphqlField?.buckets?.__arguments?.[0]?.max?.value ?? MAX_AGGREGATION_SIZE;
     const termFilter = graphqlField?.buckets?.filter_by_term ?? null;
     const topHits = graphqlField?.buckets?.top_hits ?? null;
     const topHitsSource = topHits?.__arguments?.[0]?._source ?? null;

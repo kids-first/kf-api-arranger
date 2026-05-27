@@ -1,10 +1,9 @@
 import { describe, expect, it } from 'vitest';
-
-import buildAggregations from './index.js';
+import buildQuery from '../buildQuery/index.js';
 import createFieldAggregation from './createFieldAggregation.js';
 import getNestedSqonFilters from './getNestedSqonFilters.js';
+import buildAggregations from './index.js';
 import injectNestedFiltersToAggs from './injectNestedFiltersToAggs.js';
-import buildQuery from '../buildQuery/index.js';
 
 // ─── createFieldAggregation ──────────────────────────────────────────
 

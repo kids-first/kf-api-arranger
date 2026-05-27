@@ -82,7 +82,10 @@ function normalizeFilters(filter: Filter): Filter {
         const normals = value.filter(v => !isSpecialFilter(v));
         const filters: Filter[] =
             normals.length > 0
-                ? [{ ...filter, content: { ...(content as LeafContent), value: normals } } as Filter, ...(specials as Filter[])]
+                ? [
+                      { ...filter, content: { ...(content as LeafContent), value: normals } } as Filter,
+                      ...(specials as Filter[]),
+                  ]
                 : (specials as Filter[]);
         return normalizeFilters({ op: OR_OP, content: filters });
     }

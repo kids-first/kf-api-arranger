@@ -33,7 +33,16 @@ import {
     SOME_NOT_IN_OP,
 } from '../constants.js';
 import type { EsQuery } from '../types.js';
-import { isNested, mergePath, readPath, toEsRangeValue, wrapMust, wrapMustNot, wrapNested, wrapShould } from '../utils/esFilter.js';
+import {
+    isNested,
+    mergePath,
+    readPath,
+    toEsRangeValue,
+    wrapMust,
+    wrapMustNot,
+    wrapNested,
+    wrapShould,
+} from '../utils/esFilter.js';
 import normalizeFilters, { type Filter, type LeafContent } from './normalizeFilters.js';
 
 type OpArgs = { nestedFields: string[]; filter: Filter };
@@ -57,13 +66,8 @@ function wrapFilter({
     const field = (filter.content as LeafContent).field ?? '';
     // Nested-field prefixes of `field`, deepest first. The reduce below
     // walks deepest → shallowest so the outermost wrapper ends up shallowest.
-    const nestedPaths = nestedFields
-        .filter(nf => field.startsWith(nf + '.'))
-        .sort((a, b) => b.length - a.length);
-    return nestedPaths.reduce<EsQuery>(
-        (acc, path) => wrapNested(acc, path),
-        isNot ? wrapMustNot(esFilter) : esFilter,
-    );
+    const nestedPaths = nestedFields.filter(nf => field.startsWith(`${nf}.`)).sort((a, b) => b.length - a.length);
+    return nestedPaths.reduce<EsQuery>((acc, path) => wrapNested(acc, path), isNot ? wrapMustNot(esFilter) : esFilter);
 }
 
 function getRegexFilter({ nestedFields, filter }: OpArgs): EsQuery {
@@ -103,7 +107,8 @@ function getFuzzyFilter({ nestedFields, filter }: OpArgs): EsQuery {
     const nestedMap: Record<string, string[]> = {};
     for (const field of fields) {
         const group = sortedNested.find(y => field.includes(y)) ?? '';
-        (nestedMap[group] ??= []).push(field);
+        nestedMap[group] ??= [];
+        nestedMap[group].push(field);
     }
 
     // One wildcard multi-match per nested group, OR'd together.
@@ -181,7 +186,9 @@ function collapseNestedFilters({ esFilter, bools }: { esFilter: EsQuery; bools: 
 
     const found =
         path &&
-        bools.find(bool => (filterIsNested ? readPath(bool) === readPath(esFilter) : readDeep(bool, path) !== undefined));
+        bools.find(bool =>
+            filterIsNested ? readPath(bool) === readPath(esFilter) : readDeep(bool, path) !== undefined,
+        );
 
     return [
         ...bools.filter(b => b !== found),
@@ -221,13 +228,13 @@ function getGroupFilter({ nestedFields, filter }: OpArgs): EsQuery {
     const esFilters = (content as Filter[]).map(f => opSwitch({ nestedFields, filter: f }));
     const isNestedGroup = !!esFilters[0]?.nested;
     if (isNestedGroup && esFilters.map(f => f.nested?.path).includes(pivot)) {
-        const flattened = esFilters.reduce<EsQuery[]>(
-            (bools, esFilter) =>
-                op === AND_OP || op === NOT_OP
-                    ? collapseNestedFilters({ esFilter, bools })
-                    : [...bools, esFilter],
-            [],
-        );
+        const flattened = esFilters.reduce<EsQuery[]>((bools, esFilter) => {
+            if (op === AND_OP || op === NOT_OP) {
+                return collapseNestedFilters({ esFilter, bools });
+            }
+            bools.push(esFilter);
+            return bools;
+        }, []);
         return applyBooleanWrapper(flattened);
     }
     return applyBooleanWrapper(esFilters);

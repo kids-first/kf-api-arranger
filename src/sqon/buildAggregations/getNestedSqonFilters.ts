@@ -36,10 +36,10 @@ function walk(args: {
         if (lastDot <= 0) continue;
         const parentPath = field.slice(0, lastDot);
         if (nestedFields.includes(parentPath) && parentPivot !== parentPath) {
-            // (accumulator[k] ??= []).push(sqon) avoids the O(N²) hot path
-            // of `[...accumulator[k], sqon]` when many sibling filters share
-            // a parent path.
-            (accumulator[parentPath] ??= []).push(sqon);
+            // accumulator[k].push(sqon) — preferred over `[...accumulator[k], sqon]`
+            // which would be O(N²) when many sibling filters share a parent path.
+            accumulator[parentPath] ??= [];
+            accumulator[parentPath].push(sqon);
         }
     }
     return accumulator;

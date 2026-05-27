@@ -4,7 +4,10 @@
 import { ES_BOOL, ES_MUST, ES_MUST_NOT, ES_NESTED, ES_PATH, ES_QUERY, ES_SHOULD } from '../constants.js';
 import type { EsQuery } from '../types.js';
 
-export function wrapBool(op: typeof ES_MUST | typeof ES_MUST_NOT | typeof ES_SHOULD, value: EsQuery | EsQuery[]): EsQuery {
+export function wrapBool(
+    op: typeof ES_MUST | typeof ES_MUST_NOT | typeof ES_SHOULD,
+    value: EsQuery | EsQuery[],
+): EsQuery {
     return {
         [ES_BOOL]: {
             [op]: Array.isArray(value) ? value : [value],
@@ -28,7 +31,7 @@ export function wrapNested(esFilter: EsQuery, path: string): EsQuery {
 }
 
 export function isNested(filter: EsQuery | null | undefined): boolean {
-    return !!filter && Object.prototype.hasOwnProperty.call(filter, ES_NESTED);
+    return !!filter && Object.hasOwn(filter, ES_NESTED);
 }
 
 export function readPath(filter: EsQuery | null | undefined): string {

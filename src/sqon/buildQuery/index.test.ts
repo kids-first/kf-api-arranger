@@ -35,9 +35,7 @@ describe('normalizeFilters', () => {
     });
 
     it('preserves numeric zero values during array coercion', () => {
-        expect(
-            normalizeFilters({ content: { field: 'age_at_diagnosis', value: 0 }, op: 'gte' } as any),
-        ).toEqual({
+        expect(normalizeFilters({ content: { field: 'age_at_diagnosis', value: 0 }, op: 'gte' } as any)).toEqual({
             content: { field: 'age_at_diagnosis', value: [0] },
             op: 'gte',
             pivot: null,
@@ -45,9 +43,7 @@ describe('normalizeFilters', () => {
     });
 
     it('preserves empty-string values during array coercion', () => {
-        expect(
-            normalizeFilters({ content: { field: 'family_id', value: '' }, op: 'in' } as any),
-        ).toEqual({
+        expect(normalizeFilters({ content: { field: 'family_id', value: '' }, op: 'in' } as any)).toEqual({
             content: { field: 'family_id', value: [''] },
             op: 'in',
             pivot: null,
@@ -112,9 +108,7 @@ const cases: Array<{ name: string; input: any; output: any }> = [
         },
         output: {
             bool: {
-                should: [
-                    { bool: { must_not: [{ exists: { boost: 0, field: 'study_code' } }] } },
-                ],
+                should: [{ bool: { must_not: [{ exists: { boost: 0, field: 'study_code' } }] } }],
             },
         },
     },
@@ -351,7 +345,9 @@ const cases: Array<{ name: string; input: any; output: any }> = [
                                                         must: [
                                                             {
                                                                 terms: {
-                                                                    'participants.studies.experimental_strategy': ['WGS'],
+                                                                    'participants.studies.experimental_strategy': [
+                                                                        'WGS',
+                                                                    ],
                                                                     boost: 0,
                                                                 },
                                                             },
@@ -421,7 +417,11 @@ const cases: Array<{ name: string; input: any; output: any }> = [
                                                 query: {
                                                     bool: {
                                                         must: [
-                                                            { range: { 'biospecimens.diagnoses.age': { boost: 0, gte: 7 } } },
+                                                            {
+                                                                range: {
+                                                                    'biospecimens.diagnoses.age': { boost: 0, gte: 7 },
+                                                                },
+                                                            },
                                                         ],
                                                     },
                                                 },
@@ -480,7 +480,9 @@ const cases: Array<{ name: string; input: any; output: any }> = [
                                                 path: 'biospecimens.diagnoses',
                                                 query: {
                                                     bool: {
-                                                        must: [{ regexp: { 'biospecimens.diagnoses.label': 'fhir_.*' } }],
+                                                        must: [
+                                                            { regexp: { 'biospecimens.diagnoses.label': 'fhir_.*' } },
+                                                        ],
                                                     },
                                                 },
                                             },

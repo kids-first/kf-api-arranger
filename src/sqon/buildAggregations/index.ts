@@ -17,6 +17,8 @@
 //     terms agg on `tag` isn't pre-filtered by a `tag IN [...]` clause that
 //     drives the page.
 
+import { opSwitch } from '../buildQuery/index.js';
+import normalizeFilters, { type Filter, type LeafContent } from '../buildQuery/normalizeFilters.js';
 import {
     AGGS_WRAPPER_FILTERED,
     AGGS_WRAPPER_GLOBAL,
@@ -25,8 +27,6 @@ import {
     ES_NESTED,
     ES_QUERY,
 } from '../constants.js';
-import { opSwitch } from '../buildQuery/index.js';
-import normalizeFilters, { type Filter, type LeafContent } from '../buildQuery/normalizeFilters.js';
 import type { EsAggs, EsQuery } from '../types.js';
 import createFieldAggregation from './createFieldAggregation.js';
 import getNestedSqonFilters from './getNestedSqonFilters.js';
@@ -165,10 +165,7 @@ export default function buildAggregations(args: {
             fieldAggregation,
         );
 
-        Object.assign(
-            aggs,
-            wrapWithFilters({ query, field, aggregation, aggregationsFilterThemselves }),
-        );
+        Object.assign(aggs, wrapWithFilters({ query, field, aggregation, aggregationsFilterThemselves }));
     }
 
     return injectNestedFiltersToAggs({ aggs, nestedSqonFilters, aggregationsFilterThemselves });

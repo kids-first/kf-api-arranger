@@ -2,9 +2,9 @@
 // Without this, a SQON like IN(files.fhir_id, [...]) would aggregate against
 // the unfiltered nested sub-document.
 
-import { AGGS_WRAPPER_FILTERED } from '../constants.js';
 import { opSwitch } from '../buildQuery/index.js';
 import normalizeFilters, { type Filter } from '../buildQuery/normalizeFilters.js';
+import { AGGS_WRAPPER_FILTERED } from '../constants.js';
 import type { EsAggs } from '../types.js';
 
 // Builds the output from scratch instead of starting from a deep clone of
@@ -32,8 +32,7 @@ export default function injectNestedFiltersToAggs(args: {
             const filtersForPath = nestedSqonFilters[path];
             if (filtersForPath) {
                 const matching = filtersForPath.filter(
-                    sqonFilter =>
-                        aggregationsFilterThemselves || aggName.split(':')[0] !== sqonFilter.content.field,
+                    sqonFilter => aggregationsFilterThemselves || aggName.split(':')[0] !== sqonFilter.content.field,
                 );
                 result[aggName] = {
                     ...aggContent,

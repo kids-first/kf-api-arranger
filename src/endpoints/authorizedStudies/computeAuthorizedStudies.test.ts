@@ -130,17 +130,15 @@ describe('Compute Authorized Studies', () => {
                     hits: { total: { value: 0, relation: 'eq' }, max_score: null, hits: [] },
                     status: 200,
                     _shards: {
-                        failures: [
-                            { shard: 0, index: 'file_centric', node: 'n', reason: { type: 'x', reason: 'y' } },
-                        ],
+                        failures: [{ shard: 0, index: 'file_centric', node: 'n', reason: { type: 'x', reason: 'y' } }],
                     },
                 },
                 { hits: { total: { value: 0, relation: 'eq' }, max_score: null, hits: [] }, status: 200 },
             ] as unknown as FileAccessCountsResponse[]);
 
-            await expect(
-                computeAuthorizedStudiesForFence(null as any, 'gen3', ['phs001138.c1']),
-            ).rejects.toThrow(/shard failures/);
+            await expect(computeAuthorizedStudiesForFence(null as any, 'gen3', ['phs001138.c1'])).rejects.toThrow(
+                /shard failures/,
+            );
         });
     });
 });
