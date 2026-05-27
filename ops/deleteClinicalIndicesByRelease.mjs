@@ -1,8 +1,8 @@
 /**
  * Delete every clinical-entity ES index ending in `_<release>`.
  *
- *   node admin/deleteClinicalIndicesByRelease.mjs --release=re_20240709_1
- *   node admin/deleteClinicalIndicesByRelease.mjs --release=re_20240709_1 --dry-run
+ *   node ops/deleteClinicalIndicesByRelease.mjs --release=re_20240709_1
+ *   node ops/deleteClinicalIndicesByRelease.mjs --release=re_20240709_1 --dry-run
  *
  * Scope: indices whose names start with biospecimen_centric, participant_centric,
  * study_centric, file_centric, or specimen_tree_centric AND end with `_<release>`.

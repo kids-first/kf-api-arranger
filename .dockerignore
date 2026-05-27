@@ -4,7 +4,7 @@ node_modules
 
 # Not needed at runtime — defense-in-depth in case the multi-stage gap
 # ever collapses to single-stage.
-admin/
+ops/
 scripts/
 test/
 .github/

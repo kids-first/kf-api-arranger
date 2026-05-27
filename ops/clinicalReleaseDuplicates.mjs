@@ -1,7 +1,7 @@
 /**
  * Read-only duplicate-key check on clinical-entity ES indices for a release.
  *
- *   node admin/clinicalReleaseDuplicates.mjs --release=re_20240709_1
+ *   node ops/clinicalReleaseDuplicates.mjs --release=re_20240709_1
  *
  * Per entity, runs a terms agg on the entity's unique-ID field with
  * `min_doc_count: 2` to surface any keys appearing 2+ times. A non-empty

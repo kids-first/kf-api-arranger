@@ -1,7 +1,7 @@
 /**
  * Read-only stats inventory for clinical-entity ES indices of a release.
  *
- *   node admin/clinicalReleaseStats.mjs --release=re_20240709_1
+ *   node ops/clinicalReleaseStats.mjs --release=re_20240709_1
  *
  * Two outputs:
  *   1. Global summary: total docs per entity across the release.

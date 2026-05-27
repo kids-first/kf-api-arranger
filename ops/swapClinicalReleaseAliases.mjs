@@ -2,8 +2,8 @@
  * Atomic swap of the 5 clinical-entity aliases to point at the indices
  * tagged with a given release.
  *
- *   node admin/swapClinicalReleaseAliases.mjs --release=re_20240709_1
- *   node admin/swapClinicalReleaseAliases.mjs --release=re_20240709_1 --dry-run
+ *   node ops/swapClinicalReleaseAliases.mjs --release=re_20240709_1
+ *   node ops/swapClinicalReleaseAliases.mjs --release=re_20240709_1 --dry-run
  *
  * In one updateAliases call: removes every (alias → index) currently mapped
  * under biospecimen_centric, participant_centric, study_centric, file_centric,

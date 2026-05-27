@@ -2,7 +2,7 @@
  * Read-only inventory of clinical (+ transcriptomics) ES indices, grouped
  * by (release_id, type) and bucketed by alias state.
  *
- *   ES_HOST=https://… node admin/clinicalReleaseInventory.mjs
+ *   ES_HOST=https://… node ops/clinicalReleaseInventory.mjs
  *
  * - Two tables: releases whose every index is aliased, and everything else.
  * - `aliased` column shows n/N; mixed groups are tagged `(partial)`.
