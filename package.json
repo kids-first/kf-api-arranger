@@ -17,9 +17,7 @@
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
-    "cbs": "npm run cleanAndBuild && npm start",
-    "post-re-alias-helper": "node admin/postReleaseIndicesToAliasesHelper.mjs",
-    "delete-clinical-indices-helper": "node admin/deleteClinicalIndicesFromRelease.mjs"
+    "cbs": "npm run cleanAndBuild && npm start"
   },
   "repository": {
     "type": "git",
