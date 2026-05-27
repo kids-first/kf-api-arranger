@@ -4,6 +4,8 @@ import { getNestedFieldsForIndex } from '../../sqon/getNestedFieldsForIndex.js';
 import { and, not, or } from '../../sqon/manipulateSqon.js';
 import type { Sqon } from '../../sqon/types.js';
 
+export const VENN_SUPPORTED_INDICES = ['participant', 'file', 'biospecimen', 'variant', 'variant_somatic'];
+
 export type VennOutput = {
     operation: string;
     count: number;

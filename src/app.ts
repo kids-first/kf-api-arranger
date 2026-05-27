@@ -25,7 +25,7 @@ import type {
 import { getStatistics, getStudiesStatistics } from './endpoints/statistics/index.js';
 import transcriptomicsRouter from './endpoints/transcriptomics/route.js';
 import { computeUpset } from './endpoints/upset.js';
-import { reformatVenn, venn } from './endpoints/venn/venn.js';
+import { reformatVenn, VENN_SUPPORTED_INDICES, venn } from './endpoints/venn/venn.js';
 import { esHost, keycloakURL, userApiURL } from './env.js';
 import { globalErrorHandler, globalErrorLogger } from './errors.js';
 import { flushAllCache, STATISTICS_CACHE_ID, STATISTICS_PUBLIC_CACHE_ID, twineWithCache } from './middleware/cache.js';
@@ -189,9 +189,7 @@ export default (keycloak: Keycloak, runInternalQuery: RunInternalQuery): Express
             req.headers.authorization,
         );
 
-        const index = ['participant', 'file', 'biospecimen', 'variant', 'variant_somatic'].includes(req.body?.index)
-            ? req.body?.index
-            : 'participant';
+        const index = VENN_SUPPORTED_INDICES.includes(req.body?.index) ? req.body?.index : 'participant';
 
         const datum1 = await venn(sqons, index);
         const datum2 = datum1.map(x => ({ ...x, sqon: replaceIdsWithSetId(x.sqon, mSetItToIds) }));
