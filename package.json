@@ -13,6 +13,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "build": "rm -rf ./dist/* && tsc --build",
+    "typecheck": "tsc --noEmit",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "serve": "npm run build && npm start"
