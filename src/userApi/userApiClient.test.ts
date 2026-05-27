@@ -24,6 +24,15 @@ afterAll(() => {
     globalThis.fetch = originalFetch;
 });
 
+// Real fetch() Response derives `ok` from the status code (true for 200-299).
+// Replicate that here so the production check `response.ok` behaves the
+// same against the mocks as it would against a real Response.
+const buildMockResponse = (status: number, body: unknown) => ({
+    status,
+    ok: status >= 200 && status < 300,
+    json: () => body,
+});
+
 describe('UserApi Client', () => {
     const accessToken = 'Bearer bearer';
     const setId = '1ea';
@@ -44,7 +53,7 @@ describe('UserApi Client', () => {
         });
 
         it('should return body if status is 200', async () => {
-            const mockResponse = { status: 200, json: () => [userSet, userSet] };
+            const mockResponse = buildMockResponse(200, [userSet, userSet]);
             fetchMock.mockImplementation(() => mockResponse);
 
             const result = await getUserSets(accessToken);
@@ -55,7 +64,7 @@ describe('UserApi Client', () => {
 
         it('should throw a UserApiError if status is not 200', async () => {
             const expectedError = new UserApiError(401, 'Unauthorized');
-            const mockResponse = { status: 401, json: () => 'Unauthorized' };
+            const mockResponse = buildMockResponse(401, 'Unauthorized');
 
             fetchMock.mockImplementation(() => mockResponse);
 
@@ -70,7 +79,7 @@ describe('UserApi Client', () => {
         });
 
         it('should return body if status is 200', async () => {
-            const mockResponse = { status: 200, json: () => [{ ...userSet, sharedpublicly: true }] };
+            const mockResponse = buildMockResponse(200, [{ ...userSet, sharedpublicly: true }]);
             fetchMock.mockImplementation(() => mockResponse);
 
             const result = await getSharedSet(accessToken, setId);
@@ -81,7 +90,7 @@ describe('UserApi Client', () => {
 
         it('should throw a UserApiError if status is not 200', async () => {
             const expectedError = new UserApiError(401, 'Unauthorized');
-            const mockResponse = { status: 401, json: () => 'Unauthorized' };
+            const mockResponse = buildMockResponse(401, 'Unauthorized');
 
             fetchMock.mockImplementation(() => mockResponse);
 
@@ -104,7 +113,7 @@ describe('UserApi Client', () => {
         });
 
         it('should return body if status is < 300', async () => {
-            const mockResponse = { status: 200, json: () => createdSet };
+            const mockResponse = buildMockResponse(200, createdSet);
             fetchMock.mockImplementation(() => mockResponse);
 
             const result = await postUserSet(accessToken, createBody);
@@ -115,7 +124,7 @@ describe('UserApi Client', () => {
 
         it('should throw a UserApiError if status is not 200', async () => {
             const expectedError = new UserApiError(401, 'Unauthorized');
-            const mockResponse = { status: 401, json: () => 'Unauthorized' };
+            const mockResponse = buildMockResponse(401, 'Unauthorized');
 
             fetchMock.mockImplementation(() => mockResponse);
 
@@ -138,7 +147,7 @@ describe('UserApi Client', () => {
         });
 
         it('should return body if status is < 300', async () => {
-            const mockResponse = { status: 200, json: () => updatedSet };
+            const mockResponse = buildMockResponse(200, updatedSet);
             fetchMock.mockImplementation(() => mockResponse);
 
             const result = await putUserSet(accessToken, updateBody, setId);
@@ -149,7 +158,7 @@ describe('UserApi Client', () => {
 
         it('should throw a UserApiError if status is not 200', async () => {
             const expectedError = new UserApiError(401, 'Unauthorized');
-            const mockResponse = { status: 401, json: () => 'Unauthorized' };
+            const mockResponse = buildMockResponse(401, 'Unauthorized');
 
             fetchMock.mockImplementation(() => mockResponse);
 
@@ -164,7 +173,7 @@ describe('UserApi Client', () => {
         });
 
         it('should return body if status is 200', async () => {
-            const mockResponse = { status: 200, json: () => true };
+            const mockResponse = buildMockResponse(200, true);
             fetchMock.mockImplementation(() => mockResponse);
 
             const result = await deleteUserSet(accessToken, setId);
@@ -175,7 +184,7 @@ describe('UserApi Client', () => {
 
         it('should throw a UserApiError if status is not 200', async () => {
             const expectedError = new UserApiError(401, 'Unauthorized');
-            const mockResponse = { status: 401, json: () => 'Unauthorized' };
+            const mockResponse = buildMockResponse(401, 'Unauthorized');
 
             fetchMock.mockImplementation(() => mockResponse);
 
