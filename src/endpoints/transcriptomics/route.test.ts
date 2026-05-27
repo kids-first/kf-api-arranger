@@ -9,7 +9,7 @@ import {
     fakeKeycloakUrl,
     getToken,
     publicKey,
-} from '../../../test/authTestUtils.js';
+} from '../../auth.test-utils.js';
 import buildApp from '../../app.js';
 import type { RunInternalQuery } from '../../arrangerUtils.js';
 import { flushAllCache } from '../../middleware/cache.js';

@@ -3,7 +3,7 @@ import Keycloak from 'keycloak-connect';
 import request from 'supertest';
 import { vi } from 'vitest';
 
-import { fakeKeycloakClient, fakeKeycloakRealm, fakeKeycloakUrl, getToken, publicKey } from '../test/authTestUtils.js';
+import { fakeKeycloakClient, fakeKeycloakRealm, fakeKeycloakUrl, getToken, publicKey } from './auth.test-utils.js';
 import buildApp from './app.js';
 import type { RunInternalQuery } from './arrangerUtils.js';
 import { SetNotFoundError } from './endpoints/sets/setError.js';
