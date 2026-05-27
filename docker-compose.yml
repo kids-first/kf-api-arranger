@@ -1,12 +1,11 @@
 services:
   app:
     image: node:24-alpine3.22
+    network_mode: host
     working_dir: /app
     volumes:
       - .:/app
     command: sh -c 'npm install && npm run dev'
-    ports:
-      - "5050:5050"
 
   test:
     image: node:24-alpine3.22
