@@ -38,7 +38,7 @@ const capFirst = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1);
 
 // Shared across all entities — multi-entity schemas need a single Node
 // interface instance so the schema validator doesn't see N copies.
-export const NodeInterface = new GraphQLInterfaceType({
+const NodeInterface = new GraphQLInterfaceType({
     name: 'Node',
     fields: { id: { type: new GraphQLNonNull(GraphQLID) } },
 });

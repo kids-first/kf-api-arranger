@@ -30,8 +30,6 @@ export const OP_ALIASES: Record<string, string> = {
     '!=': NOT_IN_OP,
 };
 
-export const DATE_FORMAT = 'YYYY-MM-DD';
-
 export const ARRAY_CONTENT: string[] = [IN_OP, NOT_IN_OP, SOME_NOT_IN_OP, GT_OP, GTE_OP, LT_OP, LTE_OP];
 
 // ES query tag names
@@ -43,7 +41,6 @@ export const ES_NESTED = 'nested';
 export const ES_BOOL = 'bool';
 export const ES_QUERY = 'query';
 export const ES_PATH = 'path';
-export const ES_DATE_FORMAT = 'YYYY-MM-DD HH:mm:ss.SSSSSS';
 
 // Aggregation tag names
 export const STATS = 'stats';

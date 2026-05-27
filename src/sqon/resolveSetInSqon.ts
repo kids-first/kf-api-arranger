@@ -26,7 +26,7 @@ const injectIdsIntoSqon = (sqon: SetSqon, setIdsToValueMap: Record<string, strin
     })),
 });
 
-export const resolveSetsInSqonWithMapper = async (
+const resolveSetsInSqonWithMapper = async (
     sqon: SetSqon,
     _userId: string,
     accessToken: string,

@@ -4,10 +4,7 @@
 import { ES_BOOL, ES_MUST, ES_MUST_NOT, ES_NESTED, ES_PATH, ES_QUERY, ES_SHOULD } from '../constants.js';
 import type { EsQuery } from '../types.js';
 
-export function wrapBool(
-    op: typeof ES_MUST | typeof ES_MUST_NOT | typeof ES_SHOULD,
-    value: EsQuery | EsQuery[],
-): EsQuery {
+function wrapBool(op: typeof ES_MUST | typeof ES_MUST_NOT | typeof ES_SHOULD, value: EsQuery | EsQuery[]): EsQuery {
     return {
         [ES_BOOL]: {
             [op]: Array.isArray(value) ? value : [value],

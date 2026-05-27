@@ -7,7 +7,7 @@ import type { GraphQLScalarType } from 'graphql';
 import { GraphQLBoolean, GraphQLFloat, GraphQLInt, GraphQLString } from 'graphql';
 import type { ScalarEsType } from './types.js';
 
-export const ES_TO_GQL_SCALAR: Readonly<Record<ScalarEsType, GraphQLScalarType>> = {
+const ES_TO_GQL_SCALAR: Readonly<Record<ScalarEsType, GraphQLScalarType>> = {
     keyword: GraphQLString,
     text: GraphQLString,
     ip: GraphQLString,

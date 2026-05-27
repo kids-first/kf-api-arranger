@@ -20,7 +20,7 @@ export const SubActionTypes = {
     REMOVE_IDS: 'REMOVE_IDS',
 };
 
-export const getUserSet = async (accessToken: string, setId: string): Promise<UserSet> => {
+const getUserSet = async (accessToken: string, setId: string): Promise<UserSet> => {
     const existingSetsFilterById: UserSet[] = (await getUserSets(accessToken)).filter(r => r.id === setId);
     if (existingSetsFilterById.length !== 1) {
         throw new SetNotFoundError('Set to update can not be found !');

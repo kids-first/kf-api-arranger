@@ -104,14 +104,14 @@ const fetchBiospecimenStats = async (client: Client): Promise<number> => {
     return body.aggregations.types_count.value;
 };
 
-export const fetchVariantStats = async (client: Client): Promise<number> => {
+const fetchVariantStats = async (client: Client): Promise<number> => {
     const { body } = await client.count({
         index: esVariantIndex,
     });
     return body?.count;
 };
 
-export const fetchGenomesStats = async (client: Client): Promise<number> => {
+const fetchGenomesStats = async (client: Client): Promise<number> => {
     const { body } = await client.count({
         index: esParticipantIndex,
         body: {
@@ -164,7 +164,7 @@ export const fetchGenomesStats = async (client: Client): Promise<number> => {
     return body?.count;
 };
 
-export const fetchTranscriptomesStats = async (client: Client): Promise<number> => {
+const fetchTranscriptomesStats = async (client: Client): Promise<number> => {
     const { body } = await client.count({
         index: esParticipantIndex,
         body: {
@@ -226,7 +226,7 @@ export const fetchTranscriptomesStats = async (client: Client): Promise<number> 
     return body?.count;
 };
 
-export const fetchDemographicsStats = async (client: Client): Promise<Record<string, number>[]> => {
+const fetchDemographicsStats = async (client: Client): Promise<Record<string, number>[]> => {
     const response = await client.msearch({
         body: [
             { index: esParticipantIndex },
@@ -264,7 +264,7 @@ export const fetchDemographicsStats = async (client: Client): Promise<Record<str
     return [sex, downSyndromeStatus, race, ethnicity];
 };
 
-export const fetchTopDiagnosis = async (client: Client): Promise<Diagnosis[]> => {
+const fetchTopDiagnosis = async (client: Client): Promise<Diagnosis[]> => {
     const excludeDownSyndrom = '.*MONDO:(0700030|0008608|0700129|0700127|0700130|0700128|0700126).*';
 
     const groupByDiagnosisTerms = {

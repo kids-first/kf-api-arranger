@@ -131,7 +131,7 @@ export const venn = async (sqons: Sqon[], index: string): Promise<VennOutput[]> 
     }));
 };
 
-export const reformatWhenSpecifiedEntity = (os: VennOutput[]): VennEntityOutput[] =>
+const reformatWhenSpecifiedEntity = (os: VennOutput[]): VennEntityOutput[] =>
     os.map(o => ({
         operation: o.operation,
         entitySqon: o.sqon,

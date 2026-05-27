@@ -2,8 +2,6 @@ import type { RunInternalQuery } from '../arrangerUtils.js';
 import { resolveSetIds } from '../sqon/setSqon.js';
 import type { SetSqon } from './sets/setsTypes.js';
 
-export const idKey = 'fhir_id';
-
 export const getPhenotypesNodes = async (
     sqon: SetSqon,
     runInternalQuery: RunInternalQuery,
