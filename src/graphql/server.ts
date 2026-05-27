@@ -64,15 +64,7 @@ export async function buildGraphqlServer(): Promise<GraphqlServerHandle> {
 
     const schema = addResolversToSchema({
         schema: rawSchema,
-        resolvers: createResolvers(
-            entities.map(e => ({
-                entityName: e.entityName,
-                esIndex: e.esIndex,
-                nestedFields: e.nestedFields,
-                extendedEntries: e.extendedEntries,
-                columnsState: e.columnsState,
-            })),
-        ),
+        resolvers: createResolvers(entities),
     });
 
     const server = new ApolloServer<ServerContext>({ schema });

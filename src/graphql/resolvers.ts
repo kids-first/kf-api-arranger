@@ -20,18 +20,10 @@ import buildAggregations from '../sqon/buildAggregations/index.js';
 import buildQuery from '../sqon/buildQuery/index.js';
 import { flattenAggregations } from '../sqon/flattenAggregations.js';
 import type { EsClient } from './es/client.js';
-import type { ExtendedEntry } from './schema/types.js';
+import type { EntityModule } from './schema/index.js';
 
 export type ServerContext = {
     es: EsClient;
-};
-
-export type EntityResolverConfig = {
-    entityName: string;
-    esIndex: string;
-    nestedFields: string[];
-    extendedEntries: ExtendedEntry[];
-    columnsState: unknown;
 };
 
 type SortInput = {
@@ -137,7 +129,7 @@ function resolveNested(value: unknown, nestedFields: string[], parent = ''): unk
     return out;
 }
 
-export function createResolvers(entities: EntityResolverConfig[]): IResolvers<unknown, ServerContext> {
+export function createResolvers(entities: EntityModule[]): IResolvers<unknown, ServerContext> {
     const root: Record<string, () => unknown> = {};
     const result: IResolvers<unknown, ServerContext> = { Root: root };
 
