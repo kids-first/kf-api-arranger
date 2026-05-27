@@ -27,7 +27,7 @@ export const searchSqon = async (
     });
 
     if (results?.errors) {
-        throw new Error(String(results.errors));
+        throw new Error(JSON.stringify(results.errors));
     }
 
     const edges = ((results?.data as any)?.[type]?.hits?.edges ?? []) as Array<{ node: Record<string, string> }>;
