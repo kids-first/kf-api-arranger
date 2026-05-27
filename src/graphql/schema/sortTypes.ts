@@ -1,14 +1,14 @@
 // Sort input — used by `hits(sort: [Sort], ...)`. Module-level singleton
 // (one instance shared across all entity wrappers, like stateTypes.ts).
 //
-// Matches arranger's `Sort` input shape exactly:
+// Shape:
 //   input Sort { field: String!, order: Order, mode: Mode, missing: Missing }
 //   enum Order   { asc, desc }
 //   enum Mode    { avg, max, min, sum }
 //   enum Missing { first, last }
 //
-// `mode` is in the schema for SDL parity but our resolver doesn't consume it
-// — the FE never sends it. Add to `buildEsSort` in resolvers.ts if/when used.
+// `mode` is in the schema but the resolver doesn't consume it — the FE
+// never sends it. Add to `buildEsSort` in resolvers.ts if/when used.
 // `missing` arrives at the resolver as the enum's string name ('first'/'last');
 // buildEsSort prepends the ES-required '_' (→ '_first'/'_last').
 

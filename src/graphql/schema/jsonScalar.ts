@@ -1,7 +1,4 @@
-// Re-export the well-known JSON scalar used by arranger.
-// We use the upstream `graphql-type-json` package rather than rolling our own
-// for compatibility — arranger uses the same package, so consumers built
-// against arranger's `JSON` scalar will see the same behavior.
+// Re-export the well-known `JSON` scalar from `graphql-type-json`.
 
 // Note: `graphql-type-json` is a CJS package. Under ESM, the *default* import
 // resolves to the namespace object (no `name` property → GraphQL schema build

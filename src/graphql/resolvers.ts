@@ -1,17 +1,17 @@
-// Resolver factory.
-// Slice S: Root.<entity> + <entity>.hits.
-// Slice T (added 2026-05-21): <entity>.aggregations via
-// local buildAggregations + flattenAggregations (src/sqon/).
-// Slice U (added 2026-05-22): <entity>.extended + <entity>.columnsState,
-// both read from the per-entity config loaded once at startup.
-// Slice V (added 2026-05-22): nested fields pre-shaped into Connection
-// payload via resolveNested.
-// Slice X (multi-entity, 2026-05-22): one createResolvers call handles all
-// N entities; each entity's resolvers close over its own esIndex +
-// nestedFields + extendedEntries + columnsState. ServerContext is just { es }.
-// Slice Y (added 2026-05-22): hits() supports sort/offset/searchAfter args
-// matching arranger's signature; buildEsSort handles missing-defaults +
-// nested-path detection.
+// Resolver factory for the multi-entity GraphQL schema. One createResolvers
+// call wires the resolvers for all N entities; each entity's resolvers close
+// over its own esIndex + nestedFields + extendedEntries + columnsState.
+// ServerContext holds the EsClient only.
+//
+// Entity-level resolvers:
+//   - hits(filters, sort, first, offset, searchAfter): full ES search.
+//   - aggregations(filters, ...): ES search with aggs body, response is
+//     flattened to dot-paths then GraphQL-keyed (`__` for `.`).
+//   - extended(fields?): returns the per-entity extended list (filterable).
+//   - columnsState: returns the precomputed (or null) columnsState.
+//
+// Nested fields are shaped into Connection payloads at the source level via
+// resolveNested, so sub-Connection queries traverse the right structure.
 
 import type { IResolvers } from '@graphql-tools/utils';
 import type { GraphQLResolveInfo } from 'graphql';
@@ -40,20 +40,14 @@ type HitsArgs = {
     searchAfter?: unknown[];
 };
 
-// Port of arranger's body.sort construction
-// (arranger-2.19.2/modules/mapping-utils/src/resolveHits.js:208-230).
-// For each sort entry: compute deepest nested-field prefix on the sort field
-// so ES knows to apply nested sorting; supply a `missing` default based on
-// order direction if not provided.
-// NB: the prefix check below uses `indexOf(nf) === 0` verbatim from arranger.
-// That's technically loose (would treat `genes_extra` as starting with
-// `genes` if both were nested), but we keep it for byte-parity. Tighten to
-// `fld === nf || fld.startsWith(nf + '.')` if that bug ever bites.
+// For each sort entry: compute the deepest nested-field prefix on the sort
+// field so ES applies nested-sort semantics; supply a `missing` default
+// based on order direction if not provided.
 function buildEsSort(sortInputs: SortInput[], nestedFields: string[]): unknown[] {
     return sortInputs.map(({ field, order, missing }) => {
         const fld = field ?? '';
         const nestedPath = nestedFields
-            .filter(nf => fld.indexOf(nf) === 0)
+            .filter(nf => fld === nf || fld.startsWith(`${nf}.`))
             .reduce((deepest, p) => (deepest.length > p.length ? deepest : p), '');
         return {
             [fld]: {
@@ -75,15 +69,9 @@ type ExtendedArgs = {
     fields?: string[];
 };
 
-// arranger's `normalizeFilters` short-circuits on falsy input (returns the
-// filter as-is) but crashes on an empty `{}` SQON: it lacks an `op` field,
-// hits the "Must specify op" error branch, and the error-message stringify
-// path throws "Cannot convert object to primitive value" before the Error
-// itself is constructed. Symptom is a TypeError with a confusing stack.
-// Root cause is the missing-op SQON; the stringify failure is a side effect
-// of how the Babel-transpiled middleware builds that error message.
-// Coerce empty/missing SQONs to undefined at the boundary so we hit the
-// falsy short-circuit cleanly.
+// normalizeFilters throws on a SQON missing `op`. Coerce empty/missing SQONs
+// to undefined at the boundary so the normalizer's falsy short-circuit
+// handles them cleanly instead of hitting the throw.
 function normalizeSqonInput(filters: unknown): unknown {
     if (filters == null) return undefined;
     if (typeof filters === 'object' && Object.keys(filters as object).length === 0) {
@@ -92,15 +80,12 @@ function normalizeSqonInput(filters: unknown): unknown {
     return filters;
 }
 
-// Slice V — port of arranger-2.19.2/modules/mapping-utils/src/resolveHits.js
-// `resolveNested` (lines 86-133). Walks an ES `_source` object and, for any
-// field whose full dotted path is in `nestedFields`, replaces its value with
-// the Connection-shaped `{ hits: { edges: [{ node }], total } }` payload
-// that Apollo's default field resolvers can pick across for sub-Connection
-// queries (`contacts { hits { edges { node { ... } } } }`). Non-nested
-// values are walked through unchanged (objects recurse to find nested
-// descendants; scalars pass through). The `isArray` scalar-wrap branch from
-// arranger is omitted for now — add if real data needs it.
+// Walks an ES `_source` object and, for any field whose full dotted path is
+// in `nestedFields`, replaces its value with the Connection-shaped
+// `{ hits: { edges: [{ node }], total } }` payload that Apollo's default
+// field resolvers can pick across for sub-Connection queries
+// (`contacts { hits { edges { node { ... } } } }`). Non-nested values pass
+// through (objects recurse to find nested descendants; scalars unchanged).
 function resolveNested(value: unknown, nestedFields: string[], parent = ''): unknown {
     if (value == null || typeof value !== 'object') return value;
     if (Array.isArray(value)) {
@@ -196,11 +181,10 @@ export function createResolvers(entities: EntityModule[]): IResolvers<unknown, S
                     aggregations: res.aggregations ?? {},
                     includeMissing: args.include_missing,
                 });
-                // arranger's flattenAggregations keys nested-path results with
-                // dots (`contacts.institution`), but GraphQL field names use
-                // double underscores. Convert at the resolver boundary so the
-                // default field resolver picks up the right key — verbatim
-                // from arranger-2.19.2/modules/mapping-utils/src/resolveAggregations.js.
+                // flattenAggregations emits dot-keyed nested paths
+                // (`contacts.institution`); GraphQL field names use double
+                // underscores. Convert at the resolver boundary so the
+                // default field resolver picks up the right key.
                 return Object.fromEntries(Object.entries(flat).map(([k, v]) => [k.replace(/\./g, '__'), v]));
             },
         };

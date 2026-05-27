@@ -1,6 +1,4 @@
 // Internal types for the schema generator.
-// Mirrors the structure used by the byte-parity-proven .mjs experiment in
-// experiments/schemaGen/, ported to TS.
 
 export type ScalarEsType =
     | 'keyword'

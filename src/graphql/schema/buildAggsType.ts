@@ -10,9 +10,9 @@ import { GraphQLObjectType } from 'graphql';
 import { Aggregations, NumericAggregations } from './aggsTypes.js';
 import type { FieldNode, FieldTree, ScalarEsType } from './types.js';
 
-// Verbatim from arranger's esToAggTypeMap.js, restricted to the ES types our
-// fieldTree currently accepts. `ip` isn't in arranger's table — we default
-// it to Aggregations (keyword-like) rather than crashing.
+// ES scalar type → GraphQL Aggregations type. Numeric types get
+// NumericAggregations (with stats); the rest get bucket-shaped Aggregations.
+// `ip` defaults to Aggregations (keyword-like).
 const ES_TO_AGG_TYPE: Readonly<Record<ScalarEsType, GraphQLObjectType>> = {
     keyword: Aggregations,
     text: Aggregations,

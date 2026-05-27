@@ -1,10 +1,8 @@
-// The 4 shared aggregation types — vendored programmatically from
-// arranger-2.19.2/modules/schema/src/Aggregations.js. Field order matches
-// arranger exactly so future SDL parity checks have a chance.
+// The 4 shared aggregation types.
 //
-// Still omitted (not addressed by our consumers yet): NumericAggregations.
-// histogram, Aggregations.buckets(max:) arg, and Aggregations.cardinality.
-// top_hits + filter_by_term were added for the /phenotypes route (Phase A2).
+// Not yet exposed (no consumer requires them): NumericAggregations.histogram,
+// Aggregations.buckets(max:) arg, and Aggregations.cardinality.
+// top_hits + filter_by_term were added for the /phenotypes route.
 
 import { GraphQLFloat, GraphQLInt, GraphQLList, GraphQLObjectType, GraphQLString } from 'graphql';
 import { GraphQLJSON } from './jsonScalar.js';
@@ -26,9 +24,9 @@ export const Bucket = new GraphQLObjectType({
         doc_count: { type: GraphQLInt },
         key: { type: GraphQLString },
         key_as_string: { type: GraphQLString },
-        // Arranger extensions used by /phenotypes (flattened by
-        // flattenAggregations — top_hits returns the picked _source projection,
-        // filter_by_term returns just `{doc_count}`).
+        // Used by /phenotypes (flattened by flattenAggregations — top_hits
+        // returns the picked _source projection, filter_by_term returns just
+        // `{doc_count}`).
         top_hits: {
             type: GraphQLJSON,
             args: {

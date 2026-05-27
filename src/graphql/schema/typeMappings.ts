@@ -1,7 +1,7 @@
 // ES scalar type → GraphQL scalar.
-// Note: arranger maps `long`/`integer`/`short`/`byte` to `Float`, NOT `Int`, to
-// avoid JS-side overflow on ES `long` (int64) > Number.MAX_SAFE_INTEGER.
-// We match that exactly for byte-parity with arranger's emitted SDL.
+// `long`/`integer`/`short`/`byte` map to `Float`, not `Int`, to avoid JS-side
+// overflow on ES `long` (int64) > Number.MAX_SAFE_INTEGER. This is also the
+// shape the FE expects on the GraphQL contract.
 
 import type { GraphQLScalarType } from 'graphql';
 import { GraphQLBoolean, GraphQLFloat, GraphQLInt, GraphQLString } from 'graphql';

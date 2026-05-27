@@ -1,8 +1,7 @@
-// Slice V: recursive type builder for entity-level + nested sub-Connection
-// type families. Replaces the slice-S stub treatment of nested/object fields
-// in the former buildNodeType.ts.
+// Recursive type builder for entity-level + nested sub-Connection type
+// families.
 //
-// Three kinds of types emitted, mirroring arranger-2.19.2:
+// Three kinds of types emitted:
 //   1. Node type (`<Path>Node`) — has id, score, and recursive fields. Used
 //      for entity-level Node and every sub-Connection Node. Implements Node
 //      interface.
@@ -12,12 +11,11 @@
 //      `<Path>Aggregations` (entity-level only), `<Path>Connection`,
 //      `<Path>Edge`, `<Path>Node`.
 //
-// Sub-Connection wrappers skip arranger's `mapping`, `aggsState`,
-// `matchBoxState`, and sub-level `extended`/`columnsState`/`aggregations`
-// fields — frontend audit (2026-05-22) confirmed none are queried at
-// sub-Connection level. Top-level entity wrapper still exposes
-// `extended` and `columnsState` (slice U); the args `includeEntityMetadata`
-// and `aggsType` switch those on.
+// Sub-Connection wrappers omit `mapping`, `aggsState`, `matchBoxState`, and
+// sub-level `extended`/`columnsState`/`aggregations` — frontend audit
+// (2026-05-22) confirmed none are queried at sub-Connection level. The
+// top-level entity wrapper still exposes `extended` + `columnsState`;
+// `includeEntityMetadata` and `aggsType` switch those on.
 
 import type { GraphQLFieldConfigMap, GraphQLOutputType } from 'graphql';
 import {
@@ -39,9 +37,7 @@ import type { ExtendedMap, FieldNode } from './types.js';
 const capFirst = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1);
 
 // Shared across all entities — multi-entity schemas need a single Node
-// interface instance so the schema validator doesn't see N copies. The slice-V
-// factory `buildNodeInterface()` was per-call; multi-entity refactor (slice X)
-// flipped it to a module-level singleton.
+// interface instance so the schema validator doesn't see N copies.
 export const NodeInterface = new GraphQLInterfaceType({
     name: 'Node',
     fields: { id: { type: new GraphQLNonNull(GraphQLID) } },
@@ -55,8 +51,8 @@ type BuildFieldMapArgs = {
 };
 
 // Recursive walker — emits the field map for either a Node type (entity-level
-// or sub-Connection Node) or an object container. Order matches arranger:
-// scalars first alphabetically, then nested/object fields alphabetically.
+// or sub-Connection Node) or an object container. Ordering: scalars first
+// alphabetically, then nested/object fields alphabetically.
 function buildFieldMap(args: BuildFieldMapArgs): GraphQLFieldConfigMap<unknown, unknown> {
     const { fields, extendedMap, parentName, parentPath } = args;
     const ordered = fields

@@ -1,8 +1,6 @@
-// Slice U: programmatic port of the ColumnState family from
-// arranger-2.19.2/modules/schema/src/State.js (output types only).
-// AggState/AggsState/MatchBoxState families and all *Input types are omitted
-// — include-portal-ui's frontend audit (2026-05-22) confirmed only
-// columnsState + extended are queried.
+// ColumnState output type family. AggState/AggsState/MatchBoxState families
+// and all *Input types are omitted — frontend audit (2026-05-22) confirmed
+// only columnsState + extended are queried by the FE.
 
 import { GraphQLBoolean, GraphQLList, GraphQLObjectType, GraphQLString } from 'graphql';
 
