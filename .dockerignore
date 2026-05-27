@@ -1,11 +1,24 @@
-Dockerfile
-.git
+# Build artifacts and dependencies — regenerated inside the image
 node_modules
+dist
+
+# Secrets and local configs
+.env
+.env.example
+.git
+.idea
+.claude
 
 # Not needed at runtime — defense-in-depth in case the multi-stage gap
 # ever collapses to single-stage.
 ops/
 scripts/
-test/
+experiments/
+docs/
 .github/
 *.md
+Dockerfile
+docker-compose.yml
+biome.json
+vitest.config.ts
+.gitignore
