@@ -19,7 +19,7 @@ const injectIdsIntoSqon = (sqon: SetSqon, setIdsToValueMap: Record<string, strin
             ? {
                   ...op.content,
                   value: Array.isArray(op.content.value)
-                      ? op.content.value.map(value => setIdsToValueMap[value] || op.content.value).flat(Infinity)
+                      ? op.content.value.map(value => setIdsToValueMap[value] || value).flat(Infinity)
                       : setIdsToValueMap[op.content.value] || op.content.value,
               }
             : injectIdsIntoSqon(op, setIdsToValueMap).content,
