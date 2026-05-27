@@ -28,9 +28,10 @@ export const getPublicStudy = async (code: string): Promise<RData> => {
     return r.body.hits?.hits?.map(x => x._source)?.[0];
 };
 
+const MAX_AGG_TERMS_SIZE = 10000;
+
 export const getPublicGraphs = async (code: string): Promise<RData> => {
     const client = EsInstance.getInstance();
-    const MAX_AGG_TERMS_SIZE = 10000;
     const mr = await client.msearch({
         body: [
             { index: `participant_centric` },
