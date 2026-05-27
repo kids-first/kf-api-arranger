@@ -5,12 +5,10 @@ import { esHost, esPass, esUser } from './env.js';
 class EsInstance {
     private instance: Client;
     constructor() {
-        if (!this.instance) {
-            if (esUser && esPass) {
-                this.instance = new Client({ node: esHost, auth: { username: esUser, password: esPass } });
-            } else {
-                this.instance = new Client({ node: esHost });
-            }
+        if (esUser && esPass) {
+            this.instance = new Client({ node: esHost, auth: { username: esUser, password: esPass } });
+        } else {
+            this.instance = new Client({ node: esHost });
         }
     }
 
