@@ -25,7 +25,7 @@ export type UserSet = {
 type Method = 'GET' | 'POST' | 'PUT' | 'DELETE';
 
 const callUserApi = async <T>(path: string, method: Method, accessToken: string, body?: unknown): Promise<T> => {
-    const response = await fetch(encodeURI(`${userApiURL}${path}`), {
+    const response = await fetch(`${userApiURL}${path}`, {
         method,
         headers: {
             Authorization: accessToken,
@@ -36,7 +36,7 @@ const callUserApi = async <T>(path: string, method: Method, accessToken: string,
 
     const responseBody = (await response.json()) as T;
 
-    if (response.status < 300) {
+    if (response.ok) {
         return responseBody;
     }
 
