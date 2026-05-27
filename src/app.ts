@@ -62,7 +62,6 @@ export default (keycloak: Keycloak, runInternalQuery: RunInternalQuery): Express
             keycloak: keycloakURL,
             elasticsearch: esHost,
             users: userApiURL,
-            arrangerNext: true,
         });
     });
 
