@@ -86,7 +86,7 @@ export const updateSetContent = async (
 ): Promise<SavedSet> => {
     const setToUpdate = await getUserSet(accessToken, setId);
 
-    const { sqon, ids, setType } = setToUpdate.content;
+    const { sqon, ids } = setToUpdate.content;
 
     const sqonAfterReplace = await resolveSetsInSqon(requestBody.sqon, userId, accessToken);
 
@@ -97,10 +97,6 @@ export const updateSetContent = async (
         setToUpdate.content.idField,
         runInternalQuery,
     );
-
-    if (setType !== setToUpdate.content.setType) {
-        throw new Error('Cannot add/remove from a set not of the same type');
-    }
 
     const existingSqonWithNewSqon =
         requestBody.subAction === SubActionTypes.ADD_IDS
