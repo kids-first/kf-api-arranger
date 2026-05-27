@@ -520,7 +520,7 @@ describe('buildQuery — perf', () => {
         const elapsedMs = performance.now() - t0;
         const perCallUs = (elapsedMs * 1000) / ITERATIONS;
 
-        console.log(
+        console.info(
             `buildQuery: ${perCallUs.toFixed(2)}µs/call · ` +
                 `${elapsedMs.toFixed(1)}ms total over ${ITERATIONS.toLocaleString()} iterations`,
         );

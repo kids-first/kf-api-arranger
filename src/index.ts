@@ -9,17 +9,17 @@ import keycloakConfig from './keycloak.js';
 import { resolveSetIdMiddleware } from './middleware/resolveSetIdInSqon.js';
 
 process.on('uncaughtException', err => {
-    console.log(`Uncaught Exception: ${err.message}`);
+    console.error(`Uncaught Exception: ${err.message}`);
     process.exit(1);
 });
 
 process.on('unhandledRejection', (reason, promise) => {
-    console.log('Unhandled rejection at ', promise, `reason: ${reason}`);
+    console.error('Unhandled rejection at ', promise, `reason: ${reason}`);
     process.exit(1);
 });
 
 process.on('SIGINT', () => {
-    console.log(`Process ${process.pid} has been interrupted`);
+    console.info(`Process ${process.pid} has been interrupted`);
     process.exit(0);
 });
 
@@ -51,5 +51,5 @@ app.use(
 );
 
 app.listen(port, () => {
-    console.log(`⚡️ Listening on port ${port} ⚡️`);
+    console.info(`⚡️ Listening on port ${port} ⚡️`);
 });

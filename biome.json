@@ -7,7 +7,7 @@
     },
     "files": {
         "ignoreUnknown": true,
-        "includes": ["src/**", "scripts/**", "vitest.config.ts", "!**/dist", "!**/node_modules"]
+        "includes": ["src/**", "vitest.config.ts", "!**/dist", "!**/node_modules"]
     },
     "formatter": {
         "enabled": true,
@@ -32,7 +32,7 @@
             "suspicious": {
                 "noConsole": {
                     "level": "error",
-                    "options": { "allow": ["warn", "error", "log", "assert"] }
+                    "options": { "allow": ["warn", "error", "info", "assert"] }
                 },
                 "noExplicitAny": "off"
             },
