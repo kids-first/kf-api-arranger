@@ -41,12 +41,17 @@ export const computeAuthorizedStudiesForFence = async (
     const countFailures =
         accessCounts?.filter(x => x._shards?.failures && x._shards.failures.length > 0)?.map(x => x._shards.failures) ||
         [];
-    console.assert(countFailures.length === 0, 'failures detected', countFailures);
+    if (countFailures.length > 0) {
+        throw new Error(
+            `Authorized-Studies: shard failures in files-counts multi-search: ${JSON.stringify(countFailures)}`,
+        );
+    }
     const size = Object.keys(M_SEARCH).length; //there are "size" response elements per study
-    console.assert(
-        accessCounts.length % size === 0,
-        '`Authorized-Studies: Unexpected chunks size from files counts multi-search',
-    );
+    if (accessCounts.length % size !== 0) {
+        throw new Error(
+            `Authorized-Studies: unexpected chunks size from files-counts multi-search (got ${accessCounts.length}, expected multiple of ${size})`,
+        );
+    }
     return {
         data: dataAggregations.map((x: StudyDataSpecific, i: number): StudyDataSpecific | StudyDataGlobal => {
             const extractMSearchHitsTotal = (index: number) =>
@@ -84,12 +89,12 @@ export const computeAuthorizedStudiesForAllFences = async (req: Request, res: Re
     }
 
     const MAX_ACL_SIZE = 500;
-    const MAX_ALC_LENGTH_VALUE = 100;
+    const MAX_ACL_LENGTH_VALUE = 100;
     const aclAreProcessable = Object.values(body).every(
         x =>
             Array.isArray(x.acl) &&
             x.acl.length <= MAX_ACL_SIZE &&
-            x.acl.every(a => typeof a === 'string' && a.length < MAX_ALC_LENGTH_VALUE),
+            x.acl.every(a => typeof a === 'string' && a.length <= MAX_ACL_LENGTH_VALUE),
     );
     if (!aclAreProcessable) {
         return res.status(422).send(`Acls must be a list of acl values for each fence and not exceed a certain size`);

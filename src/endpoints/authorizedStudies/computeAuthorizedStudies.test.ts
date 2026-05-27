@@ -1,4 +1,4 @@
-import { vi } from 'vitest';
+import { expect, vi } from 'vitest';
 import { computeAuthorizedStudiesForFence } from './computeAuthorizedStudies.js';
 import { multiSearchFilesAccessCounts, searchAggregatedAuthorizedStudiesForFence } from './searchers.js';
 import type { AuthStudiesData, FileAccessCountsResponse } from './types.js';
@@ -108,6 +108,39 @@ describe('Compute Authorized Studies', () => {
                     total_authorized_files_count: 14,
                 },
             ]);
+        });
+
+        it('throws when the multi-search reports shard failures (regression for console.assert no-throw)', async () => {
+            vi.mocked(searchAggregatedAuthorizedStudiesForFence).mockResolvedValue([
+                {
+                    key: 'SD_TEST',
+                    doc_count: 1,
+                    top_study_hits: {
+                        hits: {
+                            total: { value: 1, relation: 'eq' },
+                            hits: [{ _source: { study: { study_name: 'Test', study_code: 'KF-TEST' } } }],
+                        },
+                    },
+                    acls: { buckets: [] },
+                },
+            ] as any);
+
+            vi.mocked(multiSearchFilesAccessCounts).mockResolvedValue([
+                {
+                    hits: { total: { value: 0, relation: 'eq' }, max_score: null, hits: [] },
+                    status: 200,
+                    _shards: {
+                        failures: [
+                            { shard: 0, index: 'file_centric', node: 'n', reason: { type: 'x', reason: 'y' } },
+                        ],
+                    },
+                },
+                { hits: { total: { value: 0, relation: 'eq' }, max_score: null, hits: [] }, status: 200 },
+            ] as unknown as FileAccessCountsResponse[]);
+
+            await expect(
+                computeAuthorizedStudiesForFence(null as any, 'gen3', ['phs001138.c1']),
+            ).rejects.toThrow(/shard failures/);
         });
     });
 });
