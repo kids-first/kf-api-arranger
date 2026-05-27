@@ -242,6 +242,18 @@ describe('Transcriptomics router', () => {
             expect(vi.mocked(fetchSampleGeneExp)).toHaveBeenCalledTimes(0);
         });
 
+        it('should return 400 when ensembl_gene_id field is missing entirely (regression for `=== ""` strict check)', async () => {
+            const token = getToken();
+
+            await request(app)
+                .post('/transcriptomics/sampleGeneExp')
+                .send({})
+                .set('Content-type', 'application/json')
+                .set({ Authorization: `Bearer ${token}` })
+                .expect(400);
+            expect(vi.mocked(fetchSampleGeneExp)).toHaveBeenCalledTimes(0);
+        });
+
         it('should return 500 if Authorization header contains valid token but an error occurs', async () => {
             const expectedError = new Error('OOPS');
             vi.mocked(fetchSampleGeneExp).mockImplementation(() => {

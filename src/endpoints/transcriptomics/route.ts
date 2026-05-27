@@ -35,7 +35,7 @@ transcriptomicsRouter.get('/diffGeneExp/export', async (_req, res) => {
 transcriptomicsRouter.post('/sampleGeneExp', async (req, res) => {
     const ensembl_gene_id: string = req.body.ensembl_gene_id;
 
-    if (ensembl_gene_id === '') {
+    if (!ensembl_gene_id) {
         throw new MissingFilterError();
     }
     const data = await fetchSampleGeneExp(ensembl_gene_id);
