@@ -14,6 +14,8 @@ export const keycloakURL = process.env.KEYCLOAK_URL || 'https://kf-keycloak-qa.k
 export const keycloakRealm = process.env.KEYCLOAK_REALM || 'kidsfirstdrc';
 export const keycloakClient = process.env.KEYCLOAK_CLIENT || 'kidsfirst-apis';
 
+export const isInclude = keycloakRealm === 'includedcc';
+
 export const esHost = process.env.ES_HOST || 'http://localhost:9200';
 export const esUser = process.env.ES_USER;
 export const esPass = process.env.ES_PASS;

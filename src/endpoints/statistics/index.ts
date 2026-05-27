@@ -2,7 +2,7 @@ import type { Client } from '@elastic/elasticsearch';
 
 import EsInstance from '../../ElasticSearchClientInstance.js';
 import { esBiospecimenIndex, esFileIndex, esParticipantIndex, esStudyIndex, esVariantIndex } from '../../esUtils.js';
-import { isInclude } from '../../projectUtils.js';
+import { isInclude } from '../../env.js';
 
 export type Diagnosis = {
     mondo_id: string;
