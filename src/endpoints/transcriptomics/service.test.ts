@@ -15,8 +15,8 @@ import {
 } from './service.js';
 import type { DiffGeneExpVolcano, Facets, MatchedGene, SampleGeneExpVolcano } from './types.js';
 
-vi.mock('../../s3Api');
-vi.mock('../../ElasticSearchClientInstance');
+vi.mock('../../s3Api/index.js');
+vi.mock('../../ElasticSearchClientInstance.js');
 
 describe('Transcriptomics', () => {
     describe('fetchDiffGeneExp', () => {

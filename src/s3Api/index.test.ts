@@ -1,11 +1,11 @@
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { vi } from 'vitest';
 
-import { generatePreSignedUrl } from '.';
 import { S3Error } from './errors.js';
+import { generatePreSignedUrl } from './index.js';
 import S3ClientInstance from './S3ClientInstance.js';
 
-vi.mock('./S3ClientInstance');
+vi.mock('./S3ClientInstance.js');
 vi.mock('@aws-sdk/s3-request-presigner');
 
 describe('S3 Service', () => {

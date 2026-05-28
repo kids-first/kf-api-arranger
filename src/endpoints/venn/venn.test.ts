@@ -3,8 +3,8 @@ import EsInstance from '../../ElasticSearchClientInstance.js';
 import { getNestedFieldsForIndex } from '../../sqon/getNestedFieldsForIndex.js';
 import { venn } from './venn.js';
 
-vi.mock('../../ElasticSearchClientInstance');
-vi.mock('../../sqon/getNestedFieldsForIndex');
+vi.mock('../../ElasticSearchClientInstance.js');
+vi.mock('../../sqon/getNestedFieldsForIndex.js');
 
 const isNumber = (value: unknown) => typeof value === 'number' && Number.isFinite(value);
 

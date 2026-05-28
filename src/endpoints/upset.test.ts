@@ -2,7 +2,7 @@ import { vi } from 'vitest';
 import EsInstance from '../ElasticSearchClientInstance.js';
 import { buildSteps, computeUpset, countIt, topN } from './upset.js';
 
-vi.mock('../ElasticSearchClientInstance');
+vi.mock('../ElasticSearchClientInstance.js');
 
 const MOCK_ES_PARTICIPANT_MAPPINGS = {
     statusCode: 200,

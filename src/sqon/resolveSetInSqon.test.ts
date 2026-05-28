@@ -3,7 +3,7 @@ import { RIFF_TYPE_SET } from '../endpoints/sets/setsTypes.js';
 import { getSharedSet, getUserSets, type UserSet } from '../userApi/userApiClient.js';
 import { resolveSetsInSqon, retrieveSetsFromUsers } from './resolveSetInSqon.js';
 
-vi.mock('../userApi/userApiClient');
+vi.mock('../userApi/userApiClient.js');
 
 describe('retrieveSetsFromUsers', () => {
     beforeEach(() => {

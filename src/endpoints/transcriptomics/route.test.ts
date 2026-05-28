@@ -17,7 +17,7 @@ import {
 } from './service.js';
 import type { DiffGeneExpVolcano, SampleGeneExpVolcano, Facets as TranscriptomicsFacets } from './types.js';
 
-vi.mock('./service');
+vi.mock('./service.js');
 
 // Silence the production-path error logger for this suite — several tests
 // deliberately trigger globalErrorLogger (mocked routes throw, real handler

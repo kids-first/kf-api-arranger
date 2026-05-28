@@ -3,7 +3,7 @@ import { getUserSets, postSetsTags, type UserSet } from '../userApi/userApiClien
 import { resolveQueriesSetAliases, resolveSetIds } from './setSqon.js';
 import type { Sqon } from './types.js';
 
-vi.mock('../userApi/userApiClient');
+vi.mock('../userApi/userApiClient.js');
 
 describe(`resolveSetIds`, () => {
     beforeEach(() => {

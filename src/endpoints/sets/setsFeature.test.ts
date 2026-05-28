@@ -14,10 +14,10 @@ import {
     type UpdateSetTagBody,
 } from './setsTypes.js';
 
-vi.mock('../../sqon/resolveSetInSqon');
-vi.mock('../../sqon/searchSqon');
-vi.mock('../../userApi/userApiClient');
-vi.mock('../../env', () => ({
+vi.mock('../../sqon/resolveSetInSqon.js');
+vi.mock('../../sqon/searchSqon.js');
+vi.mock('../../userApi/userApiClient.js');
+vi.mock('../../env.js', () => ({
     esHost: 'http://localhost:9200',
     maxSetContentSize: 3,
 }));

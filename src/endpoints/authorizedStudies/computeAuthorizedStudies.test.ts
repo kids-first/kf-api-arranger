@@ -3,8 +3,8 @@ import { computeAuthorizedStudiesForFence } from './computeAuthorizedStudies.js'
 import { multiSearchFilesAccessCounts, searchAggregatedAuthorizedStudiesForFence } from './searchers.js';
 import type { AuthStudiesData, FileAccessCountsResponse } from './types.js';
 
-vi.mock('./searchers');
-vi.mock('../../ElasticSearchClientInstance');
+vi.mock('./searchers.js');
+vi.mock('../../ElasticSearchClientInstance.js');
 
 describe('Compute Authorized Studies', () => {
     describe(`${computeAuthorizedStudiesForFence.name}`, () => {

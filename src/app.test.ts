@@ -19,8 +19,8 @@ import { getStatistics, getStudiesStatistics, type Statistics } from './endpoint
 import { flushAllCache } from './middleware/cache.js';
 import { UserApiError } from './userApi/userApiError.js';
 
-vi.mock('./endpoints/sets/setsFeature');
-vi.mock('./endpoints/statistics');
+vi.mock('./endpoints/sets/setsFeature.js');
+vi.mock('./endpoints/statistics/index.js');
 
 // Silence the production-path error logger for this suite — several tests
 // deliberately trigger globalErrorLogger (mocked routes throw, real handler
