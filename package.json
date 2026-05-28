@@ -5,7 +5,8 @@
   "type": "module",
   "main": "dist/src/index.js",
   "engines": {
-    "node": ">=24"
+    "node": ">=24",
+    "npm": ">=11"
   },
   "scripts": {
     "dev": "tsx watch src/index.ts",
