@@ -14,5 +14,6 @@ scripts/fetch-baselines.mjs
 scripts/diff-real.mjs
 scripts/baselines.json
 
-# Claude Code session metadata + local memory backup (not project content)
-.claude/
+# Claude Code: ignore per-user state, allow shared config (settings.json, skills/, commands/, agents/, hooks/) to be committed
+.claude/settings.local.json
+.claude/memory/
