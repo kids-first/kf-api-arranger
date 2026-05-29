@@ -7,6 +7,7 @@ import {
     indexNameVariantSomaticFeatureSuggestion,
     maxNOfGenomicFeatureSuggestions,
 } from '../env.js';
+import { HttpStatus } from '../httpStatus.js';
 
 export const SUGGESTIONS_TYPES = {
     VARIANT: 'variant',
@@ -51,7 +52,7 @@ export default async (req: Request, res: Response, type: string): Promise<void> 
     const searchText = suggestionResponse.text;
     const suggestions = suggestionResponse.options.map(suggestion => suggestion._source);
 
-    res.status(200).send({
+    res.status(HttpStatus.OK).send({
         searchText,
         suggestions,
     });

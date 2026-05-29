@@ -28,6 +28,7 @@ import { computeUpset } from './endpoints/upset.js';
 import { reformatVenn, VENN_SUPPORTED_INDICES, venn } from './endpoints/venn/venn.js';
 import { esHost, keycloakURL, userApiURL } from './env.js';
 import { globalErrorHandler, globalErrorLogger } from './errors.js';
+import { HttpStatus } from './httpStatus.js';
 import { flushAllCache, STATISTICS_CACHE_ID, STATISTICS_PUBLIC_CACHE_ID, twineWithCache } from './middleware/cache.js';
 import { replaceIdsWithSetId, resolveSetsInAllSqonsWithMapper, resolveSetsInSqon } from './sqon/resolveSetInSqon.js';
 import { resolveQueriesSetAliases } from './sqon/setSqon.js';
@@ -137,7 +138,7 @@ export default (keycloak: Keycloak, runInternalQuery: RunInternalQuery): Express
         const isPlainObject = (input: unknown) => Object.prototype.toString.call(input) === '[object Object]';
         const queries = req.body?.queries;
         if (!queries || !Array.isArray(queries) || queries.some(q => !isPlainObject(q))) {
-            res.status(422).send('Bad Inputs');
+            res.status(HttpStatus.UNPROCESSABLE_ENTITY).send('Bad Inputs');
             return;
         }
 
@@ -179,7 +180,7 @@ export default (keycloak: Keycloak, runInternalQuery: RunInternalQuery): Express
         const rawEntitySqons = req.body?.entitySqons;
 
         if (!lengthOk(qbSqons) || !lengthOk(rawEntitySqons)) {
-            res.status(422).send('Bad Inputs');
+            res.status(HttpStatus.UNPROCESSABLE_ENTITY).send('Bad Inputs');
             return;
         }
 
@@ -202,7 +203,7 @@ export default (keycloak: Keycloak, runInternalQuery: RunInternalQuery): Express
     app.get('/public-study/study/:code', async (req, res) => {
         const code = req.params.code;
         if (!code || typeof code !== 'string') {
-            res.status(422).send('Bad Inputs');
+            res.status(HttpStatus.UNPROCESSABLE_ENTITY).send('Bad Inputs');
             return;
         }
         const study = await getPublicStudy(req.params.code);
@@ -212,7 +213,7 @@ export default (keycloak: Keycloak, runInternalQuery: RunInternalQuery): Express
     app.get('/public-study/graphs/:code', async (req, res) => {
         const code = req.params.code;
         if (!code || typeof code !== 'string') {
-            res.status(422).send('Bad Inputs');
+            res.status(HttpStatus.UNPROCESSABLE_ENTITY).send('Bad Inputs');
             return;
         }
         const study = await getPublicGraphs(req.params.code);

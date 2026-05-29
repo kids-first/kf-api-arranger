@@ -1,6 +1,7 @@
 import type { NextFunction, Request, Response } from 'express';
 
 import type { SetSqon, Sort } from '../endpoints/sets/setsTypes.js';
+import { HttpStatus } from '../httpStatus.js';
 import { resolveSetsInSqon } from '../sqon/resolveSetInSqon.js';
 
 type File = {
@@ -42,7 +43,7 @@ export const resolveSetIdMiddleware =
             try {
                 params = JSON.parse(req.body.params);
             } catch {
-                res.status(422).send('Bad Inputs');
+                res.status(HttpStatus.UNPROCESSABLE_ENTITY).send('Bad Inputs');
                 return;
             }
             const files = params.files || [];

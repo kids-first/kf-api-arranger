@@ -2,6 +2,7 @@ import type { Client } from '@elastic/elasticsearch';
 import type { Request, Response } from 'express';
 
 import EsInstance from '../../ElasticSearchClientInstance.js';
+import { HttpStatus } from '../../httpStatus.js';
 import { multiSearchFilesAccessCounts, searchAggregatedAuthorizedStudiesForFence } from './searchers.js';
 import type { AuthStudiesData, ResponseResult, SearchBucket, StudyDataGlobal, StudyDataSpecific } from './types.js';
 
@@ -85,7 +86,7 @@ export const computeAuthorizedStudiesForAllFences = async (req: Request, res: Re
     const fencesAreProcessable =
         Array.isArray(fences) && fences.length > 0 && fences.every(f => SUPPORTED_FENCES.includes(f));
     if (!fencesAreProcessable) {
-        return res.status(422).send('Unsupported Fence(s) format or value');
+        return res.status(HttpStatus.UNPROCESSABLE_ENTITY).send('Unsupported Fence(s) format or value');
     }
 
     const MAX_ACL_SIZE = 500;
@@ -97,7 +98,9 @@ export const computeAuthorizedStudiesForAllFences = async (req: Request, res: Re
             x.acl.every(a => typeof a === 'string' && a.length <= MAX_ACL_LENGTH_VALUE),
     );
     if (!aclAreProcessable) {
-        return res.status(422).send(`Acls must be a list of acl values for each fence and not exceed a certain size`);
+        return res
+            .status(HttpStatus.UNPROCESSABLE_ENTITY)
+            .send(`Acls must be a list of acl values for each fence and not exceed a certain size`);
     }
 
     const state: ResponseResult = Object.fromEntries(
