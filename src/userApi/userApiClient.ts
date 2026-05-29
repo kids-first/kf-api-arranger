@@ -1,8 +1,6 @@
-import fetch from 'node-fetch';
-
-import { CreateUpdateBody, SetIdToTag, SetSqon, Sort } from '../endpoints/sets/setsTypes';
-import { userApiURL } from '../env';
-import { UserApiError } from './userApiError';
+import type { CreateUpdateBody, SetIdToTag, SetSqon, Sort } from '../endpoints/sets/setsTypes.js';
+import { userApiURL } from '../env.js';
+import { UserApiError } from './userApiError.js';
 
 export type UserSetContent = {
     setType: string;
@@ -24,127 +22,43 @@ export type UserSet = {
     is_invisible?: boolean;
 };
 
-export const getSharedSet = async (accessToken: string, setId: string): Promise<UserSet> => {
-    const uri = `${userApiURL}/user-sets/shared/${setId}`;
+type Method = 'GET' | 'POST' | 'PUT' | 'DELETE';
 
-    const response = await fetch(encodeURI(uri), {
-        method: 'get',
+const callUserApi = async <T>(path: string, method: Method, accessToken: string, body?: unknown): Promise<T> => {
+    const response = await fetch(`${userApiURL}${path}`, {
+        method,
         headers: {
             Authorization: accessToken,
             'Content-Type': 'application/json',
         },
+        ...(body !== undefined && { body: JSON.stringify(body) }),
     });
 
-    const body = await response.json();
+    const responseBody = (await response.json()) as T;
 
-    if (response.status === 200) {
-        return body;
+    if (response.ok) {
+        return responseBody;
     }
 
-    throw new UserApiError(response.status, body);
+    throw new UserApiError(response.status, responseBody);
 };
 
-export const getUserSets = async (accessToken: string): Promise<UserSet[]> => {
-    const uri = `${userApiURL}/user-sets`;
+export const getSharedSet = (accessToken: string, setId: string): Promise<UserSet> =>
+    callUserApi<UserSet>(`/user-sets/shared/${encodeURIComponent(setId)}`, 'GET', accessToken);
 
-    const response = await fetch(encodeURI(uri), {
-        method: 'get',
-        headers: {
-            Authorization: accessToken,
-            'Content-Type': 'application/json',
-        },
-    });
+export const getUserSets = (accessToken: string): Promise<UserSet[]> =>
+    callUserApi<UserSet[]>('/user-sets', 'GET', accessToken);
 
-    const body = await response.json();
+export const postUserSet = (accessToken: string, set: CreateUpdateBody): Promise<UserSet> =>
+    callUserApi<UserSet>('/user-sets', 'POST', accessToken, set);
 
-    if (response.status === 200) {
-        return body;
-    }
-
-    throw new UserApiError(response.status, body);
-};
-
-export const postUserSet = async (accessToken: string, set: CreateUpdateBody): Promise<UserSet> => {
-    const uri = `${userApiURL}/user-sets`;
-
-    const response = await fetch(encodeURI(uri), {
-        method: 'post',
-        headers: {
-            Authorization: accessToken,
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(set),
-    });
-
-    const body = await response.json();
-
-    if (response.status < 300) {
-        return body;
-    }
-
-    throw new UserApiError(response.status, body);
-};
-
-export const putUserSet = async (accessToken: string, set: CreateUpdateBody, setId: string): Promise<UserSet> => {
-    const uri = `${userApiURL}/user-sets/${setId}`;
-
-    const response = await fetch(encodeURI(uri), {
-        method: 'put',
-        headers: {
-            Authorization: accessToken,
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(set),
-    });
-
-    const body = await response.json();
-
-    if (response.status < 300) {
-        return body;
-    }
-
-    throw new UserApiError(response.status, body);
-};
+export const putUserSet = (accessToken: string, set: CreateUpdateBody, setId: string): Promise<UserSet> =>
+    callUserApi<UserSet>(`/user-sets/${encodeURIComponent(setId)}`, 'PUT', accessToken, set);
 
 export const deleteUserSet = async (accessToken: string, setId: string): Promise<string> => {
-    const uri = `${userApiURL}/user-sets/${setId}`;
-
-    const response = await fetch(encodeURI(uri), {
-        method: 'delete',
-        headers: {
-            Authorization: accessToken,
-            'Content-Type': 'application/json',
-        },
-    });
-
-    if (response.status === 200) {
-        return setId;
-    }
-
-    throw new UserApiError(response.status, response.body);
+    await callUserApi<unknown>(`/user-sets/${encodeURIComponent(setId)}`, 'DELETE', accessToken);
+    return setId;
 };
 
-export const postSetsTags = async (setIds: string[], accessToken: string): Promise<SetIdToTag[]> => {
-    const uri = `${userApiURL}/user-sets/aliases`;
-
-    const bodyPayload = {
-        setIds: setIds,
-    };
-
-    const response = await fetch(encodeURI(uri), {
-        method: 'post',
-        headers: {
-            Authorization: accessToken,
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(bodyPayload),
-    });
-
-    const body = await response.json();
-
-    if (response.status === 200) {
-        return body;
-    }
-
-    throw new UserApiError(response.status, body);
-};
+export const postSetsTags = (setIds: string[], accessToken: string): Promise<SetIdToTag[]> =>
+    callUserApi<SetIdToTag[]>('/user-sets/aliases', 'POST', accessToken, { setIds });

@@ -1,11 +1,11 @@
-import { Express } from 'express';
+import type { Express } from 'express';
 import Keycloak from 'keycloak-connect';
 import request from 'supertest';
-
-import { fakeKeycloakClient, fakeKeycloakRealm, fakeKeycloakUrl, getToken, publicKey } from '../test/authTestUtils';
-import buildApp from './app';
-import { ArrangerProject } from './arrangerUtils';
-import { SetNotFoundError } from './endpoints/sets/setError';
+import { vi } from 'vitest';
+import buildApp from './app.js';
+import type { RunInternalQuery } from './arrangerUtils.js';
+import { fakeKeycloakClient, fakeKeycloakRealm, fakeKeycloakUrl, getToken, publicKey } from './auth.test-utils.js';
+import { SetNotFoundError } from './endpoints/sets/setError.js';
 import {
     createSet,
     deleteSet,
@@ -13,47 +13,53 @@ import {
     SubActionTypes,
     updateSetContent,
     updateSetTag,
-} from './endpoints/sets/setsFeature';
-import { Set, UpdateSetContentBody, UpdateSetTagBody } from './endpoints/sets/setsTypes';
-import { getStatistics, getStudiesStatistics, Statistics } from './endpoints/statistics';
-import { flushAllCache } from './middleware/cache';
-import { UserApiError } from './userApi/userApiError';
+} from './endpoints/sets/setsFeature.js';
+import type { SavedSet, UpdateSetContentBody, UpdateSetTagBody } from './endpoints/sets/setsTypes.js';
+import { getStatistics, getStudiesStatistics, type Statistics } from './endpoints/statistics/index.js';
+import { flushAllCache } from './middleware/cache.js';
+import { UserApiError } from './userApi/userApiError.js';
 
-jest.mock('./endpoints/sets/setsFeature');
-jest.mock('./endpoints/statistics');
+vi.mock('./endpoints/sets/setsFeature.js');
+vi.mock('./endpoints/statistics/index.js');
 
-describe('Express app (without Arranger)', () => {
+// Silence the production-path error logger for this suite — several tests
+// deliberately trigger globalErrorLogger (mocked routes throw, real handler
+// console.errors the result). The stack-trace dumps make passing runs look
+// like a fire. Scoped to this file so unexpected console.errors elsewhere
+// still surface.
+beforeAll(() => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+});
+afterAll(() => {
+    vi.restoreAllMocks();
+});
+
+describe('Express app', () => {
     let app: Express;
-    let keycloakFakeConfig;
 
-    const getProject = (_s: string) => ({} as ArrangerProject);
+    const runInternalQuery: RunInternalQuery = async () => ({ data: null });
 
     beforeEach(() => {
-        const publicKeyToVerify = publicKey;
-        keycloakFakeConfig = {
+        const keycloakFakeConfig = {
             realm: fakeKeycloakRealm,
             'confidential-port': 0,
             'bearer-only': true,
             'auth-server-url': fakeKeycloakUrl,
             'ssl-required': 'external',
             resource: fakeKeycloakClient,
-            'realm-public-key': publicKeyToVerify, // For test purpose, we use public key to validate token.
+            'realm-public-key': publicKey, // For test purpose, we use public key to validate token.
         };
         const keycloak = new Keycloak({}, keycloakFakeConfig);
-        app = buildApp(keycloak, getProject); // Re-create app between each test to ensure isolation between tests.
+        app = buildApp(keycloak, runInternalQuery); // Re-create app between each test to ensure isolation between tests.
     });
 
-    it('GET /status (public) should responds with json', async () => {
-        await request(app)
-            .get('/status')
-            .expect('Content-Type', /json/);
+    it('GET /status (public) should respond with json', async () => {
+        await request(app).get('/status').expect('Content-Type', /json/);
     });
 
     describe('POST /cache-clear', () => {
         it('should return 403 if no Authorization header', async () =>
-            await request(app)
-                .post('/cache-clear')
-                .expect(403));
+            await request(app).post('/cache-clear').expect(403));
 
         it('should return 403 if not an ADMIN', async () => {
             const token = getToken();
@@ -76,7 +82,7 @@ describe('Express app (without Arranger)', () => {
 
     describe('GET /statistics', () => {
         beforeEach(() => {
-            (getStatistics as jest.Mock).mockReset();
+            vi.mocked(getStatistics).mockReset();
             flushAllCache();
         });
 
@@ -165,30 +171,26 @@ describe('Express app (without Arranger)', () => {
                     },
                 ],
             };
-            (getStatistics as jest.Mock).mockImplementation(() => expectedStats);
+            vi.mocked(getStatistics).mockResolvedValue(expectedStats);
 
-            await request(app)
-                .get('/statistics')
-                .expect(200, expectedStats);
-            expect((getStatistics as jest.Mock).mock.calls.length).toEqual(1);
+            await request(app).get('/statistics').expect(200, expectedStats);
+            expect(vi.mocked(getStatistics)).toHaveBeenCalledTimes(1);
         });
 
         it('should return 500 if an error occurs', async () => {
             const expectedError = new Error('OOPS');
-            (getStatistics as jest.Mock).mockImplementation(() => {
+            vi.mocked(getStatistics).mockImplementation(() => {
                 throw expectedError;
             });
 
-            await request(app)
-                .get('/statistics')
-                .expect(500, { error: 'Internal Server Error' });
-            expect((getStatistics as jest.Mock).mock.calls.length).toEqual(1);
+            await request(app).get('/statistics').expect(500, { error: 'Internal Server Error' });
+            expect(vi.mocked(getStatistics)).toHaveBeenCalledTimes(1);
         });
     });
 
     describe('GET /statistics/studies', () => {
         beforeEach(() => {
-            (getStudiesStatistics as jest.Mock).mockReset();
+            vi.mocked(getStudiesStatistics).mockReset();
             flushAllCache();
         });
 
@@ -227,36 +229,29 @@ describe('Express app (without Arranger)', () => {
                     },
                 ],
             };
-            (getStudiesStatistics as jest.Mock).mockImplementation(() => expectedPublicStats);
+            vi.mocked(getStudiesStatistics).mockResolvedValue(expectedPublicStats);
 
-            await request(app)
-                .get('/statistics/studies')
-                .expect(200, expectedPublicStats);
-            expect((getStudiesStatistics as jest.Mock).mock.calls.length).toEqual(1);
+            await request(app).get('/statistics/studies').expect(200, expectedPublicStats);
+            expect(vi.mocked(getStudiesStatistics)).toHaveBeenCalledTimes(1);
         });
 
         it('should return 500 if an error occurs', async () => {
             const expectedError = new Error('OOPS');
-            (getStudiesStatistics as jest.Mock).mockImplementation(() => {
+            vi.mocked(getStudiesStatistics).mockImplementation(() => {
                 throw expectedError;
             });
 
-            await request(app)
-                .get('/statistics/studies')
-                .expect(500, { error: 'Internal Server Error' });
-            expect((getStudiesStatistics as jest.Mock).mock.calls.length).toEqual(1);
+            await request(app).get('/statistics/studies').expect(500, { error: 'Internal Server Error' });
+            expect(vi.mocked(getStudiesStatistics)).toHaveBeenCalledTimes(1);
         });
     });
 
     describe('GET /sets', () => {
         beforeEach(() => {
-            (getSets as jest.Mock).mockReset();
+            vi.mocked(getSets).mockReset();
         });
 
-        it('should return 403 if no Authorization header', () =>
-            request(app)
-                .get('/sets')
-                .expect(403));
+        it('should return 403 if no Authorization header', () => request(app).get('/sets').expect(403));
 
         it('should return 200 if Authorization header contains valid token and no error occurs', async () => {
             const expectedSets = [
@@ -264,14 +259,14 @@ describe('Express app (without Arranger)', () => {
                     id: '1ae',
                     tag: 'tag1',
                     size: 11,
-                } as Set,
+                } as SavedSet,
                 {
                     id: '1af',
                     tag: 'tag2',
                     size: 22,
-                } as Set,
+                } as SavedSet,
             ];
-            (getSets as jest.Mock).mockImplementation(() => expectedSets);
+            vi.mocked(getSets).mockResolvedValue(expectedSets);
 
             const token = getToken();
 
@@ -279,12 +274,12 @@ describe('Express app (without Arranger)', () => {
                 .get('/sets')
                 .set({ Authorization: `Bearer ${token}` })
                 .expect(200, expectedSets);
-            expect((getSets as jest.Mock).mock.calls.length).toEqual(1);
+            expect(vi.mocked(getSets)).toHaveBeenCalledTimes(1);
         });
 
         it('should return 500 if Authorization header contains valid token but an error occurs', async () => {
             const expectedError = new UserApiError(404, { message: 'OOPS' });
-            (getSets as jest.Mock).mockImplementation(() => {
+            vi.mocked(getSets).mockImplementation(() => {
                 throw expectedError;
             });
 
@@ -294,13 +289,12 @@ describe('Express app (without Arranger)', () => {
                 .get('/sets')
                 .set({ Authorization: `Bearer ${token}` })
                 .expect(500, { error: 'Internal Server Error' });
-            expect((getSets as jest.Mock).mock.calls.length).toEqual(1);
+            expect(vi.mocked(getSets)).toHaveBeenCalledTimes(1);
         });
     });
 
     describe('POST /sets', () => {
         const requestBody = {
-            projectId: '2021_05_03_v2',
             type: 'participant',
             sqon: {
                 op: 'and',
@@ -320,21 +314,18 @@ describe('Express app (without Arranger)', () => {
         };
 
         beforeEach(() => {
-            (createSet as jest.Mock).mockReset();
+            vi.mocked(createSet).mockReset();
         });
 
-        it('should return 403 if no Authorization header', () =>
-            request(app)
-                .post('/sets')
-                .expect(403));
+        it('should return 403 if no Authorization header', () => request(app).post('/sets').expect(403));
 
         it('should return 200 if Authorization header contains valid token and no error occurs', async () => {
             const expectedCreatedSet = {
                 id: '1eg',
                 tag: 'Nevus',
                 size: 2,
-            } as Set;
-            (createSet as jest.Mock).mockImplementation(() => expectedCreatedSet);
+            } as SavedSet;
+            vi.mocked(createSet).mockResolvedValue(expectedCreatedSet);
 
             const token = getToken();
 
@@ -349,12 +340,12 @@ describe('Express app (without Arranger)', () => {
                 .set({ Authorization: `Bearer ${token}` })
                 .expect(checkRes)
                 .expect(200);
-            expect((createSet as jest.Mock).mock.calls.length).toEqual(1);
+            expect(vi.mocked(createSet)).toHaveBeenCalledTimes(1);
         });
 
         it('should return 500 if Authorization header contains valid token but an error occurs', async () => {
             const expectedError = new UserApiError(400, { message: 'OOPS' });
-            (createSet as jest.Mock).mockImplementation(() => {
+            vi.mocked(createSet).mockImplementation(() => {
                 throw expectedError;
             });
 
@@ -366,7 +357,7 @@ describe('Express app (without Arranger)', () => {
                 .set('Content-type', 'application/json')
                 .set({ Authorization: `Bearer ${token}` })
                 .expect(500, { error: 'Internal Server Error' });
-            expect((createSet as jest.Mock).mock.calls.length).toEqual(1);
+            expect(vi.mocked(createSet)).toHaveBeenCalledTimes(1);
         });
     });
 
@@ -378,7 +369,6 @@ describe('Express app (without Arranger)', () => {
         };
 
         const updateSetContentBody: UpdateSetContentBody = {
-            projectId: '2021_05_03_v2',
             sourceType: 'QUERY',
             subAction: SubActionTypes.ADD_IDS,
             sqon: {
@@ -396,22 +386,19 @@ describe('Express app (without Arranger)', () => {
         };
 
         beforeEach(() => {
-            (updateSetTag as jest.Mock).mockReset();
-            (updateSetContent as jest.Mock).mockReset();
+            vi.mocked(updateSetTag).mockReset();
+            vi.mocked(updateSetContent).mockReset();
         });
 
-        it('should return 403 if no Authorization header', () =>
-            request(app)
-                .put('/sets/1eh')
-                .expect(403));
+        it('should return 403 if no Authorization header', () => request(app).put('/sets/1eh').expect(403));
 
         it('should return 200 if Authorization header contains valid token and no error occurs - update tag name', async () => {
             const expectedUpdatedSet = {
                 id: '1eh',
                 size: 2,
                 tag: 'Nevus Updated',
-            } as Set;
-            (updateSetTag as jest.Mock).mockImplementation(() => expectedUpdatedSet);
+            } as SavedSet;
+            vi.mocked(updateSetTag).mockResolvedValue(expectedUpdatedSet);
 
             const userId = 'user_id';
             const token = getToken(1000, userId);
@@ -428,10 +415,10 @@ describe('Express app (without Arranger)', () => {
                 .expect(checkRes)
                 .expect(200);
 
-            expect((updateSetTag as jest.Mock).mock.calls.length).toEqual(1);
-            expect((updateSetTag as jest.Mock).mock.calls[0][0]).toEqual(updateSetTagBody);
-            expect((updateSetTag as jest.Mock).mock.calls[0][1]).toEqual(`Bearer ${token}`);
-            expect((updateSetTag as jest.Mock).mock.calls[0][2]).toEqual('1eh');
+            expect(vi.mocked(updateSetTag)).toHaveBeenCalledTimes(1);
+            expect(vi.mocked(updateSetTag).mock.calls[0][0]).toEqual(updateSetTagBody);
+            expect(vi.mocked(updateSetTag).mock.calls[0][1]).toEqual(`Bearer ${token}`);
+            expect(vi.mocked(updateSetTag).mock.calls[0][2]).toEqual('1eh');
         });
 
         it('should return 200 if Authorization header contains valid token and no error occurs - update content', async () => {
@@ -439,8 +426,8 @@ describe('Express app (without Arranger)', () => {
                 id: '1eh',
                 size: 2,
                 tag: 'Nevus',
-            } as Set;
-            (updateSetContent as jest.Mock).mockImplementation(() => expectedUpdatedSet);
+            } as SavedSet;
+            vi.mocked(updateSetContent).mockResolvedValue(expectedUpdatedSet);
 
             const userId = 'user_id';
             const token = getToken(1000, userId);
@@ -456,16 +443,16 @@ describe('Express app (without Arranger)', () => {
                 .set({ Authorization: `Bearer ${token}` })
                 .expect(checkRes)
                 .expect(200);
-            expect((updateSetContent as jest.Mock).mock.calls.length).toEqual(1);
-            expect((updateSetContent as jest.Mock).mock.calls[0][0]).toEqual(updateSetContentBody);
-            expect((updateSetContent as jest.Mock).mock.calls[0][1]).toEqual(`Bearer ${token}`);
-            expect((updateSetContent as jest.Mock).mock.calls[0][2]).toEqual(userId);
-            expect((updateSetContent as jest.Mock).mock.calls[0][3]).toEqual('1eh');
+            expect(vi.mocked(updateSetContent)).toHaveBeenCalledTimes(1);
+            expect(vi.mocked(updateSetContent).mock.calls[0][0]).toEqual(updateSetContentBody);
+            expect(vi.mocked(updateSetContent).mock.calls[0][1]).toEqual(`Bearer ${token}`);
+            expect(vi.mocked(updateSetContent).mock.calls[0][2]).toEqual(userId);
+            expect(vi.mocked(updateSetContent).mock.calls[0][3]).toEqual('1eh');
         });
 
         it('should return 404 if Authorization header contains valid token but set to update does not exist', async () => {
             const expectedError = new SetNotFoundError('Set to update can not be found !');
-            (updateSetTag as jest.Mock).mockImplementation(() => {
+            vi.mocked(updateSetTag).mockImplementation(() => {
                 throw expectedError;
             });
 
@@ -477,22 +464,19 @@ describe('Express app (without Arranger)', () => {
                 .set('Content-type', 'application/json')
                 .set({ Authorization: `Bearer ${token}` })
                 .expect(404, { error: 'Not Found' });
-            expect((updateSetTag as jest.Mock).mock.calls.length).toEqual(1);
+            expect(vi.mocked(updateSetTag)).toHaveBeenCalledTimes(1);
         });
     });
 
     describe('DELETE /sets/:setId', () => {
         beforeEach(() => {
-            (deleteSet as jest.Mock).mockReset();
+            vi.mocked(deleteSet).mockReset();
         });
 
-        it('should return 403 if no Authorization header', () =>
-            request(app)
-                .delete('/sets/1eh')
-                .expect(403));
+        it('should return 403 if no Authorization header', () => request(app).delete('/sets/1eh').expect(403));
 
         it('should return 200 if Authorization header contains valid token and no error occurs', async () => {
-            (deleteSet as jest.Mock).mockImplementation(() => true);
+            vi.mocked(deleteSet).mockResolvedValue('1ei');
 
             const token = getToken();
 
@@ -500,13 +484,13 @@ describe('Express app (without Arranger)', () => {
                 .delete('/sets/1ei')
                 .set('Content-type', 'application/json')
                 .set({ Authorization: `Bearer ${token}` })
-                .expect(200, 'true');
-            expect((deleteSet as jest.Mock).mock.calls.length).toEqual(1);
+                .expect(200, '1ei');
+            expect(vi.mocked(deleteSet)).toHaveBeenCalledTimes(1);
         });
 
         it('should return 500 if Authorization header contains valid token but an error occurs', async () => {
             const expectedError = new UserApiError(404, { message: 'OOPS' });
-            (deleteSet as jest.Mock).mockImplementation(() => {
+            vi.mocked(deleteSet).mockImplementation(() => {
                 throw expectedError;
             });
 
@@ -517,7 +501,7 @@ describe('Express app (without Arranger)', () => {
                 .set('Content-type', 'application/json')
                 .set({ Authorization: `Bearer ${token}` })
                 .expect(500, { error: 'Internal Server Error' });
-            expect((deleteSet as jest.Mock).mock.calls.length).toEqual(1);
+            expect(vi.mocked(deleteSet)).toHaveBeenCalledTimes(1);
         });
     });
 });

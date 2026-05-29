@@ -1,14 +1,14 @@
-import EsInstance from '../../ElasticSearchClientInstance';
-import { datalakeS3Url } from '../../env';
+import EsInstance from '../../ElasticSearchClientInstance.js';
+import { datalakeS3Url } from '../../env.js';
 import {
     ES_CHROMOSOME_AGG_SIZE,
     ES_SEARCH_MAX_BUCKETS,
     ES_SEARCH_MAX_HITS,
     esDiffGeneExpIndex,
     esSampleGeneExpIndex,
-} from '../../esUtils';
-import { generatePreSignedUrl } from '../../s3Api';
-import {
+} from '../../esUtils.js';
+import { generatePreSignedUrl } from '../../s3Api/index.js';
+import type {
     DiffGeneExpPoint,
     DiffGeneExpVolcano,
     ExportResponse,
@@ -19,7 +19,7 @@ import {
     MatchedGene,
     SampleGeneExpPoint,
     SampleGeneExpVolcano,
-} from './types';
+} from './types.js';
 
 export const DIFF_GENE_EXP_FILE_KEY = 'transcriptomics/diff_gene_exp/HTP/htp-dge-data.csv';
 export const SAMPLE_GENE_EXP_FILE_KEY = 'transcriptomics/sample_gene_exp/HTP/htp-rnaseq-data.csv';
@@ -108,6 +108,19 @@ export const fetchSampleGeneExp = async (ensembl_gene_id: string): Promise<Sampl
     });
 
     const hits = body.hits.hits ?? [];
+
+    if (hits.length === 0) {
+        return {
+            data: [],
+            ensembl_gene_id,
+            nControl: 0,
+            nT21: 0,
+            min_age_at_biospecimen_collection_years: 0,
+            max_age_at_biospecimen_collection_years: 0,
+            min_fpkm_value: 0,
+            max_fpkm_value: 0,
+        };
+    }
 
     const points: SampleGeneExpPoint[] = [];
     let min_age_at_biospecimen_collection_years = hits[0]._source.age_at_biospecimen_collection_years;

@@ -1,19 +1,20 @@
-import { computeAuthorizedStudiesForFence } from './computeAuthorizedStudies';
-import { multiSearchFilesAccessCounts, searchAggregatedAuthorizedStudiesForFence } from './searchers';
-import { AuthStudiesData } from './types';
+import { expect, vi } from 'vitest';
+import { computeAuthorizedStudiesForFence } from './computeAuthorizedStudies.js';
+import { multiSearchFilesAccessCounts, searchAggregatedAuthorizedStudiesForFence } from './searchers.js';
+import type { AuthStudiesData, FileAccessCountsResponse } from './types.js';
 
-jest.mock('./searchers');
-jest.mock('../../ElasticSearchClientInstance', () => jest.fn());
+vi.mock('./searchers.js');
+vi.mock('../../ElasticSearchClientInstance.js');
 
 describe('Compute Authorized Studies', () => {
-    describe(`${computeAuthorizedStudiesForFence.name} `, () => {
+    describe(`${computeAuthorizedStudiesForFence.name}`, () => {
         beforeEach(() => {
-            (searchAggregatedAuthorizedStudiesForFence as jest.Mock).mockReset();
-            (multiSearchFilesAccessCounts as jest.Mock).mockReset();
+            vi.mocked(searchAggregatedAuthorizedStudiesForFence).mockReset();
+            vi.mocked(multiSearchFilesAccessCounts).mockReset();
         });
 
         it(`should give proper result when data exists in elasticsearch cluster`, async () => {
-            (searchAggregatedAuthorizedStudiesForFence as jest.Mock).mockImplementation(() =>
+            vi.mocked(searchAggregatedAuthorizedStudiesForFence).mockImplementation(() =>
                 Promise.resolve([
                     {
                         key: 'SD_PREASA7S',
@@ -71,26 +72,12 @@ describe('Compute Authorized Studies', () => {
                 ]),
             );
 
-            (multiSearchFilesAccessCounts as jest.Mock).mockImplementation(() =>
-                Promise.resolve([
-                    {
-                        hits: { total: { value: 100, relation: 'eq' }, max_score: null, hits: [] },
-                        status: 200,
-                    },
-                    {
-                        hits: { total: { value: 0, relation: 'eq' }, max_score: null, hits: [] },
-                        status: 200,
-                    },
-                    {
-                        hits: { total: { value: 100, relation: 'eq' }, max_score: null, hits: [] },
-                        status: 200,
-                    },
-                    {
-                        hits: { total: { value: 10, relation: 'eq' }, max_score: null, hits: [] },
-                        status: 200,
-                    },
-                ]),
-            );
+            vi.mocked(multiSearchFilesAccessCounts).mockResolvedValue([
+                { hits: { total: { value: 100, relation: 'eq' }, max_score: null, hits: [] }, status: 200 },
+                { hits: { total: { value: 0, relation: 'eq' }, max_score: null, hits: [] }, status: 200 },
+                { hits: { total: { value: 100, relation: 'eq' }, max_score: null, hits: [] }, status: 200 },
+                { hits: { total: { value: 10, relation: 'eq' }, max_score: null, hits: [] }, status: 200 },
+            ] as unknown as FileAccessCountsResponse[]);
 
             const r: { data: AuthStudiesData } = await computeAuthorizedStudiesForFence(null, 'gen3', [
                 'phs001138.c1',
@@ -98,8 +85,8 @@ describe('Compute Authorized Studies', () => {
                 'phs002330.c2',
             ]);
 
-            expect((searchAggregatedAuthorizedStudiesForFence as jest.Mock).mock.calls.length).toEqual(1);
-            expect((multiSearchFilesAccessCounts as jest.Mock).mock.calls.length).toEqual(1);
+            expect(vi.mocked(searchAggregatedAuthorizedStudiesForFence)).toHaveBeenCalledTimes(1);
+            expect(vi.mocked(multiSearchFilesAccessCounts)).toHaveBeenCalledTimes(1);
             expect(r).toHaveProperty(['data']);
             expect(r.data).toEqual([
                 {
@@ -121,6 +108,37 @@ describe('Compute Authorized Studies', () => {
                     total_authorized_files_count: 14,
                 },
             ]);
+        });
+
+        it('throws when the multi-search reports shard failures (regression for console.assert no-throw)', async () => {
+            vi.mocked(searchAggregatedAuthorizedStudiesForFence).mockResolvedValue([
+                {
+                    key: 'SD_TEST',
+                    doc_count: 1,
+                    top_study_hits: {
+                        hits: {
+                            total: { value: 1, relation: 'eq' },
+                            hits: [{ _source: { study: { study_name: 'Test', study_code: 'KF-TEST' } } }],
+                        },
+                    },
+                    acls: { buckets: [] },
+                },
+            ] as any);
+
+            vi.mocked(multiSearchFilesAccessCounts).mockResolvedValue([
+                {
+                    hits: { total: { value: 0, relation: 'eq' }, max_score: null, hits: [] },
+                    status: 200,
+                    _shards: {
+                        failures: [{ shard: 0, index: 'file_centric', node: 'n', reason: { type: 'x', reason: 'y' } }],
+                    },
+                },
+                { hits: { total: { value: 0, relation: 'eq' }, max_score: null, hits: [] }, status: 200 },
+            ] as unknown as FileAccessCountsResponse[]);
+
+            await expect(computeAuthorizedStudiesForFence(null as any, 'gen3', ['phs001138.c1'])).rejects.toThrow(
+                /shard failures/,
+            );
         });
     });
 });

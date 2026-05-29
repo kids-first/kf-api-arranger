@@ -1,54 +1,80 @@
-<p align="center">
-  <img src="docs/kids_first_logo.svg" alt="Kids First repository logo" width="660px" />
-</p>
-<p align="center">
-  <a href="https://opensource.org/licenses/Apache-2.0"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=for-the-badge"></a>
-</p>
-
 # kf-api-arranger
-This is an instantiation of the [@arranger/server](https://github.com/overture-stack/arranger/tree/develop/modules/server) application for the Kids First portal, with an integration with [Keycloak](https://www.keycloak.org/docs/latest/securing_apps/index.html#_nodejs_adapter) for authentication.
 
-Arranger server is an application that wraps Elasticsearch and provides a GraphQL search API for consumption by the [Kids First Portal UI](https://github.com/kids-first/kf-portal-ui).
+GraphQL + REST API over Elasticsearch for the Kids First and INCLUDE portals.
 
-## Development
+## 🏗️ Architecture
 
-* Execute: `npm run cbs`
+Two HTTP surfaces under one process:
 
-Note: You can execute this project in a docker container if you prefer: `docker run -u node -it --rm --network host -v ${PWD}:/app --workdir /app node:20-alpine3.18 sh`
+- **REST routes** at the app root (`/status`, `/statistics`, `/sets`, `/phenotypes`, `/upset`, `/venn`, `/transcriptomics/*`, etc.) — most are Keycloak-gated.
+- **GraphQL endpoint** at `/<projectId>/graphql` — backed by a vendored SQON → ES query/aggregation pipeline (`src/sqon/`).
 
-### General
+Reads Elasticsearch across 7 entity `_centric` indices (participants, files, biospecimens, variants, genes, studies, specimen tree). Sets persistence is delegated to a separate users-api service over HTTP.
 
-* Make sure that all the needed env vars point to where they should.
+Boot is fail-fast: a missing or unreachable `ES_HOST` exits at startup. Per-route env vars (e.g. a missing suggestion index) only block their own route.
 
-* When adding a new env var, update the .env.example. Otherwise, an error will be thrown.
+## 📋 Requirements
 
-* Installing dependencies: `npm install`.
+- **Node 24+** — matches `engines.node` and the prod image
+- **Docker + Docker Compose** — for the containerized dev workflow
+- Reachable **Elasticsearch** cluster, **Keycloak** realm, and **users-api** instance
 
-### Test
-
-* Execute: `npm run test`
-
-### Development Setup with Docker
-
-Before going further, make sure that ```docker``` and ```docker-compose``` are installed on your system.
+## 🚀 Quick start
 
 ```bash
-# 1. clone the repository
-  git clone https://github.com/kids-first/kf-api-arranger
-
-# 2. enter the project's folder
-  cd kf-api-arranger
-
-# 3. create an .env file (you may have to adjust the template to your needs)
-  touch .env
-
-# 4 in a terminal, run docker-compose from project's docker-compose file. 
-  docker-compose --profile <target profile> up # for admin service
-
-# 5 to clean up afterwards once your are done developing.
-  docker-compose --profile  <target profile> down
+cp .env.example .env
+# fill in ES_HOST, KEYCLOAK_*, USER_API_URL, etc.
 ```
 
-Note: you can activate multiple profiles at once: ```docker-compose --profile a --profile b ... up```
+### Containerized (recommended)
 
-:warning: _With this setup, your host and the app's container share the project directory/volume._
+```bash
+docker compose up app                # dev mode, hot reload
+docker compose run --rm test         # test suite
+```
+
+For an interactive shell with the project mounted (poke around, run any script manually):
+
+```bash
+docker run --rm -it --network host -v "$PWD:/app" -w /app node:24-alpine3.22 sh
+```
+
+Inside the shell: `npm install && npm run dev` (or any other script). `--network host` lets the container reach host-bound services like SSH tunnels at `localhost:<port>`.
+
+### Local (host Node 24)
+
+```bash
+npm install
+npm run dev          # tsx watch — hot reload
+npm run test         # vitest run
+npm run lint         # biome check
+npm run lint:fix     # biome check --write
+```
+
+## 🔐 Environment variables
+
+See `.env.example` for the keys to set and `src/env.ts` for defaults and which are boot-fatal vs route-fatal.
+
+The critical knobs:
+
+- `ES_HOST` — boot-fatal if unreachable
+- `KEYCLOAK_URL` / `KEYCLOAK_REALM` / `KEYCLOAK_CLIENT` — must match the FE's KC client so token audience validates
+- `USER_API_URL` — sets persistence
+- `PROJECT_ID` — GraphQL mount prefix
+
+## 📂 Project layout
+
+- `src/app.ts` — REST routes, auth gates, mount points
+- `src/index.ts` — boot orchestration
+- `src/graphql/` — GraphQL schema + Apollo server
+- `src/sqon/` — in-tree SQON → ES query/aggregation builder
+- `src/endpoints/` — REST route handlers
+- `ops/` — release-time ES alias rotation helpers (see each file's header)
+
+## 🩺 Health check
+
+`GET /status` returns 200 with a minimal JSON sanity payload (Keycloak URL, ES host, users-api URL). No auth required. Use it as your orchestrator's liveness probe.
+
+## 📜 License
+
+Apache 2.0

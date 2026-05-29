@@ -1,35 +1,21 @@
-import { NextFunction, Request, Response } from 'express';
-import { ExecutionResult } from 'graphql/execution/execute';
-import { getReasonPhrase, StatusCodes } from 'http-status-codes';
+import type { NextFunction, Request, Response } from 'express';
 
-import { SetNotFoundError } from './endpoints/sets/setError';
-import { MissingFilterError } from './endpoints/transcriptomics/errors';
+import { SetNotFoundError } from './endpoints/sets/setError.js';
+import { MissingFilterError } from './endpoints/transcriptomics/errors.js';
+import { HttpStatus } from './httpStatus.js';
 
 export const globalErrorHandler = (err: unknown, _req: Request, res: Response, _next: NextFunction): void => {
     if (err instanceof SetNotFoundError) {
-        res.status(StatusCodes.NOT_FOUND).json({
-            error: getReasonPhrase(StatusCodes.NOT_FOUND),
-        });
+        res.status(HttpStatus.NOT_FOUND).json({ error: 'Not Found' });
     } else if (err instanceof MissingFilterError) {
-        res.status(StatusCodes.BAD_REQUEST).json({
-            error: err.message,
-        });
-    } else if (err instanceof Error) {
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-            error: getReasonPhrase(StatusCodes.INTERNAL_SERVER_ERROR),
-        });
+        res.status(HttpStatus.BAD_REQUEST).json({ error: err.message });
     } else {
-        throw err;
+        // globalErrorLogger has already logged `err` before this handler runs.
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: 'Internal Server Error' });
     }
 };
 
 export const globalErrorLogger = (err: unknown, _req: Request, _res: Response, next: NextFunction): void => {
     console.error(err);
     next(err);
-};
-
-export const throwErrorsFromGqlQueryIfExist = (resp: ExecutionResult): void | never => {
-    if (resp.errors) {
-        throw new Error(resp.errors.join(','));
-    }
 };

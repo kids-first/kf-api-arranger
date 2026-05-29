@@ -22,7 +22,6 @@ export type Content = {
 };
 
 export type CreateSetBody = {
-    projectId: string;
     type: string;
     sqon: SetSqon;
     idField: string;
@@ -41,7 +40,6 @@ export type UpdateSetContentBody = {
     subAction: string;
     sourceType: string;
     sqon: SetSqon;
-    projectId: string;
 };
 
 export type Sort = {
@@ -49,7 +47,7 @@ export type Sort = {
     order: string;
 };
 
-export type Set = {
+export type SavedSet = {
     id: string;
     tag: string;
     size: number;

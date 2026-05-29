@@ -1,12 +1,20 @@
 import dotenv from 'dotenv';
 
-dotenv.config();
+dotenv.config({ quiet: true });
 
 export const port = process.env.PORT || 5050;
+
+// One deployment serves one project. Used only to build the GraphQL URL
+// prefix (`/${projectId}/graphql`) for FE compatibility — legacy from
+// arranger's multi-tenant model; will be removed entirely once the FE
+// drops the prefix too.
+export const projectId = process.env.PROJECT_ID || 'include';
 
 export const keycloakURL = process.env.KEYCLOAK_URL || 'https://kf-keycloak-qa.kf-strides.org/auth';
 export const keycloakRealm = process.env.KEYCLOAK_REALM || 'kidsfirstdrc';
 export const keycloakClient = process.env.KEYCLOAK_CLIENT || 'kidsfirst-apis';
+
+export const isInclude = keycloakRealm === 'includedcc';
 
 export const esHost = process.env.ES_HOST || 'http://localhost:9200';
 export const esUser = process.env.ES_USER;
@@ -20,8 +28,8 @@ export const indexNameVariantSomaticFeatureSuggestion = process.env.VARIANTS_SOM
 
 export const userApiURL = process.env.USER_API_URL || 'https://include-users-api-qa.373997854230.d3b.io';
 
-export const maxSetContentSize: number = Number.parseInt(process.env.MAX_SET_CONTENT_SIZE) || 10000;
+export const maxSetContentSize: number = Number.parseInt(process.env.MAX_SET_CONTENT_SIZE, 10) || 10000;
 
-export const cacheTTL: number = Number.parseInt(process.env.CACHE_TTL_SEC) || 3600;
+export const cacheTTL: number = Number.parseInt(process.env.CACHE_TTL_SEC, 10) || 3600;
 
 export const datalakeS3Url: string = process.env.DATALAKE_S3_URL || 'MISSING_CONFIG';

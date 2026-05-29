@@ -1,7 +1,8 @@
-import { NextFunction, Request, Response } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 
-import { SetSqon, Sort } from '../endpoints/sets/setsTypes';
-import { resolveSetsInSqon } from '../sqon/resolveSetInSqon';
+import type { SetSqon, Sort } from '../endpoints/sets/setsTypes.js';
+import { HttpStatus } from '../httpStatus.js';
+import { resolveSetsInSqon } from '../sqon/resolveSetInSqon.js';
 
 type File = {
     fileName: string;
@@ -21,30 +22,38 @@ export type SearchPayload = {
     query: string;
 };
 
-export const resolveSetIdMiddleware = () => async (req: Request, _res: Response, next: NextFunction): Promise<void> => {
-    const userId = req['kauth']?.grant?.access_token?.content?.sub;
-    const accessToken = req.headers.authorization;
-    if (req.body && req.body.variables) {
-        req.body = await resolveSetIdForSearchPayload(req.body, userId, accessToken);
-    }
+export const resolveSetIdMiddleware =
+    () =>
+    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        const userId = req.kauth?.grant?.access_token?.content?.sub;
+        const accessToken = req.headers.authorization;
+        if (req.body?.variables) {
+            req.body = await resolveSetIdForSearchPayload(req.body, userId, accessToken);
+        }
 
-    if (req.body && Array.isArray(req.body)) {
-        const searchBody: SearchPayload[] = req.body;
-        req.body = await Promise.all(
-            searchBody.map(searchPayload => resolveSetIdForSearchPayload(searchPayload, userId, accessToken)),
-        );
-    }
+        if (req.body && Array.isArray(req.body)) {
+            const searchBody: SearchPayload[] = req.body;
+            req.body = await Promise.all(
+                searchBody.map(searchPayload => resolveSetIdForSearchPayload(searchPayload, userId, accessToken)),
+            );
+        }
 
-    if (req.body && req.body.params) {
-        const params = JSON.parse(req.body.params);
-        const files = params.files || [];
-        const filesUpdated = await Promise.all(
-            files.map((file: File) => resolveSetIdForFile(file, userId, accessToken)),
-        );
-        req.body.params = JSON.stringify({ ...params, files: filesUpdated });
-    }
-    next();
-};
+        if (req.body?.params) {
+            let params: { files?: File[] };
+            try {
+                params = JSON.parse(req.body.params);
+            } catch {
+                res.status(HttpStatus.UNPROCESSABLE_ENTITY).send('Bad Inputs');
+                return;
+            }
+            const files = params.files || [];
+            const filesUpdated = await Promise.all(
+                files.map((file: File) => resolveSetIdForFile(file, userId, accessToken)),
+            );
+            req.body.params = JSON.stringify({ ...params, files: filesUpdated });
+        }
+        next();
+    };
 
 const resolveSetIdForFile = async (file: File, userId: string, accessToken: string): Promise<File> => {
     const sqonWithResolveSetsId = await resolveSetsInSqon(file.sqon, userId, accessToken);
@@ -68,7 +77,7 @@ const resolveSetIdForSearchPayload = async (
     const isSqonKey = key => sqonNameRegex.test(key);
 
     for (const key of variablesKeys) {
-        const newSqonForKey = isSqonKey
+        const newSqonForKey = isSqonKey(key)
             ? await resolveSetsInSqon(searchPayload.variables[key], userId, accessToken)
             : originalVariables[key];
         variablesAfterReplace = { ...variablesAfterReplace, [key]: newSqonForKey };

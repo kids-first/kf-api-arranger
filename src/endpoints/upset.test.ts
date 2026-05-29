@@ -1,7 +1,8 @@
-import EsInstance from '../ElasticSearchClientInstance';
-import { buildSteps, computeUpset, countIt, topN } from './upset';
+import { vi } from 'vitest';
+import EsInstance from '../ElasticSearchClientInstance.js';
+import { buildSteps, computeUpset, countIt, topN } from './upset.js';
 
-jest.mock('../ElasticSearchClientInstance');
+vi.mock('../ElasticSearchClientInstance.js');
 
 const MOCK_ES_PARTICIPANT_MAPPINGS = {
     statusCode: 200,
@@ -193,11 +194,11 @@ describe('Upset', () => {
 
     describe(`${computeUpset.name}`, () => {
         beforeEach(() => {
-            (EsInstance.getInstance as jest.Mock).mockReset();
+            vi.mocked(EsInstance.getInstance).mockReset();
         });
 
         it('should compute top observed phenotypes with participants having them', async () => {
-            (EsInstance.getInstance as jest.Mock).mockImplementation(() => ({
+            vi.mocked(EsInstance.getInstance).mockImplementation(() => ({
                 search: async () => ({
                     body: {
                         took: 1699,

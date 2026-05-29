@@ -1,5 +1,5 @@
-import { SetSqon } from '../endpoints/sets/setsTypes';
-import { addSqonToSetSqon, removeSqonToSetSqon } from './manipulateSqon';
+import type { SetSqon } from '../endpoints/sets/setsTypes.js';
+import { addSqonToSetSqon, removeSqonToSetSqon } from './manipulateSqon.js';
 
 describe('addSqonToSetSqon', () => {
     const sqon1: SetSqon = {

@@ -1,9 +1,9 @@
 import { GetObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
-import { cacheTTL } from '../env';
-import { S3Error } from './errors';
-import S3ClientInstance from './S3ClientInstance';
+import { cacheTTL } from '../env.js';
+import { S3Error } from './errors.js';
+import S3ClientInstance from './S3ClientInstance.js';
 
 // Expires 5 min after cache expiry to be sure the pre signed url doesn't expire before the cache.
 const PRE_SIGNED_URL_EXPIRY_SEC = cacheTTL + 300;

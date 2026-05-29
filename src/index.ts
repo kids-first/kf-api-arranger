@@ -1,55 +1,48 @@
-/* eslint-disable no-console */
-import 'regenerator-runtime/runtime.js';
-
-import Arranger from '@arranger/server';
-import { getProject } from '@arranger/server';
+import { expressMiddleware } from '@as-integrations/express5';
+import express from 'express';
 import Keycloak from 'keycloak-connect';
 
-import buildApp from './app';
-import { esHost, esPass, esUser, port } from './env';
-import keycloakConfig from './keycloak';
+import buildApp from './app.js';
+import { port, projectId } from './env.js';
+import { buildGraphqlServer } from './graphql/server.js';
+import keycloakConfig, { installGrantErrorLogger } from './keycloak.js';
+import { resolveSetIdMiddleware } from './middleware/resolveSetIdInSqon.js';
 
 process.on('uncaughtException', err => {
-    console.log(`Uncaught Exception: ${err.message}`);
+    console.error(`Uncaught Exception: ${err.message}`);
     process.exit(1);
 });
 
 process.on('unhandledRejection', (reason, promise) => {
-    console.log('Unhandled rejection at ', promise, `reason: ${reason}`);
+    console.error('Unhandled rejection at ', promise, `reason: ${reason}`);
     process.exit(1);
 });
 
 process.on('SIGINT', () => {
-    console.log(`Process ${process.pid} has been interrupted`);
+    console.info(`Process ${process.pid} has been interrupted`);
     process.exit(0);
 });
 
 const keycloak = new Keycloak({}, keycloakConfig);
+installGrantErrorLogger(keycloak);
 
-const app = buildApp(keycloak, getProject);
-const externalContext = (req, _res, _con) => ({ auth: req.kauth?.grant?.access_token || {} });
+// Build the GraphQL server first — its `runInternalQuery` runs the
+// in-process queries the /sets + /phenotypes routes need.
+const { server: apollo, context, runInternalQuery } = await buildGraphqlServer();
+const app = buildApp(keycloak, runInternalQuery);
 
-Arranger({
-    esHost,
-    esUser,
-    esPass,
-    graphqlOptions: {
-        context: externalContext,
-    },
-}).then(router => {
-    app.get('/*/ping', router);
-    app.use(keycloak.protect(), router);
+// Mount Apollo at /${projectId}/graphql — single project per deployment,
+// driven entirely by the PROJECT_ID env var (default 'include').
+// resolveSetIdMiddleware runs post-auth so it has req.kauth.grant available
+// and can't be triggered by unauthenticated callers.
+app.use(
+    `/${projectId}/graphql`,
+    keycloak.protect(),
+    express.json({ limit: '50mb' }),
+    resolveSetIdMiddleware(),
+    expressMiddleware(apollo, { context: async () => context }),
+);
 
-    const k: any = keycloak;
-    const originalValidateGrant = k.grantManager.validateGrant;
-    k.grantManager.validateGrant = grant =>
-        originalValidateGrant.call(k.grantManager, grant).catch(err => {
-            console.error('Grant Validation Error', err);
-            throw err;
-        });
-
-    app.listen(port, async () => {
-        console.log('Arranger-Next Starting');
-        console.log(`⚡️ Listening on port ${port} ⚡️`);
-    });
+app.listen(port, () => {
+    console.info(`⚡️ Listening on port ${port} ⚡️`);
 });

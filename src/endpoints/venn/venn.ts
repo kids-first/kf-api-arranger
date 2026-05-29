@@ -1,9 +1,10 @@
-import { buildQuery } from '@arranger/middleware';
+import EsInstance from '../../ElasticSearchClientInstance.js';
+import buildQuery from '../../sqon/buildQuery/index.js';
+import { getNestedFieldsForIndex } from '../../sqon/getNestedFieldsForIndex.js';
+import { and, not, or } from '../../sqon/manipulateSqon.js';
+import type { Sqon } from '../../sqon/types.js';
 
-import EsInstance from '../../ElasticSearchClientInstance';
-import { getNestedFieldsForIndex } from '../../sqon/getNestedFieldsForIndex';
-import { and, not, or } from '../../sqon/manipulateSqon';
-import { Sqon } from '../../sqon/types';
+export const VENN_SUPPORTED_INDICES = ['participant', 'file', 'biospecimen', 'variant', 'variant_somatic'];
 
 export type VennOutput = {
     operation: string;
@@ -100,25 +101,23 @@ export const venn = async (sqons: Sqon[], index: string): Promise<VennOutput[]> 
 
     const client = EsInstance.getInstance();
     const indexName = `${index}_centric`;
-    if (!mNestedFields.has(index)) {
+    if (!mNestedFields.has(indexName)) {
         const fields = await getNestedFieldsForIndex(client, indexName);
         mNestedFields.set(indexName, fields);
     }
     const nestedFields = mNestedFields.get(indexName);
 
-    const mSearchBody = setFormulas
-        .map(x => [
-            { index: indexName },
-            {
-                track_total_hits: true,
-                size: 0,
-                query: buildQuery({
-                    nestedFields: nestedFields,
-                    filters: x.sqon,
-                }),
-            },
-        ])
-        .flat();
+    const mSearchBody = setFormulas.flatMap(x => [
+        { index: indexName },
+        {
+            track_total_hits: true,
+            size: 0,
+            query: buildQuery({
+                nestedFields: nestedFields,
+                filters: x.sqon,
+            }),
+        },
+    ]);
 
     const r = await client.msearch({
         body: mSearchBody,
@@ -132,7 +131,7 @@ export const venn = async (sqons: Sqon[], index: string): Promise<VennOutput[]> 
     }));
 };
 
-export const reformatWhenSpecifiedEntity = (os: VennOutput[]): VennEntityOutput[] =>
+const reformatWhenSpecifiedEntity = (os: VennOutput[]): VennEntityOutput[] =>
     os.map(o => ({
         operation: o.operation,
         entitySqon: o.sqon,
@@ -141,16 +140,18 @@ export const reformatWhenSpecifiedEntity = (os: VennOutput[]): VennEntityOutput[
 
 const reformatToTables = (data: VennOutputReformattedElement[], qbSqons: Sqon[]): VennOutputReformatted => {
     const opToQbSqon = {
-        ['Q₁']: qbSqons[0],
-        ['Q₂']: qbSqons[1],
-        ['Q₃']: qbSqons[2],
+        'Q₁': qbSqons[0],
+        'Q₂': qbSqons[1],
+        'Q₃': qbSqons[2],
     };
-    const tables = data.reduce(
-        (xs: VennOutputReformatted, x: VennOutputReformattedElement) => {
+    const tables = data.reduce<VennOutputReformatted>(
+        (xs, x) => {
             if (['Q₁', 'Q₂', 'Q₃'].some(y => y === x.operation)) {
-                return { ...xs, summary: [...xs.summary, { ...x, qbSqon: opToQbSqon[x.operation] }] };
+                xs.summary.push({ ...x, qbSqon: opToQbSqon[x.operation] });
+            } else {
+                xs.operations.push(x);
             }
-            return { ...xs, operations: [...xs.operations, x] };
+            return xs;
         },
         { summary: [], operations: [] },
     );
