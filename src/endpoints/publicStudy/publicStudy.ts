@@ -1,4 +1,5 @@
 import EsInstance from '../../ElasticSearchClientInstance.js';
+import { ES_AGG_TERMS_MAX_SIZE } from '../../esUtils.js';
 
 type RData = {
     [index: string]: any;
@@ -28,8 +29,6 @@ export const getPublicStudy = async (code: string): Promise<RData> => {
     return r.body.hits?.hits?.map(x => x._source)?.[0];
 };
 
-const MAX_AGG_TERMS_SIZE = 10000;
-
 export const getPublicGraphs = async (code: string): Promise<RData> => {
     const client = EsInstance.getInstance();
     const mr = await client.msearch({
@@ -55,25 +54,25 @@ export const getPublicGraphs = async (code: string): Promise<RData> => {
                     sex: {
                         terms: {
                             field: 'sex',
-                            size: MAX_AGG_TERMS_SIZE,
+                            size: ES_AGG_TERMS_MAX_SIZE,
                         },
                     },
                     ethnicity: {
                         terms: {
                             field: 'ethnicity',
-                            size: MAX_AGG_TERMS_SIZE,
+                            size: ES_AGG_TERMS_MAX_SIZE,
                         },
                     },
                     race: {
                         terms: {
                             field: 'race',
-                            size: MAX_AGG_TERMS_SIZE,
+                            size: ES_AGG_TERMS_MAX_SIZE,
                         },
                     },
                     down_syndrome_status: {
                         terms: {
                             field: 'down_syndrome_status',
-                            size: MAX_AGG_TERMS_SIZE,
+                            size: ES_AGG_TERMS_MAX_SIZE,
                         },
                     },
                     files: {
@@ -84,7 +83,7 @@ export const getPublicGraphs = async (code: string): Promise<RData> => {
                             data_category: {
                                 terms: {
                                     field: 'files.data_category',
-                                    size: MAX_AGG_TERMS_SIZE,
+                                    size: ES_AGG_TERMS_MAX_SIZE,
                                 },
                                 aggs: {
                                     participants: {
@@ -95,7 +94,7 @@ export const getPublicGraphs = async (code: string): Promise<RData> => {
                             data_type: {
                                 terms: {
                                     field: 'files.data_type',
-                                    size: MAX_AGG_TERMS_SIZE,
+                                    size: ES_AGG_TERMS_MAX_SIZE,
                                 },
                                 aggs: {
                                     participants: {
@@ -128,13 +127,13 @@ export const getPublicGraphs = async (code: string): Promise<RData> => {
                     sample_type: {
                         terms: {
                             field: 'sample_type',
-                            size: MAX_AGG_TERMS_SIZE,
+                            size: ES_AGG_TERMS_MAX_SIZE,
                         },
                     },
                     status: {
                         terms: {
                             field: 'status',
-                            size: MAX_AGG_TERMS_SIZE,
+                            size: ES_AGG_TERMS_MAX_SIZE,
                         },
                     },
                 },
