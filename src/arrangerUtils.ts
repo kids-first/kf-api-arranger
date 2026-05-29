@@ -6,7 +6,7 @@
 
 import type { ExecutionResult, GraphQLSchema } from 'graphql';
 import { graphql } from 'graphql';
-import type { EsClient } from './graphql/es/client.js';
+import type { EsClient } from './es/client.js';
 
 export type RunInternalQuery = (args: {
     query: string;

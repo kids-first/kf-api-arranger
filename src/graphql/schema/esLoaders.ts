@@ -8,7 +8,7 @@
 // correct.
 
 import type { GraphQLObjectType } from 'graphql';
-import type { EsClient } from '../es/client.js';
+import type { EsClient } from '../../es/client.js';
 import { buildAggsType } from './buildAggsType.js';
 import { buildEntityType } from './buildConnectionFamily.js';
 import { deriveExtended } from './deriveExtended.js';

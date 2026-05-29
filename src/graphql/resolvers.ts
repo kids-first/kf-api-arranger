@@ -16,10 +16,10 @@
 import type { IResolvers } from '@graphql-tools/utils';
 import type { GraphQLResolveInfo } from 'graphql';
 import graphqlFields from 'graphql-fields';
+import type { EsClient } from '../es/client.js';
 import buildAggregations from '../sqon/buildAggregations/index.js';
 import buildQuery from '../sqon/buildQuery/index.js';
 import { flattenAggregations } from '../sqon/flattenAggregations.js';
-import type { EsClient } from './es/client.js';
 import type { EntityModule } from './schema/index.js';
 
 export type ServerContext = {
