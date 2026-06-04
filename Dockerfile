@@ -13,4 +13,4 @@ COPY --from=build /app/package.json /app/package-lock.json ./
 RUN npm ci --omit=dev --ignore-scripts
 ENV NODE_ENV=production
 USER node
-CMD ["node", "./dist/src/index.js"]
+CMD ["node", "./dist/index.js"]
