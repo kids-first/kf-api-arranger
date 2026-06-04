@@ -111,7 +111,10 @@ if (aliasedTargets.length > 0) {
         if (ex) console.log(`  - ${ex.index} → ${ex.alias}`);
     }
     console.log('');
-    console.log('Hint: run swapClinicalReleaseAliases.mjs to point at a different release first, then re-run.');
+    console.log(
+        `Hint: run applyClinicalReleaseAliases.mjs --release=${releaseTag} --action=remove ` +
+            'to detach these aliases first, then re-run.',
+    );
     process.exit(1);
 }
 
