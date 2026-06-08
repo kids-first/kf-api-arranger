@@ -52,8 +52,9 @@ export type SavedSet = {
     tag: string;
     size: number;
     setType: string;
-    updated_date: Date;
-    created_date: Date;
+    // ISO-8601 strings forwarded straight from UserApi (see UserSet) — not Dates.
+    updated_date: string;
+    created_date: string;
     is_invisible: boolean;
 };
 

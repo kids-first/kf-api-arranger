@@ -17,8 +17,10 @@ export type UserSet = {
     content: UserSetContent;
     alias: string;
     sharedpublicly: boolean;
-    creation_date: Date;
-    updated_date: Date;
+    // JSON has no Date type: UserApi sends these as ISO-8601 strings and that is
+    // what response.json() yields. They are only ever forwarded, never used as Dates.
+    creation_date: string;
+    updated_date: string;
     is_invisible?: boolean;
 };
 
@@ -34,10 +36,23 @@ const callUserApi = async <T>(path: string, method: Method, accessToken: string,
         ...(body !== undefined && { body: JSON.stringify(body) }),
     });
 
-    const responseBody = (await response.json()) as T;
+    // Read the raw body once. Not every endpoint returns JSON — e.g. DELETE
+    // /user-sets/:id replies with the bare set id as text/html — and a 204 has
+    // no body at all. Parsing unconditionally with response.json() throws on
+    // those, so parse only when there is content that actually parses and keep
+    // the raw text otherwise.
+    const text = await response.text();
+    let responseBody: unknown = text;
+    if (text) {
+        try {
+            responseBody = JSON.parse(text);
+        } catch {
+            // Non-JSON body (e.g. DELETE returns the bare id) — keep raw text.
+        }
+    }
 
     if (response.ok) {
-        return responseBody;
+        return responseBody as T;
     }
 
     throw new UserApiError(response.status, responseBody);

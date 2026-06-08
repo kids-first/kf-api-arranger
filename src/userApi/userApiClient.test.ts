@@ -26,11 +26,25 @@ afterAll(() => {
 
 // Real fetch() Response derives `ok` from the status code (true for 200-299).
 // Replicate that here so the production check `response.ok` behaves the
-// same against the mocks as it would against a real Response.
+// same against the mocks as it would against a real Response. callUserApi now
+// reads the body via response.text() and parses it itself, so serialize the
+// body to a string the way the wire would carry it.
 const buildMockResponse = (status: number, body: unknown) => ({
     status,
     ok: status >= 200 && status < 300,
-    json: () => body,
+    text: () => Promise.resolve(typeof body === 'string' ? body : JSON.stringify(body)),
+});
+
+// Response stand-in that holds the raw body *bytes* (a string) and only turns
+// them into a value when json()/text() is called — exactly like undici's real
+// Response. Unlike buildMockResponse (which hands back an already-parsed value),
+// json() here runs JSON.parse over the raw body, so it throws on a non-JSON
+// payload the same way production does.
+const buildWireResponse = (status: number, rawBody: string) => ({
+    status,
+    ok: status >= 200 && status < 300,
+    text: () => Promise.resolve(rawBody),
+    json: () => Promise.resolve(JSON.parse(rawBody)),
 });
 
 describe('UserApi Client', () => {
@@ -43,8 +57,9 @@ describe('UserApi Client', () => {
         content: {} as UserSetContent,
         alias: 'tag',
         sharedpublicly: false,
-        creation_date: new Date(),
-        updated_date: new Date(),
+        // ISO strings, as they arrive over the wire — see buildWireResponse.
+        creation_date: '2026-01-01T00:00:00.000Z',
+        updated_date: '2026-01-01T00:00:00.000Z',
     };
 
     describe('Get user Sets', () => {
@@ -175,6 +190,22 @@ describe('UserApi Client', () => {
         it('should return body if status is 200', async () => {
             const mockResponse = buildMockResponse(200, true);
             fetchMock.mockImplementation(() => mockResponse);
+
+            const result = await deleteUserSet(accessToken, setId);
+
+            expect(result).toEqual(setId);
+            expect(fetchMock).toHaveBeenCalledTimes(1);
+        });
+
+        // Regression: UserApi replies to DELETE with the bare set id as a
+        // text/html body (e.g. `33acefcc-…`, content-length 36 — not JSON).
+        // callUserApi parses every response with response.json(), so undici
+        // runs JSON.parse over the raw id, reads `33` then chokes on `a` at
+        // position 2. Against the current code this rejects with that
+        // SyntaxError; it should instead succeed and return the set id.
+        it('should return the set id when UserApi replies with the bare id as text/html', async () => {
+            const deletedIdBody = '33acefcc-6bc3-415b-a937-e4a9e3c72b5f';
+            fetchMock.mockImplementation(() => buildWireResponse(200, deletedIdBody));
 
             const result = await deleteUserSet(accessToken, setId);
 
