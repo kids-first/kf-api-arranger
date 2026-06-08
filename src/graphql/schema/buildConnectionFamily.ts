@@ -12,10 +12,9 @@
 //      `<Path>Edge`, `<Path>Node`.
 //
 // Sub-Connection wrappers omit `mapping`, `aggsState`, `matchBoxState`, and
-// sub-level `extended`/`columnsState`/`aggregations` — frontend audit
-// (2026-05-22) confirmed none are queried at sub-Connection level. The
-// top-level entity wrapper still exposes `extended` + `columnsState`;
-// `includeEntityMetadata` and `aggsType` switch those on.
+// sub-level `extended`/`aggregations` — frontend audit (2026-05-22) confirmed
+// none are queried at sub-Connection level. The top-level entity wrapper still
+// exposes `extended`; `includeEntityMetadata` and `aggsType` switch it on.
 
 import type { GraphQLFieldConfigMap, GraphQLOutputType } from 'graphql';
 import {
@@ -30,7 +29,6 @@ import {
 } from 'graphql';
 import { GraphQLJSON } from './jsonScalar.js';
 import { SortInputType } from './sortTypes.js';
-import { ColumnsStateType } from './stateTypes.js';
 import { gqlScalarFor } from './typeMappings.js';
 import type { ExtendedMap, FieldNode } from './types.js';
 
@@ -187,7 +185,6 @@ export function buildConnectionFamily(args: BuildConnectionFamilyArgs): Connecti
                     type: GraphQLJSON,
                     args: { fields: { type: new GraphQLList(GraphQLString) } },
                 };
-                out.columnsState = { type: ColumnsStateType };
             }
             return out;
         },

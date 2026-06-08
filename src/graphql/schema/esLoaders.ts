@@ -25,12 +25,7 @@ function buildEntityModule(esIndex: string, entityName: string, mapping: Record<
     // buildFieldTree's RawMapping type matches the ES _mapping response shape
     // exactly; cast is structural, not nominal.
     const tree = buildFieldTree(mapping as Parameters<typeof buildFieldTree>[0]);
-    const {
-        map: extendedMap,
-        entries: extendedEntries,
-        columnsState,
-        fallbackHits,
-    } = deriveExtended(esIndex, entityName, tree);
+    const { map: extendedMap, entries: extendedEntries, fallbackHits } = deriveExtended(esIndex, entityName, tree);
     const aggsType = buildAggsType(tree, entityName);
     const entityType: GraphQLObjectType = buildEntityType({
         entityName,
@@ -44,7 +39,6 @@ function buildEntityModule(esIndex: string, entityName: string, mapping: Record<
         entityType,
         nestedFields: collectNestedFields(tree),
         extendedEntries,
-        columnsState,
         fallbackHits,
     };
 }

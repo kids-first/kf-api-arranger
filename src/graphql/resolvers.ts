@@ -1,6 +1,6 @@
 // Resolver factory for the multi-entity GraphQL schema. One createResolvers
 // call wires the resolvers for all N entities; each entity's resolvers close
-// over its own esIndex + nestedFields + extendedEntries + columnsState.
+// over its own esIndex + nestedFields + extendedEntries.
 // ServerContext holds the EsClient only.
 //
 // Entity-level resolvers:
@@ -8,7 +8,6 @@
 //   - aggregations(filters, ...): ES search with aggs body, response is
 //     flattened to dot-paths then GraphQL-keyed (`__` for `.`).
 //   - extended(fields?): returns the per-entity extended list (filterable).
-//   - columnsState: returns the precomputed (or null) columnsState.
 //
 // Nested fields are shaped into Connection payloads at the source level via
 // resolveNested, so sub-Connection queries traverse the right structure.
@@ -118,14 +117,11 @@ export function createResolvers(entities: EntityModule[]): IResolvers<unknown, S
     const result: IResolvers<unknown, ServerContext> = { Root: root };
 
     for (const entity of entities) {
-        const { entityName, esIndex, nestedFields, extendedEntries, columnsState } = entity;
+        const { entityName, esIndex, nestedFields, extendedEntries } = entity;
         root[entityName] = () => ({});
         result[entityName] = {
             extended(_parent: unknown, { fields }: ExtendedArgs) {
                 return fields ? extendedEntries.filter(e => fields.includes(e.field)) : extendedEntries;
-            },
-            columnsState() {
-                return columnsState;
             },
             async hits(_parent: unknown, args: HitsArgs, ctx: ServerContext) {
                 const sqon = normalizeSqonInput(args.filters);

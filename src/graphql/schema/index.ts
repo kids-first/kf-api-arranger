@@ -16,7 +16,6 @@ export type EntityModule = {
     entityType: GraphQLObjectType;
     nestedFields: string[];
     extendedEntries: ExtendedEntry[];
-    columnsState: unknown;
     fallbackHits: string[];
 };
 

@@ -1,5 +1,5 @@
 // Sort input — used by `hits(sort: [Sort], ...)`. Module-level singleton
-// (one instance shared across all entity wrappers, like stateTypes.ts).
+// (one instance shared across all entity wrappers).
 //
 // Shape:
 //   input Sort { field: String!, order: Order, mode: Mode, missing: Missing }

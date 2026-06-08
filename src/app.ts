@@ -23,6 +23,14 @@ import type {
     UpdateSetTagBody,
 } from './endpoints/sets/setsTypes.js';
 import { getStatistics, getStudiesStatistics } from './endpoints/statistics/index.js';
+import {
+    buildTsv,
+    type ExportTableBody,
+    fetchExportRows,
+    isSupportedExportIndex,
+    isSupportedFileType,
+    sanitizeFileName,
+} from './endpoints/tableExport.js';
 import transcriptomicsRouter from './endpoints/transcriptomics/route.js';
 import { computeUpset } from './endpoints/upset.js';
 import { reformatVenn, VENN_SUPPORTED_INDICES, venn } from './endpoints/venn/venn.js';
@@ -198,6 +206,35 @@ export default (keycloak: Keycloak, runInternalQuery: RunInternalQuery): Express
         res.send({
             data: reformatVenn(datum2, qbSqons),
         });
+    });
+
+    // POST /export — tabular file export for the FE report tables (replaces the
+    // @arranger /download route). PROVISIONAL: input validation + response shape
+    // are finalized in Phase 2 (error handling + FE format discussion).
+    app.post('/export', keycloak.protect(), async (req, res) => {
+        const body = (req.body ?? {}) as ExportTableBody;
+
+        if (!isSupportedExportIndex(body.index)) {
+            res.status(HttpStatus.BAD_REQUEST).send('Unsupported or missing index');
+            return;
+        }
+        if (!isSupportedFileType(body.fileType)) {
+            res.status(HttpStatus.BAD_REQUEST).send('Unsupported or missing fileType');
+            return;
+        }
+        if (!Array.isArray(body.columns) || body.columns.length === 0) {
+            res.status(HttpStatus.BAD_REQUEST).send('No columns provided');
+            return;
+        }
+
+        const sqon = await resolveSetsInSqon(body.sqon ?? { op: 'and', content: [] }, null, req.headers.authorization);
+        const rows = await fetchExportRows(body.index, sqon, body.sort ?? [], body.columns);
+        const tsv = buildTsv(body.columns, rows);
+
+        const fileName = sanitizeFileName(body.fileName, body.index);
+        res.setHeader('Content-Type', 'text/tab-separated-values; charset=utf-8');
+        res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+        res.send(tsv);
     });
 
     app.get('/public-study/study/:code', async (req, res) => {

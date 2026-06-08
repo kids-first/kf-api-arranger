@@ -24,14 +24,6 @@
 // auto-generated label for fields without a hand-curated displayName
 // (e.g. `biospecimen_facet_ids.biospecimen_fhir_id_1` →
 // "Biospecimen Facet Ids Biospecimen Fhir Id 1").
-//
-// columnsState: intentionally `null`. The FE only consumes columnsState as
-// a server→FE→server round-trip for /include/download (see Phase C punch
-// item #3b — /download redesign drops columnsState entirely). /download is
-// already a placeholder on this branch, so any non-null shape here would
-// silently swallow the broken export with a 0-column TSV. Returning null
-// makes the FE columnsStateQuery null-deref loudly — the desired failure
-// mode for a known-unsupported path.
 
 import { getArrayFieldsFallback } from './arrayFieldsFallback.js';
 import type { DerivedExtended, ExtendedEntry, ExtendedMap, FieldNode, FieldTree } from './types.js';
@@ -64,7 +56,7 @@ export function deriveExtended(esIndex: string, entityName: string, tree: FieldT
     walk(tree.fields, '');
 
     const map: ExtendedMap = new Map(entries.map(e => [e.field, e]));
-    return { map, entries, columnsState: null, entityName, fallbackHits };
+    return { map, entries, entityName, fallbackHits };
 }
 
 function typeFor(node: FieldNode): string {
