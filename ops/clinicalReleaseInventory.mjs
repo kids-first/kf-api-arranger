@@ -4,8 +4,10 @@
  *
  *   ES_HOST=https://… node ops/clinicalReleaseInventory.mjs
  *
- * - Two tables: releases whose every index is aliased, and everything else.
- * - `aliased` column shows n/N; mixed groups are tagged `(partial)`.
+ * - Two tables: releases with at least one aliased index, and releases with at
+ *   least one non-aliased index. A partially-aliased release shows up in BOTH.
+ * - `alias_state` column reads `fully aliased`, `partially aliased (n/N)`, or
+ *   `not aliased`.
  * - `entities` column shows coverage of the 5 clinical stems (or 2
  *   transcriptomics stems), with missing names listed.
  * - Sort: newest creation date first.
@@ -52,11 +54,10 @@ const formatEntities = (presentStems, allStems) => {
     return `${presentStems.length}/${allStems.length} (-${missing.join(', ')})`;
 };
 
-const formatAliased = (aliasedCount, total) => {
-    if (aliasedCount === 0 || aliasedCount === total) {
-        return `${aliasedCount}/${total}`;
-    }
-    return `${aliasedCount}/${total} (partial)`;
+const formatAliasState = (aliasedCount, total) => {
+    if (aliasedCount === 0) return 'not aliased';
+    if (aliasedCount === total) return 'fully aliased';
+    return `partially aliased (${aliasedCount}/${total})`;
 };
 
 const client = new Client({ node: esHost });
@@ -107,18 +108,19 @@ const enrichedGroups = Object.values(groups).map(members => {
             type,
             n_indices: members.length,
             entities: formatEntities(presentStems, allStems),
-            aliased: formatAliased(aliasedCount, members.length),
+            alias_state: formatAliasState(aliasedCount, members.length),
             creation_date: latest.creationDateStr,
         },
         sortKey: latest.creationDate,
-        allAliased: aliasedCount === members.length,
+        hasAlias: aliasedCount > 0,
+        hasUnaliased: aliasedCount < members.length,
     };
 });
 
 const sorted = enrichedGroups.toSorted((a, b) => b.sortKey - a.sortKey);
 
-const aliasedRows = sorted.filter(g => g.allAliased).map(g => g.row);
-const notAliasedRows = sorted.filter(g => !g.allAliased).map(g => g.row);
+const aliasedRows = sorted.filter(g => g.hasAlias).map(g => g.row);
+const notAliasedRows = sorted.filter(g => g.hasUnaliased).map(g => g.row);
 
 console.log('===== ALIASED releases =====');
 if (aliasedRows.length) {
