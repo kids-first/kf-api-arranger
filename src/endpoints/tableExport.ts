@@ -23,6 +23,18 @@ import { getNestedFieldsForIndex } from '../sqon/getNestedFieldsForIndex.js';
 import type { Sqon } from '../sqon/types.js';
 import type { SetSqon, Sort } from './sets/setsTypes.js';
 
+// Response headers carrying the truncation signal back to the FE. The body is
+// the TSV file itself, so the count can't ride in the body — it goes here. The
+// browser only exposes these to the FE's JS if they're listed in CORS
+// `Access-Control-Expose-Headers`, so app.ts feeds this same list to cors().
+export const EXPORT_HEADERS = {
+    totalCount: 'X-Export-Total-Count',
+    rowLimit: 'X-Export-Row-Limit',
+    truncated: 'X-Export-Truncated',
+} as const;
+
+export const EXPORT_EXPOSED_HEADERS = Object.values(EXPORT_HEADERS);
+
 export type ExportColumn = { field: string; header: string };
 
 export type ExportFileType = 'tsv';
@@ -114,7 +126,7 @@ export const fetchExportRows = async (
     sqon: SetSqon,
     sort: Sort[],
     columns: ExportColumn[],
-): Promise<Record<string, unknown>[]> => {
+): Promise<{ rows: Record<string, unknown>[]; total: number }> => {
     const client = EsInstance.getInstance();
     const indexName = `${index}_centric`;
 
@@ -144,14 +156,17 @@ export const fetchExportRows = async (
     });
 
     // v1 caps at a single page (maxSetContentSize — the ceiling sets impose
-    // product-wide). Surface truncation loudly rather than silently dropping
-    // rows; search_after/scroll for unbounded export is a follow-up.
+    // product-wide). When the match count exceeds the cap we still return the
+    // capped page; the route surfaces the true `total` to the FE via response
+    // headers so it can warn the user the file is partial. Also logged for ops
+    // visibility. search_after/scroll for unbounded export is a follow-up.
     const total: number = body?.hits?.total?.value ?? 0;
     if (total > maxSetContentSize) {
         console.warn(`[export] ${indexName}: ${total} rows matched, truncating to ${maxSetContentSize}`);
     }
 
-    return body.hits.hits.map((h: { _source: Record<string, unknown> }) => h._source);
+    const rows = body.hits.hits.map((h: { _source: Record<string, unknown> }) => h._source);
+    return { rows, total };
 };
 
 // Strip anything that isn't filename-safe (also neutralizes header injection via

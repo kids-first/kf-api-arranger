@@ -25,6 +25,8 @@ import type {
 import { getStatistics, getStudiesStatistics } from './endpoints/statistics/index.js';
 import {
     buildTsv,
+    EXPORT_EXPOSED_HEADERS,
+    EXPORT_HEADERS,
     type ExportTableBody,
     fetchExportRows,
     isSupportedExportIndex,
@@ -34,7 +36,7 @@ import {
 import transcriptomicsRouter from './endpoints/transcriptomics/route.js';
 import { computeUpset } from './endpoints/upset.js';
 import { reformatVenn, VENN_SUPPORTED_INDICES, venn } from './endpoints/venn/venn.js';
-import { esHost, keycloakURL, userApiURL } from './env.js';
+import { esHost, keycloakURL, maxSetContentSize, userApiURL } from './env.js';
 import { globalErrorHandler, globalErrorLogger } from './errors.js';
 import { HttpStatus } from './httpStatus.js';
 import { flushAllCache, STATISTICS_CACHE_ID, STATISTICS_PUBLIC_CACHE_ID, twineWithCache } from './middleware/cache.js';
@@ -45,7 +47,7 @@ import type { Sqon } from './sqon/types.js';
 export default (keycloak: Keycloak, runInternalQuery: RunInternalQuery): Express => {
     const app = express();
 
-    app.use(cors());
+    app.use(cors({ exposedHeaders: EXPORT_EXPOSED_HEADERS }));
 
     app.use(express.json({ limit: '50mb' }));
     app.use(
@@ -228,12 +230,18 @@ export default (keycloak: Keycloak, runInternalQuery: RunInternalQuery): Express
         }
 
         const sqon = await resolveSetsInSqon(body.sqon ?? { op: 'and', content: [] }, null, req.headers.authorization);
-        const rows = await fetchExportRows(body.index, sqon, body.sort ?? [], body.columns);
+        const { rows, total } = await fetchExportRows(body.index, sqon, body.sort ?? [], body.columns);
         const tsv = buildTsv(body.columns, rows);
 
         const fileName = sanitizeFileName(body.fileName, body.index);
         res.setHeader('Content-Type', 'text/tab-separated-values; charset=utf-8');
         res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+        // Always surface the true match count + cap so the FE can tell the user
+        // when the file is partial (total > limit ⇒ truncated). Readable by the
+        // FE's JS only because these names are in cors() exposedHeaders above.
+        res.setHeader(EXPORT_HEADERS.totalCount, String(total));
+        res.setHeader(EXPORT_HEADERS.rowLimit, String(maxSetContentSize));
+        res.setHeader(EXPORT_HEADERS.truncated, String(total > maxSetContentSize));
         res.send(tsv);
     });
 

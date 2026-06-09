@@ -13,6 +13,13 @@ import {
 vi.mock('../ElasticSearchClientInstance.js');
 vi.mock('../sqon/getNestedFieldsForIndex.js');
 
+// Shape of the single argument fetchExportRows passes to client.search(...).
+// Typing the mock impl's param makes search.mock.calls[0][0] infer as this
+// object rather than `undefined` (an untyped `() => ...` has no params, so the
+// call tuple is empty) — without it the IDE flags arg/arg.body as possibly
+// undefined even though tsc skips test files.
+type EsSearchArg = { index: string; size: number; body: Record<string, unknown> };
+
 describe('tableExport', () => {
     describe(`${isSupportedExportIndex.name}`, () => {
         it('accepts the four supported indices', () => {
@@ -124,12 +131,12 @@ describe('tableExport', () => {
         });
 
         it('queries <index>_centric, prunes _source to the exact dotted paths, maps sort, returns _source rows', async () => {
-            const search = vi.fn(async () => ({
+            const search = vi.fn(async (_arg: EsSearchArg) => ({
                 body: { hits: { total: { value: 1, relation: 'eq' }, hits: [{ _source: { study_code: 'ST1' } }] } },
             }));
             vi.mocked(EsInstance.getInstance).mockImplementation(() => ({ search }));
 
-            const rows = await fetchExportRows(
+            const { rows, total } = await fetchExportRows(
                 'study',
                 { op: 'and', content: [] },
                 [{ field: 'study_code', order: 'asc' }],
@@ -140,6 +147,7 @@ describe('tableExport', () => {
             );
 
             expect(rows).toEqual([{ study_code: 'ST1' }]);
+            expect(total).toBe(1);
 
             const arg = search.mock.calls[0][0];
             expect(arg.index).toBe('study_centric');
@@ -148,7 +156,7 @@ describe('tableExport', () => {
         });
 
         it('omits sort when none is given', async () => {
-            const search = vi.fn(async () => ({
+            const search = vi.fn(async (_arg: EsSearchArg) => ({
                 body: { hits: { total: { value: 0, relation: 'eq' }, hits: [] } },
             }));
             vi.mocked(EsInstance.getInstance).mockImplementation(() => ({ search }));
@@ -158,14 +166,14 @@ describe('tableExport', () => {
             expect(search.mock.calls[0][0].body.sort).toBeUndefined();
         });
 
-        it('warns and still returns rows when the match count exceeds the cap', async () => {
+        it('warns, reports the true total, and still returns the capped page when the match count exceeds the cap', async () => {
             const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-            const search = vi.fn(async () => ({
+            const search = vi.fn(async (_arg: EsSearchArg) => ({
                 body: { hits: { total: { value: 10001, relation: 'gte' }, hits: [{ _source: { a: 1 } }] } },
             }));
             vi.mocked(EsInstance.getInstance).mockImplementation(() => ({ search }));
 
-            const rows = await fetchExportRows(
+            const { rows, total } = await fetchExportRows(
                 'participant',
                 { op: 'and', content: [] },
                 [],
@@ -173,6 +181,7 @@ describe('tableExport', () => {
             );
 
             expect(rows).toEqual([{ a: 1 }]);
+            expect(total).toBe(10001);
             expect(warn).toHaveBeenCalledTimes(1);
             warn.mockRestore();
         });
