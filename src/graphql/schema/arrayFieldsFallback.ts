@@ -78,6 +78,28 @@ const VARIANT_CENTRIC = new Set<string>([
     'studies.zygosity',
 ]);
 
+// Mirrors VARIANT_CENTRIC (same germline gene/clinvar/studies sub-structure).
+// Bare `genes` is omitted on purpose — it's a `nested` field, auto-detected as
+// an array by the deriver.
+const VARIANT_SOMATIC_CENTRIC = new Set<string>([
+    'clinvar.clin_sig',
+    'clinvar.conditions',
+    'clinvar.inheritance',
+    'clinvar.interpretations',
+    'gene_external_reference',
+    'genes.alias',
+    'genes.consequences.consequence',
+    'genes.consequences.refseq_mrna_id',
+    'genes.cosmic.tumour_types_germline',
+    'genes.omim.inheritance',
+    'genes.omim.inheritance_code',
+    'genes.orphanet.inheritance',
+    'genes.spliceai.type',
+    'studies.participant_ids',
+    'studies.transmission',
+    'studies.zygosity',
+]);
+
 const GENE_CENTRIC = new Set<string>(['alias']);
 
 const PARTICIPANT_CENTRIC = new Set<string>([
@@ -95,6 +117,7 @@ const BY_INDEX: ReadonlyMap<string, ReadonlySet<string>> = new Map([
     ['file_centric', FILE_CENTRIC],
     ['study_centric', STUDY_CENTRIC],
     ['variant_centric', VARIANT_CENTRIC],
+    ['variant_somatic_centric', VARIANT_SOMATIC_CENTRIC],
     ['gene_centric', GENE_CENTRIC],
     ['participant_centric', PARTICIPANT_CENTRIC],
     // specimen_tree_centric has no scalar-array fields per the QA audit.

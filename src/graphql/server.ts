@@ -35,6 +35,14 @@ const ES_ENTITIES: ReadonlyArray<{ esIndex: string; entityName: string }> = [
     { esIndex: 'variant_centric', entityName: 'variants' },
 ];
 
+// Optional entities: registered only when their index exists. variant_somatic
+// is KF-only — INCLUDE has no variant_somatic_centric, so loadAllEntitiesFromEs
+// skips it there (the mapping fetch 404s) instead of failing boot. When present
+// it exposes the `variants_somatic` GraphQL entity the somatic search page queries.
+const OPTIONAL_ES_ENTITIES: ReadonlyArray<{ esIndex: string; entityName: string }> = [
+    { esIndex: 'variant_somatic_centric', entityName: 'variants_somatic' },
+];
+
 export type GraphqlServerHandle = {
     server: ApolloServer<ServerContext>;
     context: ServerContext;
@@ -47,7 +55,10 @@ export async function buildGraphqlServer(): Promise<GraphqlServerHandle> {
     await pingCluster();
 
     const es = createRealEsClient();
-    const entities: EntityModule[] = await loadAllEntitiesFromEs(es, ES_ENTITIES);
+    const entities: EntityModule[] = await loadAllEntitiesFromEs(es, [
+        ...ES_ENTITIES,
+        ...OPTIONAL_ES_ENTITIES.map(e => ({ ...e, optional: true })),
+    ]);
 
     // Single boot-time visibility of the ETL/fallback gap. Silent when the
     // ETL has tagged every multi-value scalar via meta.isArray.

@@ -43,10 +43,34 @@ function buildEntityModule(esIndex: string, entityName: string, mapping: Record<
     };
 }
 
+// A missing index surfaces as a 404 (index_not_found_exception) from the ES
+// client. Required entities rethrow (boot stays fail-fast); `optional` entities
+// swallow only the 404 and are skipped, so a deployment that simply lacks the
+// index — e.g. INCLUDE has no variant_somatic_centric — boots cleanly without
+// it. Any other error (network, auth, malformed mapping) still propagates.
+function isIndexNotFound(err: unknown): boolean {
+    const e = err as { statusCode?: number; meta?: { statusCode?: number }; message?: string };
+    return e?.statusCode === 404 || e?.meta?.statusCode === 404 || /index_not_found/i.test(e?.message ?? '');
+}
+
 export async function loadAllEntitiesFromEs(
     es: EsClient,
-    entities: ReadonlyArray<{ esIndex: string; entityName: string }>,
+    entities: ReadonlyArray<{ esIndex: string; entityName: string; optional?: boolean }>,
 ): Promise<EntityModule[]> {
-    const mappings = await Promise.all(entities.map(({ esIndex }) => fetchMapping(es, esIndex)));
-    return entities.map(({ esIndex, entityName }, i) => buildEntityModule(esIndex, entityName, mappings[i]));
+    const loaded = await Promise.all(
+        entities.map(async ({ esIndex, entityName, optional }) => {
+            try {
+                return buildEntityModule(esIndex, entityName, await fetchMapping(es, esIndex));
+            } catch (err) {
+                if (optional && isIndexNotFound(err)) {
+                    console.info(
+                        `[entities] optional index "${esIndex}" absent; skipping GraphQL entity "${entityName}"`,
+                    );
+                    return null;
+                }
+                throw err;
+            }
+        }),
+    );
+    return loaded.filter((e): e is EntityModule => e !== null);
 }
