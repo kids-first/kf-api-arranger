@@ -1,6 +1,8 @@
 import dotenv from 'dotenv';
 
-dotenv.config({ quiet: true });
+// ENV_FILE selects the per-project env file (.env.include / .env.kf); falls
+// back to plain .env when unset. See the `dev:*` npm scripts.
+dotenv.config({ path: process.env.ENV_FILE || '.env', quiet: true });
 
 export const port = process.env.PORT || 5050;
 

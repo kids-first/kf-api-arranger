@@ -62,6 +62,23 @@ The critical knobs:
 - `USER_API_URL` — sets persistence
 - `PROJECT_ID` — GraphQL mount prefix
 
+### Switching between INCLUDE and KF
+
+This one codebase is deployed for two portals — **INCLUDE** and **Kids-First (KF)** — which differ in `ES_HOST`, `KEYCLOAK_URL`/`KEYCLOAK_REALM`, `USER_API_URL`, `DATALAKE_S3_URL`, `PROJECT_ID`, and the suggestion index names (INCLUDE uses singular `gene_suggestions`/`variant_suggestions`; KF uses plural `genes_suggestions`/`variants_suggestions`).
+
+For local dev, keep a complete env file per portal and select it with `ENV_FILE` instead of hand-editing `.env`:
+
+```bash
+cp .env.example .env.include   # fill in INCLUDE values
+cp .env.example .env.kf        # fill in KF values
+
+npm run dev:include            # ENV_FILE=.env.include npm run dev
+npm run dev:kf                 # ENV_FILE=.env.kf     npm run dev
+npm run dev                    # plain .env (fallback, unchanged)
+```
+
+`.env`, `.env.include`, and `.env.kf` are all gitignored. `src/env.ts` loads `process.env.ENV_FILE || '.env'`.
+
 ## 📂 Project layout
 
 - `src/app.ts` — REST routes, auth gates, mount points

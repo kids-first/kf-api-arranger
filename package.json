@@ -10,6 +10,8 @@
   },
   "scripts": {
     "dev": "tsx watch src/index.ts",
+    "dev:include": "ENV_FILE=.env.include tsx watch src/index.ts",
+    "dev:kf": "ENV_FILE=.env.kf tsx watch src/index.ts",
     "start": "node ./dist/index.js",
     "test": "vitest run",
     "test:watch": "vitest",
