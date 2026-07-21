@@ -1,25 +1,15 @@
-import { graphql } from 'graphql';
-import { get } from 'lodash';
-
-import { ArrangerProject } from '../arrangerUtils';
-import { SetSqon, Sort } from '../endpoints/sets/setsTypes';
-import { maxSetContentSize } from '../env';
+import type { RunInternalQuery } from '../arrangerUtils.js';
+import type { SetSqon, Sort } from '../endpoints/sets/setsTypes.js';
+import { maxSetContentSize } from '../env.js';
 
 export const searchSqon = async (
     sqon: SetSqon,
-    projectId: string,
     type: string,
     sort: Sort[],
     idField: string,
-    getProject: (projectId: string) => ArrangerProject,
+    runInternalQuery: RunInternalQuery,
 ): Promise<string[]> => {
-    const project = getProject(projectId);
-
-    if (!project) {
-        throw new Error(`ProjectID '${projectId}' cannot be established.`);
-    }
-
-    const results = await runQuery({
+    const results = await runInternalQuery({
         query: `
             query ($sqon: JSON, $sort: [Sort], $first: Int) {
                 ${type} {
@@ -34,29 +24,12 @@ export const searchSqon = async (
             }
         `,
         variables: { sqon, sort, first: maxSetContentSize },
-        mock: false,
-        project,
     });
 
-    if (get(results, 'errors', undefined)) {
-        throw new Error(get(results, 'errors', undefined));
+    if (results?.errors) {
+        throw new Error(JSON.stringify(results.errors));
     }
 
-    const ids: string[] = get(results, `data.${type}.hits.edges`, []).map(edge => edge.node[idField]);
-
-    return ids;
-};
-
-const runQuery = ({ query, variables, mock, project }) => {
-    const schema = mock ? project.mockSchema : project.schema;
-    return graphql({
-        schema,
-        contextValue: {
-            schema,
-            es: project.es,
-            projectId: project.id,
-        },
-        source: query,
-        variableValues: variables,
-    });
+    const edges = ((results?.data as any)?.[type]?.hits?.edges ?? []) as Array<{ node: Record<string, string> }>;
+    return edges.map(edge => edge.node[idField]);
 };

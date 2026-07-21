@@ -1,6 +1,6 @@
-import { SetIdToTag } from '../endpoints/sets/setsTypes';
-import { getUserSets, postSetsTags } from '../userApi/userApiClient';
-import { Content, Sqon } from './types';
+import type { SetIdToTag } from '../endpoints/sets/setsTypes.js';
+import { getUserSets, postSetsTags } from '../userApi/userApiClient.js';
+import type { Content, Sqon } from './types.js';
 
 const participantKey = 'fhir_id';
 const participantFileKey = 'files.fhir_id';
@@ -30,9 +30,13 @@ const traverseWithMutationAtSetId = (node: Sqon, callback: (content: Content) =>
     }
 
     if (Array.isArray(node)) {
-        node.forEach(item => traverseWithMutationAtSetId(item, callback));
+        node.forEach(item => {
+            traverseWithMutationAtSetId(item, callback);
+        });
     } else {
-        Object.values(node).forEach(item => traverseWithMutationAtSetId(item, callback));
+        Object.values(node).forEach(item => {
+            traverseWithMutationAtSetId(item, callback);
+        });
     }
 };
 

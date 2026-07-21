@@ -1,13 +1,13 @@
-import { NextFunction, Request, Response } from 'express';
-import { StatusCodes } from 'http-status-codes';
+import type { Request, Response } from 'express';
 
-import EsInstance from '../ElasticSearchClientInstance';
+import EsInstance from '../ElasticSearchClientInstance.js';
 import {
     indexNameGeneFeatureSuggestion,
     indexNameVariantFeatureSuggestion,
     indexNameVariantSomaticFeatureSuggestion,
     maxNOfGenomicFeatureSuggestions,
-} from '../env';
+} from '../env.js';
+import { HttpStatus } from '../httpStatus.js';
 
 export const SUGGESTIONS_TYPES = {
     VARIANT: 'variant',
@@ -15,49 +15,45 @@ export const SUGGESTIONS_TYPES = {
     GENE: 'gene',
 };
 
-export default async (req: Request, res: Response, next: NextFunction, type: string): Promise<void> => {
-    try {
-        const prefix = req.params.prefix;
+export default async (req: Request, res: Response, type: string): Promise<void> => {
+    const prefix = req.params.prefix;
 
-        const client = await EsInstance.getInstance();
+    const client = await EsInstance.getInstance();
 
-        const retrieveIndex = () => {
-            switch (type) {
-                case SUGGESTIONS_TYPES.GENE:
-                    return indexNameGeneFeatureSuggestion;
-                case SUGGESTIONS_TYPES.VARIANT:
-                    return indexNameVariantFeatureSuggestion;
-                case SUGGESTIONS_TYPES.VARIANT_SOMATIC:
-                    return indexNameVariantSomaticFeatureSuggestion;
-            }
-        };
-        const _index = retrieveIndex();
+    const retrieveIndex = () => {
+        switch (type) {
+            case SUGGESTIONS_TYPES.GENE:
+                return indexNameGeneFeatureSuggestion;
+            case SUGGESTIONS_TYPES.VARIANT:
+                return indexNameVariantFeatureSuggestion;
+            case SUGGESTIONS_TYPES.VARIANT_SOMATIC:
+                return indexNameVariantSomaticFeatureSuggestion;
+        }
+    };
+    const _index = retrieveIndex();
 
-        const { body } = await client.search({
-            index: _index,
-            body: {
-                suggest: {
-                    suggestions: {
-                        prefix,
-                        completion: {
-                            field: 'suggest',
-                            size: maxNOfGenomicFeatureSuggestions,
-                        },
+    const { body } = await client.search({
+        index: _index,
+        body: {
+            suggest: {
+                suggestions: {
+                    prefix,
+                    completion: {
+                        field: 'suggest',
+                        size: maxNOfGenomicFeatureSuggestions,
                     },
                 },
             },
-        });
+        },
+    });
 
-        const suggestionResponse = body.suggest.suggestions[0];
+    const suggestionResponse = body.suggest.suggestions[0];
 
-        const searchText = suggestionResponse.text;
-        const suggestions = suggestionResponse.options.map(suggestion => suggestion._source);
+    const searchText = suggestionResponse.text;
+    const suggestions = suggestionResponse.options.map(suggestion => suggestion._source);
 
-        res.status(StatusCodes.OK).send({
-            searchText,
-            suggestions,
-        });
-    } catch (e) {
-        next(e);
-    }
+    res.status(HttpStatus.OK).send({
+        searchText,
+        suggestions,
+    });
 };

@@ -1,9 +1,8 @@
-import { Client } from '@elastic/elasticsearch';
-import filesize from 'filesize';
+import type { Client } from '@elastic/elasticsearch';
 
-import EsInstance from '../../ElasticSearchClientInstance';
-import { esBiospecimenIndex, esFileIndex, esParticipantIndex, esStudyIndex, esVariantIndex } from '../../esUtils';
-import { isInclude } from '../../projectUtils';
+import EsInstance from '../../ElasticSearchClientInstance.js';
+import { isInclude } from '../../env.js';
+import { esBiospecimenIndex, esFileIndex, esParticipantIndex, esStudyIndex, esVariantIndex } from '../../esUtils.js';
 
 export type Diagnosis = {
     mondo_id: string;
@@ -46,7 +45,19 @@ const fetchFileSizeStats = async (client: Client): Promise<string> => {
         },
         size: 0,
     });
-    return filesize(body.aggregations.types_count.value);
+    return humanByteSize(body.aggregations.types_count.value);
+};
+
+// Replacement for filesize@3 — binary (1024) base, 2 decimals, JEDEC-style unit names.
+const humanByteSize = (bytes: number): string => {
+    const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
+    let n = bytes;
+    let i = 0;
+    while (n >= 1024 && i < units.length - 1) {
+        n /= 1024;
+        i++;
+    }
+    return `${n.toFixed(2)} ${units[i]}`;
 };
 
 const fetchStudyStats = async (client: Client): Promise<number> => {
@@ -93,14 +104,14 @@ const fetchBiospecimenStats = async (client: Client): Promise<number> => {
     return body.aggregations.types_count.value;
 };
 
-export const fetchVariantStats = async (client: Client): Promise<number> => {
+const fetchVariantStats = async (client: Client): Promise<number> => {
     const { body } = await client.count({
         index: esVariantIndex,
     });
     return body?.count;
 };
 
-export const fetchGenomesStats = async (client: Client): Promise<number> => {
+const fetchGenomesStats = async (client: Client): Promise<number> => {
     const { body } = await client.count({
         index: esParticipantIndex,
         body: {
@@ -153,7 +164,7 @@ export const fetchGenomesStats = async (client: Client): Promise<number> => {
     return body?.count;
 };
 
-export const fetchTranscriptomesStats = async (client: Client): Promise<number> => {
+const fetchTranscriptomesStats = async (client: Client): Promise<number> => {
     const { body } = await client.count({
         index: esParticipantIndex,
         body: {
@@ -215,7 +226,7 @@ export const fetchTranscriptomesStats = async (client: Client): Promise<number> 
     return body?.count;
 };
 
-export const fetchDemographicsStats = async (client: Client): Promise<Record<string, number>[]> => {
+const fetchDemographicsStats = async (client: Client): Promise<Record<string, number>[]> => {
     const response = await client.msearch({
         body: [
             { index: esParticipantIndex },
@@ -253,7 +264,7 @@ export const fetchDemographicsStats = async (client: Client): Promise<Record<str
     return [sex, downSyndromeStatus, race, ethnicity];
 };
 
-export const fetchTopDiagnosis = async (client: Client): Promise<Diagnosis[]> => {
+const fetchTopDiagnosis = async (client: Client): Promise<Diagnosis[]> => {
     const excludeDownSyndrom = '.*MONDO:(0700030|0008608|0700129|0700127|0700130|0700128|0700126).*';
 
     const groupByDiagnosisTerms = {

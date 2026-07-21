@@ -1,7 +1,6 @@
-import { buildQuery } from '@arranger/middleware';
-
-import EsInstance from '../ElasticSearchClientInstance';
-import { getNestedFieldsForIndex } from '../sqon/getNestedFieldsForIndex';
+import EsInstance from '../ElasticSearchClientInstance.js';
+import buildQuery from '../sqon/buildQuery/index.js';
+import { getNestedFieldsForIndex } from '../sqon/getNestedFieldsForIndex.js';
 
 export type UpsetData = {
     name: string;
@@ -76,7 +75,7 @@ export const computeUpset = async (
         ],
     };
 
-    let hits = [];
+    const hits: { fhir_id: string; phenotype: { hpo_phenotype_observed: string }[] }[] = [];
     for (const step of buildSteps()) {
         const { body } = await client.search({
             index: 'participant_centric',
@@ -85,12 +84,11 @@ export const computeUpset = async (
             body: searchBody,
         });
 
-        hits = [
-            ...hits,
+        hits.push(
             ...body.hits.hits.map(
                 (x: { _source: { fhir_id: string; phenotype: { hpo_phenotype_observed: string }[] } }) => x._source,
             ),
-        ];
+        );
 
         const hasNext: boolean = body.hits.total.value >= step.from + BATCH_SIZE;
         if (!hasNext) {
@@ -105,13 +103,16 @@ export const computeUpset = async (
             ph: [...new Set(x.phenotype.map(p => p.hpo_phenotype_observed))],
         }));
 
-    const allQueryPhenotypes: string[] = ps.map(x => x.ph).flat();
+    const allQueryPhenotypes: string[] = ps.flatMap(x => x.ph);
 
     //countIt is sorted by descending counts
     const top = topN(countIt(allQueryPhenotypes), topMax > 0 && topMax <= 25 ? topMax : DEFAULT_TOP);
 
     const data = top.map(x => {
-        const pts = ps.reduce((ys, y) => (y.ph.includes(x) ? [...ys, y.patient] : ys), []);
+        const pts = ps.reduce<string[]>((ys, y) => {
+            if (y.ph.includes(x)) ys.push(y.patient);
+            return ys;
+        }, []);
         return {
             name: x,
             elems: pts,

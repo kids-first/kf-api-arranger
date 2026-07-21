@@ -1,20 +1,18 @@
-import { difference, dropRight, union } from 'lodash';
-
-import { ArrangerProject } from '../../arrangerUtils';
-import { maxSetContentSize } from '../../env';
-import { addSqonToSetSqon, removeSqonToSetSqon } from '../../sqon/manipulateSqon';
-import { resolveSetsInSqon } from '../../sqon/resolveSetInSqon';
-import { searchSqon } from '../../sqon/searchSqon';
-import { deleteUserSet, getUserSets, postUserSet, putUserSet, UserSet } from '../../userApi/userApiClient';
-import { SetNotFoundError } from './setError';
+import type { RunInternalQuery } from '../../arrangerUtils.js';
+import { maxSetContentSize } from '../../env.js';
+import { addSqonToSetSqon, removeSqonToSetSqon } from '../../sqon/manipulateSqon.js';
+import { resolveSetsInSqon } from '../../sqon/resolveSetInSqon.js';
+import { searchSqon } from '../../sqon/searchSqon.js';
+import { deleteUserSet, getUserSets, postUserSet, putUserSet, type UserSet } from '../../userApi/userApiClient.js';
+import { SetNotFoundError } from './setError.js';
 import {
-    CreateSetBody,
-    CreateUpdateBody,
+    type CreateSetBody,
+    type CreateUpdateBody,
     RIFF_TYPE_SET,
-    Set,
-    UpdateSetContentBody,
-    UpdateSetTagBody,
-} from './setsTypes';
+    type SavedSet,
+    type UpdateSetContentBody,
+    type UpdateSetTagBody,
+} from './setsTypes.js';
 
 export const SubActionTypes = {
     RENAME_TAG: 'RENAME_TAG',
@@ -22,7 +20,7 @@ export const SubActionTypes = {
     REMOVE_IDS: 'REMOVE_IDS',
 };
 
-export const getUserSet = async (accessToken: string, setId: string): Promise<UserSet> => {
+const getUserSet = async (accessToken: string, setId: string): Promise<UserSet> => {
     const existingSetsFilterById: UserSet[] = (await getUserSets(accessToken)).filter(r => r.id === setId);
     if (existingSetsFilterById.length !== 1) {
         throw new SetNotFoundError('Set to update can not be found !');
@@ -31,7 +29,7 @@ export const getUserSet = async (accessToken: string, setId: string): Promise<Us
     return existingSetsFilterById[0];
 };
 
-export const getSets = async (accessToken: string): Promise<Set[]> => {
+export const getSets = async (accessToken: string): Promise<SavedSet[]> => {
     const userContents = await getUserSets(accessToken);
     return userContents.map(set => mapUserResultToSet(set));
 };
@@ -40,11 +38,11 @@ export const createSet = async (
     requestBody: CreateSetBody,
     accessToken: string,
     userId: string,
-    getProject: (projectId: string) => ArrangerProject,
-): Promise<Set> => {
-    const { sqon, sort, projectId, type, idField, tag, is_invisible } = requestBody;
+    runInternalQuery: RunInternalQuery,
+): Promise<SavedSet> => {
+    const { sqon, sort, type, idField, tag, is_invisible } = requestBody;
     const sqonAfterReplace = await resolveSetsInSqon(sqon, userId, accessToken);
-    const ids = await searchSqon(sqonAfterReplace, projectId, type, sort, idField, getProject);
+    const ids = await searchSqon(sqonAfterReplace, type, sort, idField, runInternalQuery);
 
     const truncatedIds = truncateIds(ids);
 
@@ -62,7 +60,11 @@ export const createSet = async (
     return mapUserResultToSet(createResult);
 };
 
-export const updateSetTag = async (requestBody: UpdateSetTagBody, accessToken: string, setId: string): Promise<Set> => {
+export const updateSetTag = async (
+    requestBody: UpdateSetTagBody,
+    accessToken: string,
+    setId: string,
+): Promise<SavedSet> => {
     const setToUpdate: UserSet = await getUserSet(accessToken, setId);
 
     const payload: CreateUpdateBody = {
@@ -80,34 +82,32 @@ export const updateSetContent = async (
     accessToken: string,
     userId: string,
     setId: string,
-    getProject: (projectId: string) => ArrangerProject,
-): Promise<Set> => {
+    runInternalQuery: RunInternalQuery,
+): Promise<SavedSet> => {
     const setToUpdate = await getUserSet(accessToken, setId);
 
-    const { sqon, ids, setType } = setToUpdate.content;
+    const { sqon, ids } = setToUpdate.content;
 
     const sqonAfterReplace = await resolveSetsInSqon(requestBody.sqon, userId, accessToken);
 
     const newSqonIds = await searchSqon(
         sqonAfterReplace,
-        requestBody.projectId,
         setToUpdate.content.setType,
         setToUpdate.content.sort,
         setToUpdate.content.idField,
-        getProject,
+        runInternalQuery,
     );
-
-    if (setType !== setToUpdate.content.setType) {
-        throw new Error('Cannot add/remove from a set not of the same type');
-    }
 
     const existingSqonWithNewSqon =
         requestBody.subAction === SubActionTypes.ADD_IDS
             ? addSqonToSetSqon(sqon, requestBody.sqon)
             : removeSqonToSetSqon(sqon, requestBody.sqon);
 
+    const newSqonIdsSet = new Set(newSqonIds);
     const existingIdsWithNewIds =
-        requestBody.subAction === SubActionTypes.ADD_IDS ? union(ids, newSqonIds) : difference(ids, newSqonIds);
+        requestBody.subAction === SubActionTypes.ADD_IDS
+            ? [...new Set([...ids, ...newSqonIds])]
+            : ids.filter(x => !newSqonIdsSet.has(x));
     const truncatedIds = truncateIds(existingIdsWithNewIds);
 
     const payload: CreateUpdateBody = {
@@ -123,7 +123,7 @@ export const updateSetContent = async (
 export const deleteSet = async (accessToken: string, setId: string): Promise<string> =>
     await deleteUserSet(accessToken, setId);
 
-const mapUserResultToSet = (output: UserSet): Set => ({
+const mapUserResultToSet = (output: UserSet): SavedSet => ({
     id: output.id,
     tag: output.alias,
     size: output.content.ids.length,
@@ -137,5 +137,5 @@ const truncateIds = (ids: string[]): string[] => {
     if (ids.length <= maxSetContentSize) {
         return ids;
     }
-    return dropRight(ids, ids.length - maxSetContentSize);
+    return ids.slice(0, maxSetContentSize);
 };

@@ -1,8 +1,24 @@
-import { ExecutionResult } from 'graphql/execution/execute';
+// In-process GraphQL runner. Internal routes (`/sets`, `/phenotypes`) issue
+// queries against our own generated schema without going through Apollo +
+// HTTP — a direct `graphql()` call returning the same ExecutionResult shape
+// arranger's runQuery used to produce. Single-project deployment: the
+// runner closes over schema + ES client at boot, no per-call lookup.
 
-type RunQuery = ({ query, variables }: { query: unknown; variables: unknown }) => Promise<ExecutionResult>;
+import type { ExecutionResult, GraphQLSchema } from 'graphql';
+import { graphql } from 'graphql';
+import type { EsClient } from './es/client.js';
 
-export type ArrangerProject = {
-    runQuery: ({ query: string, variables: unknown }) => Promise<ExecutionResult>;
-};
-export const runProjectQuery = (project: ArrangerProject): RunQuery => project.runQuery;
+export type RunInternalQuery = (args: {
+    query: string;
+    variables?: Record<string, unknown>;
+}) => Promise<ExecutionResult>;
+
+export function makeRunInternalQuery(schema: GraphQLSchema, es: EsClient): RunInternalQuery {
+    return ({ query, variables }) =>
+        graphql({
+            schema,
+            source: query,
+            variableValues: variables ?? null,
+            contextValue: { es },
+        });
+}

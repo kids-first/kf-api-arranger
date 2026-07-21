@@ -1,17 +1,11 @@
-import { Express } from 'express';
+import type { Express } from 'express';
 import Keycloak from 'keycloak-connect';
 import request from 'supertest';
-
-import {
-    fakeKeycloakClient,
-    fakeKeycloakRealm,
-    fakeKeycloakUrl,
-    getToken,
-    publicKey,
-} from '../../../test/authTestUtils';
-import buildApp from '../../app';
-import { ArrangerProject } from '../../arrangerUtils';
-import { flushAllCache } from '../../middleware/cache';
+import { vi } from 'vitest';
+import buildApp from '../../app.js';
+import type { RunInternalQuery } from '../../arrangerUtils.js';
+import { fakeKeycloakClient, fakeKeycloakRealm, fakeKeycloakUrl, getToken, publicKey } from '../../auth.test-utils.js';
+import { flushAllCache } from '../../middleware/cache.js';
 import {
     checkGenesExist,
     checkSampleIdsAndGene,
@@ -20,42 +14,50 @@ import {
     fetchDiffGeneExp,
     fetchFacets,
     fetchSampleGeneExp,
-} from './service';
-import { DiffGeneExpVolcano, Facets as TranscriptomicsFacets, SampleGeneExpVolcano } from './types';
+} from './service.js';
+import type { DiffGeneExpVolcano, SampleGeneExpVolcano, Facets as TranscriptomicsFacets } from './types.js';
 
-jest.mock('./service');
+vi.mock('./service.js');
+
+// Silence the production-path error logger for this suite — several tests
+// deliberately trigger globalErrorLogger (mocked routes throw, real handler
+// console.errors the result). The stack-trace dumps make passing runs look
+// like a fire. Scoped to this file so unexpected console.errors elsewhere
+// still surface.
+beforeAll(() => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+});
+afterAll(() => {
+    vi.restoreAllMocks();
+});
 
 describe('Transcriptomics router', () => {
     let app: Express;
-    let keycloakFakeConfig;
 
-    const getProject = (_s: string) => ({} as ArrangerProject);
+    const runInternalQuery: RunInternalQuery = async () => ({ data: null });
 
     beforeEach(() => {
-        const publicKeyToVerify = publicKey;
-        keycloakFakeConfig = {
+        const keycloakFakeConfig = {
             realm: fakeKeycloakRealm,
             'confidential-port': 0,
             'bearer-only': true,
             'auth-server-url': fakeKeycloakUrl,
             'ssl-required': 'external',
             resource: fakeKeycloakClient,
-            'realm-public-key': publicKeyToVerify, // For test purpose, we use public key to validate token.
+            'realm-public-key': publicKey, // For test purpose, we use public key to validate token.
         };
         const keycloak = new Keycloak({}, keycloakFakeConfig);
-        app = buildApp(keycloak, getProject); // Re-create app between each test to ensure isolation between tests.
+        app = buildApp(keycloak, runInternalQuery); // Re-create app between each test to ensure isolation between tests.
     });
 
     describe('POST /transcriptomics/diffGeneExp', () => {
         beforeEach(() => {
-            (fetchDiffGeneExp as jest.Mock).mockReset();
+            vi.mocked(fetchDiffGeneExp).mockReset();
             flushAllCache();
         });
 
         it('should return 403 if no Authorization header', () =>
-            request(app)
-                .post('/transcriptomics/diffGeneExp')
-                .expect(403));
+            request(app).post('/transcriptomics/diffGeneExp').expect(403));
 
         it('should return 200 if Authorization header contains valid token and no error occurs', async () => {
             const diffGeneExpByCategory: DiffGeneExpVolcano[] = [
@@ -98,7 +100,7 @@ describe('Transcriptomics router', () => {
                 },
             ];
 
-            (fetchDiffGeneExp as jest.Mock).mockImplementation(() => diffGeneExpByCategory);
+            vi.mocked(fetchDiffGeneExp).mockResolvedValue(diffGeneExpByCategory);
 
             const token = getToken();
 
@@ -107,12 +109,12 @@ describe('Transcriptomics router', () => {
                 .set('Content-type', 'application/json')
                 .set({ Authorization: `Bearer ${token}` })
                 .expect(200, diffGeneExpByCategory);
-            expect((fetchDiffGeneExp as jest.Mock).mock.calls.length).toEqual(1);
+            expect(vi.mocked(fetchDiffGeneExp)).toHaveBeenCalledTimes(1);
         });
 
         it('should return 500 if Authorization header contains valid token but an error occurs', async () => {
             const expectedError = new Error('OOPS');
-            (fetchDiffGeneExp as jest.Mock).mockImplementation(() => {
+            vi.mocked(fetchDiffGeneExp).mockImplementation(() => {
                 throw expectedError;
             });
 
@@ -123,25 +125,23 @@ describe('Transcriptomics router', () => {
                 .set('Content-type', 'application/json')
                 .set({ Authorization: `Bearer ${token}` })
                 .expect(500, { error: 'Internal Server Error' });
-            expect((fetchDiffGeneExp as jest.Mock).mock.calls.length).toEqual(1);
+            expect(vi.mocked(fetchDiffGeneExp)).toHaveBeenCalledTimes(1);
         });
     });
 
     describe('GET /transcriptomics/diffGeneExp/export', () => {
         beforeEach(() => {
-            (exportDiffGeneExp as jest.Mock).mockReset();
+            vi.mocked(exportDiffGeneExp).mockReset();
             flushAllCache();
         });
 
         it('should return 403 if no Authorization header', () =>
-            request(app)
-                .get('/transcriptomics/diffGeneExp/export')
-                .expect(403));
+            request(app).get('/transcriptomics/diffGeneExp/export').expect(403));
 
         it('should return 200 if Authorization header contains valid token and no error occurs', async () => {
             const data = { url: 'pre-signed-url' };
 
-            (exportDiffGeneExp as jest.Mock).mockImplementation(() => data);
+            vi.mocked(exportDiffGeneExp).mockResolvedValue(data);
 
             const token = getToken();
 
@@ -150,12 +150,12 @@ describe('Transcriptomics router', () => {
                 .set('Content-type', 'application/json')
                 .set({ Authorization: `Bearer ${token}` })
                 .expect(200, data);
-            expect((exportDiffGeneExp as jest.Mock).mock.calls.length).toEqual(1);
+            expect(vi.mocked(exportDiffGeneExp)).toHaveBeenCalledTimes(1);
         });
 
         it('should return 500 if Authorization header contains valid token but an error occurs', async () => {
             const expectedError = new Error('OOPS');
-            (exportDiffGeneExp as jest.Mock).mockImplementation(() => {
+            vi.mocked(exportDiffGeneExp).mockImplementation(() => {
                 throw expectedError;
             });
 
@@ -166,13 +166,13 @@ describe('Transcriptomics router', () => {
                 .set('Content-type', 'application/json')
                 .set({ Authorization: `Bearer ${token}` })
                 .expect(500, { error: 'Internal Server Error' });
-            expect((exportDiffGeneExp as jest.Mock).mock.calls.length).toEqual(1);
+            expect(vi.mocked(exportDiffGeneExp)).toHaveBeenCalledTimes(1);
         });
     });
 
     describe('POST /transcriptomics/sampleGeneExp', () => {
         beforeEach(() => {
-            (fetchSampleGeneExp as jest.Mock).mockReset();
+            vi.mocked(fetchSampleGeneExp).mockReset();
         });
 
         const requestBody = {
@@ -180,10 +180,7 @@ describe('Transcriptomics router', () => {
         };
 
         it('should return 403 if no Authorization header', () =>
-            request(app)
-                .post('/transcriptomics/sampleGeneExp')
-                .send(requestBody)
-                .expect(403));
+            request(app).post('/transcriptomics/sampleGeneExp').send(requestBody).expect(403));
 
         it('should return 200 if Authorization header contains valid token and no error occurs', async () => {
             const sampleGeneExp: SampleGeneExpVolcano = {
@@ -219,7 +216,7 @@ describe('Transcriptomics router', () => {
                 max_fpkm_value: 2.4399124042981217,
             };
 
-            (fetchSampleGeneExp as jest.Mock).mockImplementation(() => sampleGeneExp);
+            vi.mocked(fetchSampleGeneExp).mockResolvedValue(sampleGeneExp);
 
             const token = getToken();
 
@@ -229,8 +226,8 @@ describe('Transcriptomics router', () => {
                 .set('Content-type', 'application/json')
                 .set({ Authorization: `Bearer ${token}` })
                 .expect(200, sampleGeneExp);
-            expect((fetchSampleGeneExp as jest.Mock).mock.calls.length).toEqual(1);
-            expect((fetchSampleGeneExp as jest.Mock).mock.calls[0][0]).toEqual('ENSG00000272368.2');
+            expect(vi.mocked(fetchSampleGeneExp)).toHaveBeenCalledTimes(1);
+            expect(vi.mocked(fetchSampleGeneExp).mock.calls[0][0]).toEqual('ENSG00000272368.2');
         });
 
         it('should return 400 if Authorization header contains valid token but no gene is provided', async () => {
@@ -242,12 +239,24 @@ describe('Transcriptomics router', () => {
                 .set('Content-type', 'application/json')
                 .set({ Authorization: `Bearer ${token}` })
                 .expect(400);
-            expect((fetchSampleGeneExp as jest.Mock).mock.calls.length).toEqual(0);
+            expect(vi.mocked(fetchSampleGeneExp)).toHaveBeenCalledTimes(0);
+        });
+
+        it('should return 400 when ensembl_gene_id field is missing entirely (regression for `=== ""` strict check)', async () => {
+            const token = getToken();
+
+            await request(app)
+                .post('/transcriptomics/sampleGeneExp')
+                .send({})
+                .set('Content-type', 'application/json')
+                .set({ Authorization: `Bearer ${token}` })
+                .expect(400);
+            expect(vi.mocked(fetchSampleGeneExp)).toHaveBeenCalledTimes(0);
         });
 
         it('should return 500 if Authorization header contains valid token but an error occurs', async () => {
             const expectedError = new Error('OOPS');
-            (fetchSampleGeneExp as jest.Mock).mockImplementation(() => {
+            vi.mocked(fetchSampleGeneExp).mockImplementation(() => {
                 throw expectedError;
             });
 
@@ -259,26 +268,24 @@ describe('Transcriptomics router', () => {
                 .set('Content-type', 'application/json')
                 .set({ Authorization: `Bearer ${token}` })
                 .expect(500, { error: 'Internal Server Error' });
-            expect((fetchSampleGeneExp as jest.Mock).mock.calls.length).toEqual(1);
-            expect((fetchSampleGeneExp as jest.Mock).mock.calls[0][0]).toEqual('ENSG00000272368.2');
+            expect(vi.mocked(fetchSampleGeneExp)).toHaveBeenCalledTimes(1);
+            expect(vi.mocked(fetchSampleGeneExp).mock.calls[0][0]).toEqual('ENSG00000272368.2');
         });
     });
 
     describe('GET /transcriptomics/sampleGeneExp/export', () => {
         beforeEach(() => {
-            (exportSampleGeneExp as jest.Mock).mockReset();
+            vi.mocked(exportSampleGeneExp).mockReset();
             flushAllCache();
         });
 
         it('should return 403 if no Authorization header', () =>
-            request(app)
-                .get('/transcriptomics/sampleGeneExp/export')
-                .expect(403));
+            request(app).get('/transcriptomics/sampleGeneExp/export').expect(403));
 
         it('should return 200 if Authorization header contains valid token and no error occurs', async () => {
             const data = { url: 'pre-signed-url' };
 
-            (exportSampleGeneExp as jest.Mock).mockImplementation(() => data);
+            vi.mocked(exportSampleGeneExp).mockResolvedValue(data);
 
             const token = getToken();
 
@@ -287,12 +294,12 @@ describe('Transcriptomics router', () => {
                 .set('Content-type', 'application/json')
                 .set({ Authorization: `Bearer ${token}` })
                 .expect(200, data);
-            expect((exportSampleGeneExp as jest.Mock).mock.calls.length).toEqual(1);
+            expect(vi.mocked(exportSampleGeneExp)).toHaveBeenCalledTimes(1);
         });
 
         it('should return 500 if Authorization header contains valid token but an error occurs', async () => {
             const expectedError = new Error('OOPS');
-            (exportSampleGeneExp as jest.Mock).mockImplementation(() => {
+            vi.mocked(exportSampleGeneExp).mockImplementation(() => {
                 throw expectedError;
             });
 
@@ -303,19 +310,17 @@ describe('Transcriptomics router', () => {
                 .set('Content-type', 'application/json')
                 .set({ Authorization: `Bearer ${token}` })
                 .expect(500, { error: 'Internal Server Error' });
-            expect((exportSampleGeneExp as jest.Mock).mock.calls.length).toEqual(1);
+            expect(vi.mocked(exportSampleGeneExp)).toHaveBeenCalledTimes(1);
         });
     });
 
     describe('POST /transcriptomics/facets', () => {
         beforeEach(() => {
-            (fetchFacets as jest.Mock).mockReset();
+            vi.mocked(fetchFacets).mockReset();
         });
 
         it('should return 403 if no Authorization header', () =>
-            request(app)
-                .post('/transcriptomics/facets')
-                .expect(403));
+            request(app).post('/transcriptomics/facets').expect(403));
 
         it('should return 200 if Authorization header contains valid token and no error occurs', async () => {
             const facets: TranscriptomicsFacets = {
@@ -328,7 +333,7 @@ describe('Transcriptomics router', () => {
                 ],
             };
 
-            (fetchFacets as jest.Mock).mockImplementation(() => facets);
+            vi.mocked(fetchFacets).mockResolvedValue(facets);
 
             const token = getToken();
 
@@ -337,12 +342,12 @@ describe('Transcriptomics router', () => {
                 .set('Content-type', 'application/json')
                 .set({ Authorization: `Bearer ${token}` })
                 .expect(200, facets);
-            expect((fetchFacets as jest.Mock).mock.calls.length).toEqual(1);
+            expect(vi.mocked(fetchFacets)).toHaveBeenCalledTimes(1);
         });
 
         it('should return 500 if Authorization header contains valid token but an error occurs', async () => {
             const expectedError = new Error('OOPS');
-            (fetchFacets as jest.Mock).mockImplementation(() => {
+            vi.mocked(fetchFacets).mockImplementation(() => {
                 throw expectedError;
             });
 
@@ -353,13 +358,13 @@ describe('Transcriptomics router', () => {
                 .set('Content-type', 'application/json')
                 .set({ Authorization: `Bearer ${token}` })
                 .expect(500, { error: 'Internal Server Error' });
-            expect((fetchFacets as jest.Mock).mock.calls.length).toEqual(1);
+            expect(vi.mocked(fetchFacets)).toHaveBeenCalledTimes(1);
         });
     });
 
     describe('POST /transcriptomics/checkSampleIdsAndGene', () => {
         beforeEach(() => {
-            (checkSampleIdsAndGene as jest.Mock).mockReset();
+            vi.mocked(checkSampleIdsAndGene).mockReset();
         });
 
         const requestBody = {
@@ -376,7 +381,7 @@ describe('Transcriptomics router', () => {
 
         it('should return 200 if Authorization header contains valid token and no error occurs', async () => {
             const sampleIds = ['bs-aa000aaa', 'bs-bbbb11b1'];
-            (checkSampleIdsAndGene as jest.Mock).mockImplementation(() => sampleIds);
+            vi.mocked(checkSampleIdsAndGene).mockResolvedValue(sampleIds);
 
             const token = getToken();
 
@@ -386,14 +391,14 @@ describe('Transcriptomics router', () => {
                 .set({ Authorization: `Bearer ${token}` })
                 .send(requestBody)
                 .expect(200, sampleIds);
-            expect((checkSampleIdsAndGene as jest.Mock).mock.calls.length).toEqual(1);
-            expect((checkSampleIdsAndGene as jest.Mock).mock.calls[0][0]).toEqual(requestBody.sample_ids);
-            expect((checkSampleIdsAndGene as jest.Mock).mock.calls[0][1]).toEqual(requestBody.ensembl_gene_id);
+            expect(vi.mocked(checkSampleIdsAndGene)).toHaveBeenCalledTimes(1);
+            expect(vi.mocked(checkSampleIdsAndGene).mock.calls[0][0]).toEqual(requestBody.sample_ids);
+            expect(vi.mocked(checkSampleIdsAndGene).mock.calls[0][1]).toEqual(requestBody.ensembl_gene_id);
         });
 
         it('should return 500 if Authorization header contains valid token but an error occurs', async () => {
             const expectedError = new Error('OOPS');
-            (checkSampleIdsAndGene as jest.Mock).mockImplementation(() => {
+            vi.mocked(checkSampleIdsAndGene).mockImplementation(() => {
                 throw expectedError;
             });
 
@@ -405,15 +410,15 @@ describe('Transcriptomics router', () => {
                 .set({ Authorization: `Bearer ${token}` })
                 .send(requestBody)
                 .expect(500, { error: 'Internal Server Error' });
-            expect((checkSampleIdsAndGene as jest.Mock).mock.calls.length).toEqual(1);
-            expect((checkSampleIdsAndGene as jest.Mock).mock.calls[0][0]).toEqual(requestBody.sample_ids);
-            expect((checkSampleIdsAndGene as jest.Mock).mock.calls[0][1]).toEqual(requestBody.ensembl_gene_id);
+            expect(vi.mocked(checkSampleIdsAndGene)).toHaveBeenCalledTimes(1);
+            expect(vi.mocked(checkSampleIdsAndGene).mock.calls[0][0]).toEqual(requestBody.sample_ids);
+            expect(vi.mocked(checkSampleIdsAndGene).mock.calls[0][1]).toEqual(requestBody.ensembl_gene_id);
         });
     });
 
     describe('POST /transcriptomics/checkGenesExist', () => {
         beforeEach(() => {
-            (checkGenesExist as jest.Mock).mockReset();
+            vi.mocked(checkGenesExist).mockReset();
         });
 
         const requestBody = {
@@ -449,7 +454,7 @@ describe('Transcriptomics router', () => {
                     ensembl_gene_id: 'ENSG00000163462.18',
                 },
             ];
-            (checkGenesExist as jest.Mock).mockImplementation(() => matchedGenes);
+            vi.mocked(checkGenesExist).mockResolvedValue(matchedGenes);
 
             const token = getToken();
 
@@ -459,13 +464,13 @@ describe('Transcriptomics router', () => {
                 .set({ Authorization: `Bearer ${token}` })
                 .send(requestBody)
                 .expect(200, matchedGenes);
-            expect((checkGenesExist as jest.Mock).mock.calls.length).toEqual(1);
-            expect((checkGenesExist as jest.Mock).mock.calls[0][0]).toEqual(requestBody.genes);
+            expect(vi.mocked(checkGenesExist)).toHaveBeenCalledTimes(1);
+            expect(vi.mocked(checkGenesExist).mock.calls[0][0]).toEqual(requestBody.genes);
         });
 
         it('should return 500 if Authorization header contains valid token but an error occurs', async () => {
             const expectedError = new Error('OOPS');
-            (checkGenesExist as jest.Mock).mockImplementation(() => {
+            vi.mocked(checkGenesExist).mockImplementation(() => {
                 throw expectedError;
             });
 
@@ -477,8 +482,8 @@ describe('Transcriptomics router', () => {
                 .set({ Authorization: `Bearer ${token}` })
                 .send(requestBody)
                 .expect(500, { error: 'Internal Server Error' });
-            expect((checkGenesExist as jest.Mock).mock.calls.length).toEqual(1);
-            expect((checkGenesExist as jest.Mock).mock.calls[0][0]).toEqual(requestBody.genes);
+            expect(vi.mocked(checkGenesExist)).toHaveBeenCalledTimes(1);
+            expect(vi.mocked(checkGenesExist).mock.calls[0][0]).toEqual(requestBody.genes);
         });
     });
 });

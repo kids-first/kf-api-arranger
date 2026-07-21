@@ -22,7 +22,6 @@ export type Content = {
 };
 
 export type CreateSetBody = {
-    projectId: string;
     type: string;
     sqon: SetSqon;
     idField: string;
@@ -41,7 +40,6 @@ export type UpdateSetContentBody = {
     subAction: string;
     sourceType: string;
     sqon: SetSqon;
-    projectId: string;
 };
 
 export type Sort = {
@@ -49,13 +47,14 @@ export type Sort = {
     order: string;
 };
 
-export type Set = {
+export type SavedSet = {
     id: string;
     tag: string;
     size: number;
     setType: string;
-    updated_date: Date;
-    created_date: Date;
+    // ISO-8601 strings forwarded straight from UserApi (see UserSet) — not Dates.
+    updated_date: string;
+    created_date: string;
     is_invisible: boolean;
 };
 

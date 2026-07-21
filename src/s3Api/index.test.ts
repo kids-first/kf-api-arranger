@@ -1,41 +1,37 @@
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { vi } from 'vitest';
 
-import { generatePreSignedUrl } from '.';
-import { S3Error } from './errors';
-import S3ClientInstance from './S3ClientInstance';
+import { S3Error } from './errors.js';
+import { generatePreSignedUrl } from './index.js';
+import S3ClientInstance from './S3ClientInstance.js';
 
-jest.mock('./S3ClientInstance');
-jest.mock('@aws-sdk/s3-request-presigner');
+vi.mock('./S3ClientInstance.js');
+vi.mock('@aws-sdk/s3-request-presigner');
 
 describe('S3 Service', () => {
     describe('Generate Pre-Signed URL', () => {
         beforeEach(() => {
-            (S3ClientInstance.getInstance as jest.Mock).mockReset();
-            (getSignedUrl as jest.Mock).mockReset();
+            vi.mocked(S3ClientInstance.getInstance).mockReset();
+            vi.mocked(getSignedUrl).mockReset();
         });
 
         it('should return a presigned URL', async () => {
-            (getSignedUrl as jest.Mock).mockResolvedValue('expected_result');
+            vi.mocked(getSignedUrl).mockResolvedValue('expected_result');
 
             const result = await generatePreSignedUrl('bucket', 'object_key');
 
             expect(result).toEqual('expected_result');
-            expect((S3ClientInstance.getInstance as jest.Mock).mock.calls.length).toEqual(1);
-            expect((getSignedUrl as jest.Mock).mock.calls.length).toEqual(1);
+            expect(vi.mocked(S3ClientInstance.getInstance)).toHaveBeenCalledTimes(1);
+            expect(vi.mocked(getSignedUrl)).toHaveBeenCalledTimes(1);
         });
 
-        it('shoudl throw an error if S3 returns an error', async () => {
+        it('should throw an error if S3 returns an error', async () => {
             const expectedError = new S3Error('OOPS from S3');
-            (getSignedUrl as jest.Mock).mockRejectedValue(expectedError);
+            vi.mocked(getSignedUrl).mockRejectedValue(expectedError);
 
-            try {
-                await generatePreSignedUrl('bucket', 'object_key');
-            } catch (e) {
-                expect(e).toEqual(expectedError);
-            } finally {
-                expect((S3ClientInstance.getInstance as jest.Mock).mock.calls.length).toEqual(1);
-                expect((getSignedUrl as jest.Mock).mock.calls.length).toEqual(1);
-            }
+            await expect(generatePreSignedUrl('bucket', 'object_key')).rejects.toEqual(expectedError);
+            expect(vi.mocked(S3ClientInstance.getInstance)).toHaveBeenCalledTimes(1);
+            expect(vi.mocked(getSignedUrl)).toHaveBeenCalledTimes(1);
         });
     });
 });
