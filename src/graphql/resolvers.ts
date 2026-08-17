@@ -4,7 +4,8 @@
 // ServerContext holds the EsClient only.
 //
 // Entity-level resolvers:
-//   - hits(filters, sort, first, offset, searchAfter): full ES search.
+//   - hits(filters, sort, first, offset, searchAfter): ES search, `_source`
+//     projected onto the requested fields.
 //   - aggregations(filters, ...): ES search with aggs body, response is
 //     flattened to dot-paths then GraphQL-keyed (`__` for `.`).
 //   - extended(fields?): returns the per-entity extended list (filterable).
@@ -14,7 +15,7 @@
 
 import type { IResolvers } from '@graphql-tools/utils';
 import type { GraphQLResolveInfo } from 'graphql';
-import graphqlFields from 'graphql-fields';
+import graphqlFields, { type FieldsTree } from 'graphql-fields';
 import type { EsClient } from '../es/client.js';
 import buildAggregations from '../sqon/buildAggregations/index.js';
 import buildQuery from '../sqon/buildQuery/index.js';
@@ -56,6 +57,16 @@ function buildEsSort(sortInputs: SortInput[], nestedFields: string[]): unknown[]
             },
         };
     });
+}
+
+// Restores the projection @arranger/mapping-utils' resolveHits applied before
+// the rewrite (SJIP-1593): the top-level keys of `edges.node`. Depth 1 only, so
+// a nested `total` — an array length — stays correct.
+export function buildSourceIncludes(hitsSelection: FieldsTree): string[] | false {
+    const nodeSelection = hitsSelection?.edges?.node;
+    if (!nodeSelection) return false;
+    const includes = Object.keys(nodeSelection).filter(f => !f.startsWith('__'));
+    return includes.length > 0 ? includes : false;
 }
 
 type AggsArgs = {
@@ -123,7 +134,7 @@ export function createResolvers(entities: EntityModule[]): IResolvers<unknown, S
             extended(_parent: unknown, { fields }: ExtendedArgs) {
                 return fields ? extendedEntries.filter(e => fields.includes(e.field)) : extendedEntries;
             },
-            async hits(_parent: unknown, args: HitsArgs, ctx: ServerContext) {
+            async hits(_parent: unknown, args: HitsArgs, ctx: ServerContext, info: GraphQLResolveInfo) {
                 const sqon = normalizeSqonInput(args.filters);
                 const built = buildQuery({ nestedFields, filters: sqon });
                 const query = Object.keys(built).length > 0 ? built : { match_all: {} };
@@ -133,6 +144,7 @@ export function createResolvers(entities: EntityModule[]): IResolvers<unknown, S
                     size: args.first ?? 10,
                     from: args.offset,
                     query,
+                    _source: buildSourceIncludes(graphqlFields(info)),
                     sort: esSort,
                     // ES rejects `search_after: null` — omit the field
                     // entirely when the caller didn't supply one.
