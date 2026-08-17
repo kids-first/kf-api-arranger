@@ -41,6 +41,7 @@ export function createRealEsClient(host?: string): EsClient {
                     size: params.size,
                     from: params.from,
                     query: params.query,
+                    _source: params._source,
                     sort: params.sort,
                     search_after: params.search_after,
                     track_total_hits: params.track_total_hits,

@@ -22,6 +22,8 @@ export type EsSearchParams = {
     size?: number;
     from?: number;
     query?: unknown;
+    // Paths to return, or `false` for none. Omitted => whole document.
+    _source?: string[] | false;
     sort?: unknown;
     search_after?: unknown[];
     track_total_hits?: boolean;
