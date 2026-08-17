@@ -11,6 +11,11 @@
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
+    // graphql ships parallel CJS/ESM copies and declares no `exports` map, so
+    // Vite picks `module` (index.mjs) while node — in prod, and for CJS deps
+    // like graphql-type-json — loads `main`. Pin tests to the copy node uses;
+    // two copies make every instanceof check across the boundary throw.
+    resolve: { alias: { graphql: 'graphql/index.js' } },
     test: {
         include: ['src/**/*.test.ts'],
         exclude: ['dist/**', 'node_modules/**'],
