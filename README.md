@@ -36,7 +36,7 @@ docker compose run --rm test         # test suite
 For an interactive shell with the project mounted (poke around, run any script manually):
 
 ```bash
-docker run --rm -it --network host -v "$PWD:/app" -w /app node:24-alpine3.22 sh
+docker run --rm -it --network host -v "$PWD:/app" -w /app node:24-alpine sh
 ```
 
 Inside the shell: `npm install && npm run dev` (or any other script). `--network host` lets the container reach host-bound services like SSH tunnels at `localhost:<port>`.

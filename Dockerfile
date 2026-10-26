@@ -1,4 +1,4 @@
-FROM node:24.16-alpine3.22 AS build
+FROM node:24-alpine AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --ignore-scripts
@@ -6,7 +6,7 @@ COPY tsconfig.json ./
 COPY src ./src
 RUN npm run build
 
-FROM node:24.16-alpine3.22 AS prod-image
+FROM node:24-alpine AS prod-image
 WORKDIR /app
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/package.json /app/package-lock.json ./
